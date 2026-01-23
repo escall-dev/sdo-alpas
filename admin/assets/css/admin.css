@@ -1905,6 +1905,56 @@ textarea.form-control {
     box-shadow: 0 10px 44px 8px rgba(0, 0, 0, 0.4), 0 5px 20px 4px rgba(0, 0, 0, 0.3);
 }
 
+/* OIC Management */
+.oic-card {
+    margin-bottom: 28px;
+    border-radius: 18px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.15);
+    max-width: 560px;
+    background: var(--card-bg, #ffffff);
+}
+
+.oic-card .detail-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.oic-card__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-top: 12px;
+}
+
+.oic-card__primary {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.oic-card__actions {
+    margin-top: 20px;
+}
+
+.oic-card__actions .btn-secondary {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+.oic-card__actions .btn-secondary:hover {
+    background: var(--bg-tertiary);
+}
+
+@media (max-width: 640px) {
+    .oic-card {
+        max-width: 100%;
+    }
+}
+
 .ref-card {
     background: var(--primary-gradient);
     color: white;

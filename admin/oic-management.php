@@ -142,42 +142,39 @@ $activeOIC = $oicModel->getActiveOICForUnit($currentRoleId);
 
 <!-- Active OIC Card -->
 <?php if ($activeOIC): ?>
-<div class="detail-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; margin-bottom: 20px;">
-    <div class="detail-card-header" style="border-bottom: 1px solid rgba(255,255,255,0.2);">
-        <h3 style="color: white; margin: 0;">
+<div class="detail-card oic-card">
+    <div class="detail-card-header">
+        <h3>
             <i class="fas fa-user-check"></i> Currently Active OIC
         </h3>
+        <span class="status-badge status-approved">
+            <i class="fas fa-check-circle"></i> Active
+        </span>
     </div>
     <div class="detail-card-body">
-        <div class="detail-grid">
+        <div class="detail-grid oic-card__grid">
             <div class="detail-item">
-                <label style="color: rgba(255,255,255,0.8);">OIC Name</label>
-                <span style="font-size: 1.1rem; font-weight: 600;"><?php echo htmlspecialchars($activeOIC['oic_name']); ?></span>
+                <label>OIC Name</label>
+                <span class="oic-card__primary"><?php echo htmlspecialchars($activeOIC['oic_name']); ?></span>
             </div>
             <div class="detail-item">
-                <label style="color: rgba(255,255,255,0.8);">Position</label>
+                <label>Position</label>
                 <span><?php echo htmlspecialchars($activeOIC['oic_position'] ?? '-'); ?></span>
             </div>
             <div class="detail-item">
-                <label style="color: rgba(255,255,255,0.8);">Period</label>
+                <label>Period</label>
                 <span>
                     <?php echo date('M j, Y', strtotime($activeOIC['start_date'])); ?> - 
                     <?php echo date('M j, Y', strtotime($activeOIC['end_date'])); ?>
                 </span>
             </div>
-            <div class="detail-item">
-                <label style="color: rgba(255,255,255,0.8);">Status</label>
-                <span class="status-badge" style="background: rgba(255,255,255,0.2); color: white;">
-                    <i class="fas fa-check-circle"></i> Active
-                </span>
-            </div>
         </div>
-        <form method="POST" action="" style="margin-top: 16px;">
+        <form method="POST" action="" class="oic-card__actions" id="deactivateActiveOICForm">
             <input type="hidden" name="_token" value="<?php echo $currentToken; ?>">
             <input type="hidden" name="action" value="deactivate">
             <input type="hidden" name="id" value="<?php echo $activeOIC['id']; ?>">
-            <button type="submit" class="btn" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);" 
-                    onclick="return confirm('Are you sure you want to deactivate this OIC delegation?')">
+            <button type="button" class="btn btn-secondary"
+                    onclick="openConfirmModal('deactivateActiveOICForm', 'Deactivate this OIC delegation?')">
                 <i class="fas fa-times"></i> Deactivate OIC
             </button>
         </form>
@@ -252,23 +249,23 @@ $activeOIC = $oicModel->getActiveOICForUnit($currentRoleId);
                     <td>
                         <div class="action-buttons">
                             <?php if ($isActive && $isCurrent): ?>
-                            <form method="POST" action="" style="display: inline;">
+                            <form method="POST" action="" style="display: inline;" id="deactivateOICForm_<?php echo $oic['id']; ?>">
                                 <input type="hidden" name="_token" value="<?php echo $currentToken; ?>">
                                 <input type="hidden" name="action" value="deactivate">
                                 <input type="hidden" name="id" value="<?php echo $oic['id']; ?>">
-                                <button type="submit" class="btn btn-icon" title="Deactivate" 
-                                        onclick="return confirm('Deactivate this OIC delegation?')" 
+                                <button type="button" class="btn btn-icon" title="Deactivate" 
+                                        onclick="openConfirmModal('deactivateOICForm_<?php echo $oic['id']; ?>', 'Deactivate this OIC delegation?')" 
                                         style="color: var(--warning);">
                                     <i class="fas fa-pause"></i>
                                 </button>
                             </form>
                             <?php endif; ?>
-                            <form method="POST" action="" style="display: inline;">
+                            <form method="POST" action="" style="display: inline;" id="deleteOICForm_<?php echo $oic['id']; ?>">
                                 <input type="hidden" name="_token" value="<?php echo $currentToken; ?>">
                                 <input type="hidden" name="action" value="delete">
                                 <input type="hidden" name="id" value="<?php echo $oic['id']; ?>">
-                                <button type="submit" class="btn btn-icon" title="Delete" 
-                                        onclick="return confirm('Are you sure you want to delete this OIC delegation? This action cannot be undone.')" 
+                                <button type="button" class="btn btn-icon" title="Delete" 
+                                        onclick="openConfirmModal('deleteOICForm_<?php echo $oic['id']; ?>', 'Delete this OIC delegation? This action cannot be undone.')" 
                                         style="color: var(--danger);">
                                     <i class="fas fa-trash"></i>
                                 </button>
@@ -282,6 +279,23 @@ $activeOIC = $oicModel->getActiveOICForUnit($currentRoleId);
         </table>
     </div>
 </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-question-circle" style="margin-right: 8px;"></i> Confirm Action</h3>
+                <button class="modal-close" onclick="closeConfirmModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage" style="margin: 0; color: var(--text-secondary);"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeConfirmModal()">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="submitConfirmModal()">Confirm</button>
+            </div>
+        </div>
+    </div>
 
 <!-- New OIC Modal -->
 <div class="modal-overlay" id="newOICModal">
@@ -345,6 +359,32 @@ $activeOIC = $oicModel->getActiveOICForUnit($currentRoleId);
 </div>
 
 <script>
+let confirmFormId = null;
+
+function openConfirmModal(formId, message) {
+    confirmFormId = formId;
+    const messageEl = document.getElementById('confirmMessage');
+    if (messageEl) {
+        messageEl.textContent = message;
+    }
+    document.getElementById('confirmModal').classList.add('active');
+}
+
+function closeConfirmModal() {
+    confirmFormId = null;
+    document.getElementById('confirmModal').classList.remove('active');
+}
+
+function submitConfirmModal() {
+    if (confirmFormId) {
+        const targetForm = document.getElementById(confirmFormId);
+        if (targetForm) {
+            targetForm.submit();
+        }
+    }
+    closeConfirmModal();
+}
+
 function openNewOICModal() {
     document.getElementById('newOICModal').classList.add('active');
 }
