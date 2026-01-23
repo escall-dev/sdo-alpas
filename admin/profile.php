@@ -57,11 +57,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <div class="complaint-detail-grid" style="grid-template-columns: 1fr 350px;">
     <!-- Profile Form -->
-    <div class="detail-card">
+    <div class="detail-card" style="order: 2;">
         <div class="detail-card-header">
             <h3><i class="fas fa-user-edit"></i> Edit Profile</h3>
         </div>
-        <div class="detail-card-body">
+        <div class="detail-card-body" style="order: 2;">
             <form method="POST" action="">
                 <input type="hidden" name="_token" value="<?php echo $currentToken; ?>">
                 
@@ -130,12 +130,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
     
     <!-- Account Info -->
-    <div style="display: flex; flex-direction: column; gap: 20px;">
+    <div style="display: flex; flex-direction: column; gap: 20px; order: 1;">
         <div class="detail-card">
             <div class="detail-card-header">
                 <h3><i class="fas fa-id-card"></i> Account Info</h3>
             </div>
-            <div class="detail-card-body">
+            <div class="detail-card-body" style="order: 1;">
                 <div class="detail-item">
                     <label>Role</label>
                     <span class="role-badge role-<?php echo strtolower(str_replace(' ', '-', $currentUser['role_name'])); ?>">

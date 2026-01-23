@@ -22,12 +22,16 @@ try {
         $lsModel = new LocatorSlip();
         $atModel = new AuthorityToTravel();
         
-        // For unit heads, get filtered counts
-        if ($auth->isUnitHead()) {
+        // Use effective role for OIC-aware counts
+        $effectiveRoleId = $auth->getEffectiveRoleId();
+        $effectiveRoleName = $auth->getEffectiveRoleName();
+        
+        // For unit heads (or OICs acting as unit heads), get filtered counts
+        if ($auth->isUnitHead() && !$auth->isApprover()) {
             $notificationCounts['ls_pending'] = 0; // Locator slips may have different routing
             $notificationCounts['at_pending'] = $atModel->getPendingCountForRole(
-                $currentUser['role_name'], 
-                $currentUser['role_id']
+                $effectiveRoleName, 
+                $effectiveRoleId
             );
         } else {
             $notificationCounts['ls_pending'] = $lsModel->getStatistics()['pending'] ?? 0;
@@ -53,7 +57,8 @@ $pageTitles = [
     'my-requests' => 'My Requests',
     'users' => 'User Management',
     'logs' => 'Activity Logs',
-    'profile' => 'My Profile'
+    'profile' => 'My Profile',
+    'oic-management' => 'OIC Management'
 ];
 
 $pageTitle = $pageTitles[$currentPage] ?? 'Admin Panel';
@@ -89,9 +94,7 @@ function navUrl($path) {
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="logo">
-                    <div class="logo-icon" style="background: linear-gradient(135deg, #0f4c75, #1b6ca8); width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-                        <i class="fas fa-plane-departure" style="color: white; font-size: 1.3rem;"></i>
-                    </div>
+                    <img src="<?php echo ADMIN_URL; ?>/assets/logos/sdo-logo.jpg" alt="SDO Logo" class="logo-img" style="width: 45px; height: 45px; border-radius: 50%; object-fit: contain; background: transparent; border: none; box-shadow: none;">
                     <div class="logo-text">
                         <span class="logo-title">SDO ATLAS</span>
                         <span class="logo-subtitle">Travel & Locator</span>
@@ -138,6 +141,14 @@ function navUrl($path) {
                         <?php endif; ?>
                     </span>
                     <span class="nav-text">Authority to Travel</span>
+                </a>
+                <?php endif; ?>
+                
+                <?php if ($auth->isUnitHead()): ?>
+                <!-- Unit Head only navigation -->
+                <a href="<?php echo navUrl('/oic-management.php'); ?>" class="nav-item <?php echo $currentPage === 'oic-management' ? 'active' : ''; ?>" data-tooltip="OIC Management">
+                    <span class="nav-icon"><i class="fas fa-user-shield"></i></span>
+                    <span class="nav-text">OIC Management</span>
                 </a>
                 <?php endif; ?>
                 

@@ -14,14 +14,17 @@ $trackingService = new TrackingService();
 
 $action = $_GET['action'] ?? '';
 $viewId = $_GET['view'] ?? '';
+$editId = $_GET['edit'] ?? '';
 $type = $_GET['type'] ?? 'local'; // local, national, personal
 $message = '';
 $error = '';
 
 // Get current user info for routing
-$currentRoleId = $currentUser['role_id'];
-$currentRoleName = $currentUser['role_name'];
+// Use effective role ID/Name which accounts for OIC delegation
+$currentRoleId = $auth->getEffectiveRoleId();
+$currentRoleName = $auth->getEffectiveRoleName();
 $currentOffice = $currentUser['employee_office'] ?? '';
+$isActingAsOIC = $auth->isActingAsOIC();
 
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -84,12 +87,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $availableAction = $atModel->getAvailableAction($at, $currentRoleId, $currentRoleName);
             
             if ($availableAction === 'approve') {
-                $atModel->approve($id, $auth->getUserId(), $currentUser['full_name'], $currentRoleId);
-                $auth->logActivity('APPROVE_AT', 'AT', $id, 'Approved AT: ' . $at['at_tracking_no']);
+                // Check if this is an OIC approval
+                $isOIC = $auth->isActingAsOIC();
+                
+                $atModel->approve($id, $auth->getUserId(), $currentUser['full_name'], $currentRoleId, $isOIC);
+                
+                // Log with OIC prefix if applicable
+                $actionType = $isOIC ? 'OIC-APPROVAL' : 'APPROVE_AT';
+                $auth->logActivity($actionType, 'AT', $id, 'Approved AT: ' . $at['at_tracking_no']);
                 $message = 'Authority to Travel approved successfully!';
             } else {
                 $error = 'You do not have permission to approve this request.';
             }
+        }
+    }
+    
+    // Handle edit action
+    if ($postAction === 'edit') {
+        try {
+            $id = $_POST['id'];
+            $at = $atModel->getById($id);
+            
+            if (!$at) {
+                $error = 'Authority to Travel not found.';
+            } elseif (!$atModel->canUserEdit($at, $auth->getUserId())) {
+                $error = 'You cannot edit this Authority to Travel.';
+            } else {
+                $category = $_POST['travel_category'] ?? 'official';
+                $scope = ($category === 'official') ? ($_POST['travel_scope'] ?? null) : null;
+                
+                $data = [
+                    'employee_name' => $_POST['employee_name'],
+                    'employee_position' => $_POST['employee_position'],
+                    'permanent_station' => $_POST['permanent_station'],
+                    'purpose_of_travel' => $_POST['purpose_of_travel'],
+                    'host_of_activity' => $_POST['host_of_activity'] ?? null,
+                    'date_from' => $_POST['date_from'],
+                    'date_to' => $_POST['date_to'],
+                    'destination' => $_POST['destination'],
+                    'fund_source' => $_POST['fund_source'] ?? null,
+                    'travel_category' => $category,
+                    'travel_scope' => $scope
+                ];
+                
+                $atModel->update($id, $data, $auth->getUserId());
+                $auth->logActivity('UPDATE_AT', 'AT', $id, 'Updated AT: ' . $at['at_tracking_no']);
+                $message = 'Authority to Travel updated successfully!';
+            }
+        } catch (Exception $e) {
+            $error = 'Failed to update Authority to Travel: ' . $e->getMessage();
         }
     }
     
@@ -168,6 +214,7 @@ if ($auth->isEmployee()) {
 }
 // Superadmin sees everything (no filters applied)
 
+// Add comprehensive filters
 if (!empty($_GET['status'])) {
     $filters['status'] = $_GET['status'];
 }
@@ -177,6 +224,24 @@ if (!empty($_GET['category'])) {
 if (!empty($_GET['scope'])) {
     $filters['travel_scope'] = $_GET['scope'];
 }
+if (!empty($_GET['unit'])) {
+    $filters['unit'] = $_GET['unit'];
+}
+if (!empty($_GET['date_from'])) {
+    $filters['date_from'] = $_GET['date_from'];
+}
+if (!empty($_GET['date_to'])) {
+    $filters['date_to'] = $_GET['date_to'];
+}
+if (!empty($_GET['approval_date_from'])) {
+    $filters['approval_date_from'] = $_GET['approval_date_from'];
+}
+if (!empty($_GET['approval_date_to'])) {
+    $filters['approval_date_to'] = $_GET['approval_date_to'];
+}
+if (!empty($_GET['approver_id'])) {
+    $filters['approver_id'] = $_GET['approver_id'];
+}
 if (!empty($_GET['search'])) {
     $filters['search'] = $_GET['search'];
 }
@@ -185,9 +250,22 @@ $page = max(1, intval($_GET['page'] ?? 1));
 $perPage = ITEMS_PER_PAGE;
 $offset = ($page - 1) * $perPage;
 
-$requests = $atModel->getAll($filters, $perPage, $offset);
-$totalRequests = $atModel->getCount($filters);
+// Pass viewer info for visibility filtering
+$requests = $atModel->getAll($filters, $perPage, $offset, $currentRoleId, $auth->getUserId());
+$totalRequests = $atModel->getCount($filters, $currentRoleId, $auth->getUserId());
 $totalPages = ceil($totalRequests / $perPage);
+
+// Get approvers for filter dropdown
+require_once __DIR__ . '/../models/AdminUser.php';
+$userModel = new AdminUser();
+$allApprovers = [];
+if ($auth->isSuperAdmin() || $auth->isASDS()) {
+    // Get all unit heads
+    $unitHeads = $userModel->getUnitHeads(true);
+    foreach ($unitHeads as $uh) {
+        $allApprovers[$uh['id']] = $uh['full_name'] . ' (' . $uh['role_name'] . ')';
+    }
+}
 
 // Pre-fill form
 $formData = [
@@ -206,6 +284,15 @@ if ($type === 'national') {
     $formScope = '';
 }
 ?>
+
+<?php if ($isActingAsOIC): ?>
+<!-- OIC Notice Banner -->
+<div class="alert" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; margin-bottom: 20px;">
+    <i class="fas fa-user-shield"></i> 
+    <strong>Acting as OIC:</strong> You are currently serving as Officer-In-Charge (<?php echo htmlspecialchars($auth->getEffectiveRoleDisplayName()); ?>). 
+    You can approve requests on behalf of the unit head.
+</div>
+<?php endif; ?>
 
 <?php if ($message): ?>
 <div class="alert alert-success">
@@ -380,6 +467,19 @@ if ($type === 'national') {
         </div>
         <?php endif; ?>
         
+        <?php if ($atModel->canUserEdit($viewData, $auth->getUserId())): ?>
+        <div class="detail-card">
+            <div class="detail-card-header">
+                <h3><i class="fas fa-edit"></i> Edit</h3>
+            </div>
+            <div class="detail-card-body">
+                <a href="<?php echo navUrl('/authority-to-travel.php?edit=' . $viewData['id']); ?>" class="btn btn-primary btn-block">
+                    <i class="fas fa-edit"></i> Edit Request
+                </a>
+            </div>
+        </div>
+        <?php endif; ?>
+        
         <!-- Routing Status -->
         <div class="detail-card">
             <div class="detail-card-header">
@@ -524,6 +624,150 @@ function closeRejectModal() {
 }
 </script>
 
+<?php elseif ($editId): ?>
+<!-- Edit Authority to Travel -->
+<?php
+$editData = $atModel->getById($editId);
+if (!$editData || !$atModel->canUserEdit($editData, $auth->getUserId())) {
+    $error = 'You cannot edit this Authority to Travel.';
+    $editData = null;
+}
+?>
+<?php if ($editData): ?>
+<div class="page-header">
+    <a href="<?php echo navUrl('/authority-to-travel.php?view=' . $editData['id']); ?>" class="back-link">
+        <i class="fas fa-arrow-left"></i> Back to View
+    </a>
+</div>
+
+<div class="detail-card">
+    <div class="detail-card-header">
+        <h3><i class="fas fa-edit"></i> Edit Authority to Travel</h3>
+    </div>
+    <div class="detail-card-body">
+        <form method="POST" action="">
+            <input type="hidden" name="_token" value="<?php echo $currentToken; ?>">
+            <input type="hidden" name="action" value="edit">
+            <input type="hidden" name="id" value="<?php echo $editData['id']; ?>">
+            
+            <!-- Travel Type Selection -->
+            <div class="form-group">
+                <label class="form-label">Travel Type <span class="required">*</span></label>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <label class="checkbox-label" style="padding: 12px 20px; border: 2px solid var(--border-color); border-radius: 8px; cursor: pointer;">
+                        <input type="radio" name="travel_category" value="official" <?php echo ($editData['travel_category'] ?? 'official') === 'official' ? 'checked' : ''; ?> onchange="toggleTravelType()">
+                        <span>Official</span>
+                    </label>
+                    <label class="checkbox-label" style="padding: 12px 20px; border: 2px solid var(--border-color); border-radius: 8px; cursor: pointer;">
+                        <input type="radio" name="travel_category" value="personal" <?php echo ($editData['travel_category'] ?? '') === 'personal' ? 'checked' : ''; ?> onchange="toggleTravelType()">
+                        <span>Personal</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="form-group" id="scopeGroup" style="<?php echo ($editData['travel_category'] ?? 'official') === 'personal' ? 'display:none;' : ''; ?>">
+                <label class="form-label">Travel Scope <span class="required">*</span></label>
+                <div style="display: flex; gap: 12px;">
+                    <label class="checkbox-label" style="padding: 12px 20px; border: 2px solid var(--border-color); border-radius: 8px; cursor: pointer;">
+                        <input type="radio" name="travel_scope" value="local" <?php echo ($editData['travel_scope'] ?? 'local') === 'local' ? 'checked' : ''; ?>>
+                        <span>Local (Within Region)</span>
+                    </label>
+                    <label class="checkbox-label" style="padding: 12px 20px; border: 2px solid var(--border-color); border-radius: 8px; cursor: pointer;">
+                        <input type="radio" name="travel_scope" value="national" <?php echo ($editData['travel_scope'] ?? '') === 'national' ? 'checked' : ''; ?>>
+                        <span>National (Outside Region)</span>
+                    </label>
+                </div>
+            </div>
+            
+            <hr style="border: none; border-top: 1px solid var(--border-color); margin: 20px 0;">
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Employee Name <span class="required">*</span></label>
+                    <input type="text" name="employee_name" class="form-control" required
+                           value="<?php echo htmlspecialchars($editData['employee_name']); ?>">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Position</label>
+                    <input type="text" name="employee_position" class="form-control"
+                           value="<?php echo htmlspecialchars($editData['employee_position'] ?? ''); ?>">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Permanent Station</label>
+                <input type="text" name="permanent_station" class="form-control"
+                       value="<?php echo htmlspecialchars($editData['permanent_station'] ?? ''); ?>">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Destination <span class="required">*</span></label>
+                <input type="text" name="destination" class="form-control" required
+                       value="<?php echo htmlspecialchars($editData['destination']); ?>">
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Date From <span class="required">*</span></label>
+                    <input type="date" name="date_from" class="form-control" required
+                           value="<?php echo date('Y-m-d', strtotime($editData['date_from'])); ?>">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Date To <span class="required">*</span></label>
+                    <input type="date" name="date_to" class="form-control" required
+                           value="<?php echo date('Y-m-d', strtotime($editData['date_to'])); ?>">
+                </div>
+            </div>
+            
+            <div id="officialFields" style="<?php echo ($editData['travel_category'] ?? 'official') === 'personal' ? 'display:none;' : ''; ?>">
+                <div class="form-group">
+                    <label class="form-label">Host of Activity</label>
+                    <input type="text" name="host_of_activity" class="form-control"
+                           value="<?php echo htmlspecialchars($editData['host_of_activity'] ?? ''); ?>">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Fund Source</label>
+                    <input type="text" name="fund_source" class="form-control"
+                           value="<?php echo htmlspecialchars($editData['fund_source'] ?? ''); ?>">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Purpose of Travel <span class="required">*</span></label>
+                <textarea name="purpose_of_travel" class="form-control" rows="3" required><?php echo htmlspecialchars($editData['purpose_of_travel']); ?></textarea>
+            </div>
+            
+            <div class="form-actions">
+                <a href="<?php echo navUrl('/authority-to-travel.php?view=' . $editData['id']); ?>" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function toggleTravelType() {
+    const category = document.querySelector('input[name="travel_category"]:checked').value;
+    const scopeGroup = document.getElementById('scopeGroup');
+    const officialFields = document.getElementById('officialFields');
+    
+    if (category === 'personal') {
+        scopeGroup.style.display = 'none';
+        officialFields.style.display = 'none';
+    } else {
+        scopeGroup.style.display = 'block';
+        officialFields.style.display = 'block';
+    }
+}
+</script>
+
+<?php endif; ?>
+
 <?php else: ?>
 <!-- List View -->
 <div class="page-header">
@@ -577,6 +821,18 @@ function closeRejectModal() {
         </div>
         
         <div class="filter-group">
+            <label>Unit</label>
+            <select name="unit" class="filter-select">
+                <option value="">All Units</option>
+                <?php foreach (SDO_OFFICES as $code => $name): ?>
+                <option value="<?php echo $code; ?>" <?php echo ($_GET['unit'] ?? '') === $code ? 'selected' : ''; ?>>
+                    <?php echo htmlspecialchars($name); ?>
+                </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        
+        <div class="filter-group">
             <label>Status</label>
             <select name="status" class="filter-select">
                 <option value="">All Status</option>
@@ -586,6 +842,44 @@ function closeRejectModal() {
                 <option value="rejected" <?php echo ($_GET['status'] ?? '') === 'rejected' ? 'selected' : ''; ?>>Rejected</option>
             </select>
         </div>
+        
+        <div class="filter-group">
+            <label>Date Filed From</label>
+            <input type="date" name="date_from" class="filter-input" 
+                   value="<?php echo htmlspecialchars($_GET['date_from'] ?? ''); ?>">
+        </div>
+        
+        <div class="filter-group">
+            <label>Date Filed To</label>
+            <input type="date" name="date_to" class="filter-input" 
+                   value="<?php echo htmlspecialchars($_GET['date_to'] ?? ''); ?>">
+        </div>
+        
+        <div class="filter-group">
+            <label>Approval Date From</label>
+            <input type="date" name="approval_date_from" class="filter-input" 
+                   value="<?php echo htmlspecialchars($_GET['approval_date_from'] ?? ''); ?>">
+        </div>
+        
+        <div class="filter-group">
+            <label>Approval Date To</label>
+            <input type="date" name="approval_date_to" class="filter-input" 
+                   value="<?php echo htmlspecialchars($_GET['approval_date_to'] ?? ''); ?>">
+        </div>
+        
+        <?php if (!empty($allApprovers)): ?>
+        <div class="filter-group">
+            <label>Approver</label>
+            <select name="approver_id" class="filter-select">
+                <option value="">All Approvers</option>
+                <?php foreach ($allApprovers as $id => $name): ?>
+                <option value="<?php echo $id; ?>" <?php echo ($_GET['approver_id'] ?? '') == $id ? 'selected' : ''; ?>>
+                    <?php echo htmlspecialchars($name); ?>
+                </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <?php endif; ?>
         
         <div class="filter-actions">
             <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-filter"></i> Filter</button>
@@ -669,6 +963,11 @@ function closeRejectModal() {
                             <a href="<?php echo navUrl('/authority-to-travel.php?view=' . $at['id']); ?>" class="btn btn-icon" title="View">
                                 <i class="fas fa-eye"></i>
                             </a>
+                            <?php if ($atModel->canUserEdit($at, $auth->getUserId())): ?>
+                            <a href="<?php echo navUrl('/authority-to-travel.php?edit=' . $at['id']); ?>" class="btn btn-icon" title="Edit" style="color: var(--primary);">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <?php endif; ?>
                             <?php if ($at['status'] === 'approved'): ?>
                             <a href="<?php echo navUrl('/api/generate-docx.php?type=at&id=' . $at['id']); ?>" class="btn btn-icon" title="Download" style="color: var(--success);">
                                 <i class="fas fa-download"></i>

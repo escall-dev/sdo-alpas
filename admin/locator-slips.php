@@ -11,8 +11,15 @@ require_once __DIR__ . '/../services/TrackingService.php';
 $lsModel = new LocatorSlip();
 $trackingService = new TrackingService();
 
+// Get current user info for routing and visibility
+// Use effective role ID/Name which accounts for OIC delegation
+$currentRoleId = $auth->getEffectiveRoleId();
+$currentRoleName = $auth->getEffectiveRoleName();
+$isActingAsOIC = $auth->isActingAsOIC();
+
 $action = $_GET['action'] ?? '';
 $viewId = $_GET['view'] ?? '';
+$editId = $_GET['edit'] ?? '';
 $message = '';
 $error = '';
 
@@ -39,7 +46,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'user_id' => $auth->getUserId()
             ];
             
-            $id = $lsModel->create($data);
+            // Get requester info for routing
+            $requesterRoleId = $currentUser['role_id'];
+            $requesterOffice = $currentUser['employee_office'] ?? $_POST['employee_office'];
+            
+            $id = $lsModel->create($data, $requesterRoleId, $requesterOffice);
             $auth->logActivity('create', 'locator_slip', $id, 'Created Locator Slip: ' . $controlNo);
             
             $message = 'Locator Slip filed successfully! Tracking Number: ' . $controlNo;
@@ -49,11 +60,60 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
     
-    if ($postAction === 'approve' && $auth->canApproveLS()) {
+    if ($postAction === 'edit') {
+        // Edit Locator Slip (only if pending)
+        try {
+            $id = $_POST['id'];
+            $ls = $lsModel->getById($id);
+            
+            if (!$ls) {
+                $error = 'Locator Slip not found.';
+            } elseif (!$lsModel->canUserEdit($ls, $auth->getUserId())) {
+                $error = 'You cannot edit this Locator Slip.';
+            } else {
+                $data = [
+                    'employee_name' => $_POST['employee_name'],
+                    'employee_position' => $_POST['employee_position'],
+                    'employee_office' => $_POST['employee_office'],
+                    'purpose_of_travel' => $_POST['purpose_of_travel'],
+                    'travel_type' => $_POST['travel_type'],
+                    'date_time' => $_POST['date_time'],
+                    'destination' => $_POST['destination']
+                ];
+                
+                $lsModel->update($id, $data, $auth->getUserId());
+                $auth->logActivity('update', 'locator_slip', $id, 'Updated Locator Slip: ' . $ls['ls_control_no']);
+                $message = 'Locator Slip updated successfully!';
+            }
+        } catch (Exception $e) {
+            $error = 'Failed to update Locator Slip: ' . $e->getMessage();
+        }
+    }
+    
+    if ($postAction === 'approve') {
         $id = $_POST['id'];
         $ls = $lsModel->getById($id);
         
-        if ($ls && $ls['status'] === 'pending') {
+        // Check if user can approve:
+        // 1. They are the assigned approver
+        // 2. They are acting as OIC for the assigned approver's role
+        // 3. They are ASDS or superadmin
+        $canApprove = ($ls['assigned_approver_user_id'] == $auth->getUserId()) || 
+                     $auth->isASDS() || 
+                     $auth->isSuperAdmin();
+        
+        // Also check if user is OIC for the assigned approver's role
+        if (!$canApprove && $auth->isActingAsOIC()) {
+            $oicInfo = $auth->getActiveOICDelegation();
+            if ($oicInfo && $oicInfo['unit_head_role_id'] == $ls['assigned_approver_role_id']) {
+                $canApprove = true;
+            }
+        }
+        
+        if ($ls && $ls['status'] === 'pending' && $canApprove) {
+            // Check if this is an OIC approval
+            $isOIC = $auth->isActingAsOIC();
+            
             // Expand common acronyms to full titles for approver position
             $posRaw = trim($currentUser['employee_position'] ?? '');
             $posKey = strtoupper($posRaw);
@@ -68,9 +128,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Also check role_name for position
             $approverPosition = $positionMap[$posKey] ?? $positionMap[$currentUser['role_name']] ?? ($posRaw ?: $currentUser['role_name'] ?? '');
 
-            $lsModel->approve($id, $auth->getUserId(), $currentUser['full_name'], $approverPosition);
-            $auth->logActivity('approve', 'locator_slip', $id, 'Approved Locator Slip: ' . $ls['ls_control_no']);
+            $lsModel->approve($id, $auth->getUserId(), $currentUser['full_name'], $approverPosition, $isOIC);
+            
+            // Log with OIC prefix if applicable
+            $actionType = $isOIC ? 'OIC-APPROVAL' : 'approve';
+            $auth->logActivity($actionType, 'locator_slip', $id, 'Approved Locator Slip: ' . $ls['ls_control_no']);
             $message = 'Locator Slip approved successfully!';
+        } else {
+            $error = 'You do not have permission to approve this request.';
         }
     }
     
@@ -93,19 +158,39 @@ if ($viewId) {
     $viewData = $lsModel->getById($viewId);
     if (!$viewData) {
         $error = 'Locator Slip not found.';
-    } elseif ($auth->isEmployee() && $viewData['user_id'] != $auth->getUserId()) {
+    } elseif (!$lsModel->canUserView($viewData, $currentRoleId, $auth->getUserId())) {
         $error = 'You do not have permission to view this request.';
         $viewData = null;
     }
 }
 
-// Get list data
+// Get list data with comprehensive filters
 $filters = [];
-if ($auth->isEmployee()) {
-    $filters['user_id'] = $auth->getUserId();
-}
+
+// Add filter parameters
 if (!empty($_GET['status'])) {
     $filters['status'] = $_GET['status'];
+}
+if (!empty($_GET['unit'])) {
+    $filters['unit'] = $_GET['unit'];
+}
+if (!empty($_GET['travel_type'])) {
+    $filters['travel_type'] = $_GET['travel_type'];
+}
+if (!empty($_GET['date_from'])) {
+    $filters['date_from'] = $_GET['date_from'];
+}
+if (!empty($_GET['date_to'])) {
+    $filters['date_to'] = $_GET['date_to'];
+}
+if (!empty($_GET['approval_date_from'])) {
+    $filters['approval_date_from'] = $_GET['approval_date_from'];
+}
+if (!empty($_GET['approval_date_to'])) {
+    $filters['approval_date_to'] = $_GET['approval_date_to'];
+}
+if (!empty($_GET['approver_id'])) {
+    $filters['approver_id'] = $_GET['approver_id'];
 }
 if (!empty($_GET['search'])) {
     $filters['search'] = $_GET['search'];
@@ -115,9 +200,22 @@ $page = max(1, intval($_GET['page'] ?? 1));
 $perPage = ITEMS_PER_PAGE;
 $offset = ($page - 1) * $perPage;
 
-$requests = $lsModel->getAll($filters, $perPage, $offset);
-$totalRequests = $lsModel->getCount($filters);
+// Pass viewer info for visibility filtering
+$requests = $lsModel->getAll($filters, $perPage, $offset, $currentRoleId, $auth->getUserId());
+$totalRequests = $lsModel->getCount($filters, $currentRoleId, $auth->getUserId());
 $totalPages = ceil($totalRequests / $perPage);
+
+// Get approvers for filter dropdown
+require_once __DIR__ . '/../models/AdminUser.php';
+$userModel = new AdminUser();
+$allApprovers = [];
+if ($auth->isSuperAdmin() || $auth->isASDS()) {
+    // Get all unit heads
+    $unitHeads = $userModel->getUnitHeads(true);
+    foreach ($unitHeads as $uh) {
+        $allApprovers[$uh['id']] = $uh['full_name'] . ' (' . $uh['role_name'] . ')';
+    }
+}
 
 // Pre-fill form with user data
 $formData = [
@@ -126,6 +224,15 @@ $formData = [
     'employee_office' => $currentUser['employee_office'] ?? ''
 ];
 ?>
+
+<?php if ($isActingAsOIC): ?>
+<!-- OIC Notice Banner -->
+<div class="alert" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; margin-bottom: 20px;">
+    <i class="fas fa-user-shield"></i> 
+    <strong>Acting as OIC:</strong> You are currently serving as Officer-In-Charge (<?php echo htmlspecialchars($auth->getEffectiveRoleDisplayName()); ?>). 
+    You can approve requests on behalf of the unit head.
+</div>
+<?php endif; ?>
 
 <?php if ($message): ?>
 <div class="alert alert-success">
@@ -139,7 +246,100 @@ $formData = [
 </div>
 <?php endif; ?>
 
-<?php if ($viewData): ?>
+<?php if ($editId): ?>
+<!-- Edit Locator Slip -->
+<?php
+$editData = $lsModel->getById($editId);
+if (!$editData || !$lsModel->canUserEdit($editData, $auth->getUserId())) {
+    $error = 'You cannot edit this Locator Slip.';
+    $editData = null;
+}
+?>
+<?php if ($editData): ?>
+<div class="page-header">
+    <a href="<?php echo navUrl('/locator-slips.php?view=' . $editData['id']); ?>" class="back-link">
+        <i class="fas fa-arrow-left"></i> Back to View
+    </a>
+</div>
+
+<div class="detail-card">
+    <div class="detail-card-header">
+        <h3><i class="fas fa-edit"></i> Edit Locator Slip</h3>
+    </div>
+    <div class="detail-card-body">
+        <form method="POST" action="">
+            <input type="hidden" name="_token" value="<?php echo $currentToken; ?>">
+            <input type="hidden" name="action" value="edit">
+            <input type="hidden" name="id" value="<?php echo $editData['id']; ?>">
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Employee Name <span class="required">*</span></label>
+                    <input type="text" name="employee_name" class="form-control" required
+                           value="<?php echo htmlspecialchars($editData['employee_name']); ?>">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Position</label>
+                    <input type="text" name="employee_position" class="form-control"
+                           value="<?php echo htmlspecialchars($editData['employee_position'] ?? ''); ?>">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Office/Division</label>
+                <select name="employee_office" class="form-control">
+                    <option value="">-- Select Office --</option>
+                    <?php foreach (SDO_OFFICES as $code => $name): ?>
+                    <option value="<?php echo $code; ?>" <?php echo ($editData['employee_office'] ?? '') === $code ? 'selected' : ''; ?>>
+                        <?php echo htmlspecialchars($name); ?>
+                    </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Travel Type <span class="required">*</span></label>
+                    <select name="travel_type" class="form-control" required>
+                        <?php foreach (TRAVEL_TYPES as $code => $label): ?>
+                        <option value="<?php echo $code; ?>" <?php echo ($editData['travel_type'] ?? '') === $code ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($label); ?>
+                        </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Date & Time <span class="required">*</span></label>
+                    <input type="datetime-local" name="date_time" class="form-control" required
+                           value="<?php echo date('Y-m-d\TH:i', strtotime($editData['date_time'])); ?>">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Destination <span class="required">*</span></label>
+                <input type="text" name="destination" class="form-control" required
+                       value="<?php echo htmlspecialchars($editData['destination']); ?>">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Purpose of Travel <span class="required">*</span></label>
+                <textarea name="purpose_of_travel" class="form-control" rows="3" required><?php echo htmlspecialchars($editData['purpose_of_travel']); ?></textarea>
+            </div>
+            
+            <div class="form-actions">
+                <a href="<?php echo navUrl('/locator-slips.php?view=' . $editData['id']); ?>" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<?php endif; ?>
+
+<?php elseif ($viewData): ?>
 <!-- View Single Request -->
 <div class="page-header">
     <a href="<?php echo navUrl('/locator-slips.php'); ?>" class="back-link">
@@ -233,7 +433,21 @@ $formData = [
     
     <div class="complaint-sidebar">
         <!-- Actions -->
-        <?php if ($viewData['status'] === 'pending' && $auth->canApproveLS()): ?>
+        <?php 
+        $canApprove = $viewData['status'] === 'pending' && 
+                     ($viewData['assigned_approver_user_id'] == $auth->getUserId() || 
+                      $auth->isASDS() || 
+                      $auth->isSuperAdmin());
+        
+        // Also check if user is OIC for the assigned approver's role
+        if (!$canApprove && $viewData['status'] === 'pending' && $auth->isActingAsOIC()) {
+            $oicInfo = $auth->getActiveOICDelegation();
+            if ($oicInfo && $oicInfo['unit_head_role_id'] == $viewData['assigned_approver_role_id']) {
+                $canApprove = true;
+            }
+        }
+        ?>
+        <?php if ($canApprove): ?>
         <div class="detail-card action-card">
             <div class="detail-card-header">
                 <h3><i class="fas fa-tasks"></i> Actions</h3>
@@ -251,6 +465,19 @@ $formData = [
                 <button type="button" class="btn btn-danger btn-block" onclick="showRejectModal(<?php echo $viewData['id']; ?>)">
                     <i class="fas fa-times"></i> Reject
                 </button>
+            </div>
+        </div>
+        <?php endif; ?>
+        
+        <?php if ($lsModel->canUserEdit($viewData, $auth->getUserId())): ?>
+        <div class="detail-card">
+            <div class="detail-card-header">
+                <h3><i class="fas fa-edit"></i> Edit</h3>
+            </div>
+            <div class="detail-card-body">
+                <a href="<?php echo navUrl('/locator-slips.php?edit=' . $viewData['id']); ?>" class="btn btn-primary btn-block">
+                    <i class="fas fa-edit"></i> Edit Request
+                </a>
             </div>
         </div>
         <?php endif; ?>
@@ -393,6 +620,30 @@ function closeRejectModal() {
         </div>
         
         <div class="filter-group">
+            <label>Unit</label>
+            <select name="unit" class="filter-select">
+                <option value="">All Units</option>
+                <?php foreach (SDO_OFFICES as $code => $name): ?>
+                <option value="<?php echo $code; ?>" <?php echo ($_GET['unit'] ?? '') === $code ? 'selected' : ''; ?>>
+                    <?php echo htmlspecialchars($name); ?>
+                </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        
+        <div class="filter-group">
+            <label>Travel Type</label>
+            <select name="travel_type" class="filter-select">
+                <option value="">All Types</option>
+                <?php foreach (TRAVEL_TYPES as $code => $label): ?>
+                <option value="<?php echo $code; ?>" <?php echo ($_GET['travel_type'] ?? '') === $code ? 'selected' : ''; ?>>
+                    <?php echo htmlspecialchars($label); ?>
+                </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        
+        <div class="filter-group">
             <label>Status</label>
             <select name="status" class="filter-select">
                 <option value="">All Status</option>
@@ -401,6 +652,44 @@ function closeRejectModal() {
                 <option value="rejected" <?php echo ($_GET['status'] ?? '') === 'rejected' ? 'selected' : ''; ?>>Rejected</option>
             </select>
         </div>
+        
+        <div class="filter-group">
+            <label>Date Filed From</label>
+            <input type="date" name="date_from" class="filter-input" 
+                   value="<?php echo htmlspecialchars($_GET['date_from'] ?? ''); ?>">
+        </div>
+        
+        <div class="filter-group">
+            <label>Date Filed To</label>
+            <input type="date" name="date_to" class="filter-input" 
+                   value="<?php echo htmlspecialchars($_GET['date_to'] ?? ''); ?>">
+        </div>
+        
+        <div class="filter-group">
+            <label>Approval Date From</label>
+            <input type="date" name="approval_date_from" class="filter-input" 
+                   value="<?php echo htmlspecialchars($_GET['approval_date_from'] ?? ''); ?>">
+        </div>
+        
+        <div class="filter-group">
+            <label>Approval Date To</label>
+            <input type="date" name="approval_date_to" class="filter-input" 
+                   value="<?php echo htmlspecialchars($_GET['approval_date_to'] ?? ''); ?>">
+        </div>
+        
+        <?php if (!empty($allApprovers)): ?>
+        <div class="filter-group">
+            <label>Approver</label>
+            <select name="approver_id" class="filter-select">
+                <option value="">All Approvers</option>
+                <?php foreach ($allApprovers as $id => $name): ?>
+                <option value="<?php echo $id; ?>" <?php echo ($_GET['approver_id'] ?? '') == $id ? 'selected' : ''; ?>>
+                    <?php echo htmlspecialchars($name); ?>
+                </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <?php endif; ?>
         
         <div class="filter-actions">
             <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-filter"></i> Filter</button>
@@ -460,6 +749,11 @@ function closeRejectModal() {
                             <a href="<?php echo navUrl('/locator-slips.php?view=' . $ls['id']); ?>" class="btn btn-icon" title="View">
                                 <i class="fas fa-eye"></i>
                             </a>
+                            <?php if ($lsModel->canUserEdit($ls, $auth->getUserId())): ?>
+                            <a href="<?php echo navUrl('/locator-slips.php?edit=' . $ls['id']); ?>" class="btn btn-icon" title="Edit" style="color: var(--primary);">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <?php endif; ?>
                             <?php if ($ls['status'] === 'approved'): ?>
                             <a href="<?php echo navUrl('/api/generate-docx.php?type=ls&id=' . $ls['id']); ?>" class="btn btn-icon" title="Download" style="color: var(--success);">
                                 <i class="fas fa-download"></i>

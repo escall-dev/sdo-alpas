@@ -75,10 +75,29 @@ class AuthorityToTravel {
 
     /**
      * Create a new Authority to Travel request with routing
+     * Supports OIC delegation
      */
     public function create($data, $requesterRoleId, $requesterOffice) {
         // Determine routing based on role and office
         $routing = $this->determineRouting($requesterRoleId, $requesterOffice);
+        
+        // Get effective approver (may be OIC)
+        $assignedApproverUserId = null;
+        if ($routing['routing_stage'] === 'recommending') {
+            // Get unit head for this office
+            $recommenderRole = $this->getRecommenderRoleForOffice($requesterOffice);
+            require_once __DIR__ . '/AdminUser.php';
+            $userModel = new AdminUser();
+            $unitHeads = $userModel->getByRole($recommenderRole, true);
+            
+            if (!empty($unitHeads)) {
+                $unitHeadUserId = $unitHeads[0]['id'];
+                // Check for active OIC
+                require_once __DIR__ . '/OICDelegation.php';
+                $oicModel = new OICDelegation();
+                $assignedApproverUserId = $oicModel->getEffectiveApproverUserId($recommenderRole, $unitHeadUserId);
+            }
+        }
         
         $sql = "INSERT INTO authority_to_travel (
             at_tracking_no, employee_name, employee_position, permanent_station,
@@ -86,8 +105,9 @@ class AuthorityToTravel {
             destination, fund_source, inclusive_dates,
             requesting_employee_name, request_date,
             travel_category, travel_scope, user_id, status,
-            current_approver_role, routing_stage, requester_office, requester_role_id
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?)";
+            current_approver_role, routing_stage, requester_office, requester_role_id,
+            assigned_approver_user_id, date_filed
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?)";
         
         $this->db->query($sql, [
             $data['at_tracking_no'],
@@ -109,7 +129,9 @@ class AuthorityToTravel {
             $routing['current_approver_role'],
             $routing['routing_stage'],
             $requesterOffice,
-            $requesterRoleId
+            $requesterRoleId,
+            $assignedApproverUserId,
+            date('Y-m-d')
         ]);
 
         return $this->db->lastInsertId();
@@ -242,16 +264,35 @@ class AuthorityToTravel {
 
     /**
      * Get all Authority to Travel requests with filters
+     * Includes visibility filtering based on user role
      */
-    public function getAll($filters = [], $limit = 15, $offset = 0) {
+    public function getAll($filters = [], $limit = 15, $offset = 0, $viewerRoleId = null, $viewerUserId = null) {
         $sql = "SELECT at.*, 
                        u.full_name as filed_by_name, u.email as filed_by_email,
-                       a.full_name as approved_by_name
+                       u.employee_office as filed_by_office,
+                       a.full_name as approved_by_name,
+                       approver.full_name as assigned_approver_name,
+                       approver.employee_position as assigned_approver_position
                 FROM authority_to_travel at
                 LEFT JOIN admin_users u ON at.user_id = u.id
                 LEFT JOIN admin_users a ON at.approved_by = a.id
+                LEFT JOIN admin_users approver ON at.assigned_approver_user_id = approver.id
                 WHERE 1=1";
         $params = [];
+
+        // Visibility filtering
+        if ($viewerRoleId == ROLE_USER && $viewerUserId) {
+            $sql .= " AND at.user_id = ?";
+            $params[] = $viewerUserId;
+        } elseif ($viewerRoleId && in_array($viewerRoleId, UNIT_HEAD_ROLES)) {
+            // Unit heads see only requests from their supervised offices
+            if (isset(UNIT_HEAD_OFFICES[$viewerRoleId])) {
+                $offices = UNIT_HEAD_OFFICES[$viewerRoleId];
+                $placeholders = implode(',', array_fill(0, count($offices), '?'));
+                $sql .= " AND at.requester_office IN ($placeholders)";
+                $params = array_merge($params, $offices);
+            }
+        }
 
         if (!empty($filters['user_id'])) {
             $sql .= " AND at.user_id = ?";
@@ -273,9 +314,19 @@ class AuthorityToTravel {
             $params[] = $filters['travel_scope'];
         }
 
+        if (!empty($filters['unit'])) {
+            $sql .= " AND at.requester_office = ?";
+            $params[] = $filters['unit'];
+        }
+
         if (!empty($filters['current_approver_role'])) {
             $sql .= " AND at.current_approver_role = ?";
             $params[] = $filters['current_approver_role'];
+        }
+
+        if (!empty($filters['approver_id'])) {
+            $sql .= " AND at.assigned_approver_user_id = ?";
+            $params[] = $filters['approver_id'];
         }
 
         // Filter by supervised offices for unit heads
@@ -286,13 +337,23 @@ class AuthorityToTravel {
         }
 
         if (!empty($filters['date_from'])) {
-            $sql .= " AND DATE(at.created_at) >= ?";
+            $sql .= " AND DATE(at.date_filed) >= ?";
             $params[] = $filters['date_from'];
         }
 
         if (!empty($filters['date_to'])) {
-            $sql .= " AND DATE(at.created_at) <= ?";
+            $sql .= " AND DATE(at.date_filed) <= ?";
             $params[] = $filters['date_to'];
+        }
+
+        if (!empty($filters['approval_date_from'])) {
+            $sql .= " AND DATE(at.approval_date) >= ?";
+            $params[] = $filters['approval_date_from'];
+        }
+
+        if (!empty($filters['approval_date_to'])) {
+            $sql .= " AND DATE(at.approval_date) <= ?";
+            $params[] = $filters['approval_date_to'];
         }
 
         if (!empty($filters['search'])) {
@@ -312,10 +373,24 @@ class AuthorityToTravel {
 
     /**
      * Get count of Authority to Travel requests with filters
+     * Includes visibility filtering based on user role
      */
-    public function getCount($filters = []) {
+    public function getCount($filters = [], $viewerRoleId = null, $viewerUserId = null) {
         $sql = "SELECT COUNT(*) as total FROM authority_to_travel at WHERE 1=1";
         $params = [];
+
+        // Visibility filtering (same as getAll)
+        if ($viewerRoleId == ROLE_USER && $viewerUserId) {
+            $sql .= " AND at.user_id = ?";
+            $params[] = $viewerUserId;
+        } elseif ($viewerRoleId && in_array($viewerRoleId, UNIT_HEAD_ROLES)) {
+            if (isset(UNIT_HEAD_OFFICES[$viewerRoleId])) {
+                $offices = UNIT_HEAD_OFFICES[$viewerRoleId];
+                $placeholders = implode(',', array_fill(0, count($offices), '?'));
+                $sql .= " AND at.requester_office IN ($placeholders)";
+                $params = array_merge($params, $offices);
+            }
+        }
 
         if (!empty($filters['user_id'])) {
             $sql .= " AND at.user_id = ?";
@@ -337,9 +412,19 @@ class AuthorityToTravel {
             $params[] = $filters['travel_scope'];
         }
 
+        if (!empty($filters['unit'])) {
+            $sql .= " AND at.requester_office = ?";
+            $params[] = $filters['unit'];
+        }
+
         if (!empty($filters['current_approver_role'])) {
             $sql .= " AND at.current_approver_role = ?";
             $params[] = $filters['current_approver_role'];
+        }
+
+        if (!empty($filters['approver_id'])) {
+            $sql .= " AND at.assigned_approver_user_id = ?";
+            $params[] = $filters['approver_id'];
         }
 
         // Filter by supervised offices for unit heads
@@ -350,13 +435,23 @@ class AuthorityToTravel {
         }
 
         if (!empty($filters['date_from'])) {
-            $sql .= " AND DATE(at.created_at) >= ?";
+            $sql .= " AND DATE(at.date_filed) >= ?";
             $params[] = $filters['date_from'];
         }
 
         if (!empty($filters['date_to'])) {
-            $sql .= " AND DATE(at.created_at) <= ?";
+            $sql .= " AND DATE(at.date_filed) <= ?";
             $params[] = $filters['date_to'];
+        }
+
+        if (!empty($filters['approval_date_from'])) {
+            $sql .= " AND DATE(at.approval_date) >= ?";
+            $params[] = $filters['approval_date_from'];
+        }
+
+        if (!empty($filters['approval_date_to'])) {
+            $sql .= " AND DATE(at.approval_date) <= ?";
+            $params[] = $filters['approval_date_to'];
         }
 
         if (!empty($filters['search'])) {
@@ -391,11 +486,62 @@ class AuthorityToTravel {
     }
 
     /**
+     * Check if user can edit this AT request
+     * Only requestor can edit, and only when status is pending
+     */
+    public function canUserEdit($at, $viewerUserId) {
+        return $at['user_id'] == $viewerUserId && in_array($at['status'], ['pending', 'recommended']);
+    }
+
+    /**
+     * Update an AT request (only by requestor when pending/recommended)
+     */
+    public function update($id, $data, $userId) {
+        // Verify user can edit
+        $at = $this->getById($id);
+        if (!$this->canUserEdit($at, $userId)) {
+            return false;
+        }
+
+        $sql = "UPDATE authority_to_travel SET 
+                employee_name = ?,
+                employee_position = ?,
+                permanent_station = ?,
+                purpose_of_travel = ?,
+                host_of_activity = ?,
+                date_from = ?,
+                date_to = ?,
+                destination = ?,
+                fund_source = ?,
+                travel_category = ?,
+                travel_scope = ?,
+                updated_at = NOW()
+                WHERE id = ? AND user_id = ? AND status IN ('pending', 'recommended')";
+        
+        return $this->db->query($sql, [
+            $data['employee_name'],
+            $data['employee_position'] ?? null,
+            $data['permanent_station'] ?? null,
+            $data['purpose_of_travel'],
+            $data['host_of_activity'] ?? null,
+            $data['date_from'],
+            $data['date_to'],
+            $data['destination'],
+            $data['fund_source'] ?? null,
+            $data['travel_category'] ?? 'official',
+            $data['travel_scope'] ?? null,
+            $id,
+            $userId
+        ]);
+    }
+
+    /**
      * Approve an AT request (by Unit Head or ASDS)
      * Unit heads approve requests from regular users
      * ASDS approves requests from unit heads
+     * Supports OIC approval
      */
-    public function approve($id, $approverId, $approverName, $approverRoleId) {
+    public function approve($id, $approverId, $approverName, $approverRoleId, $isOIC = false) {
         $at = $this->getById($id);
         
         // Determine authority names based on who is approving
@@ -434,6 +580,15 @@ class AuthorityToTravel {
             
             return $this->db->query($sql, [$approverId, $approverFullDisplay, $id]);
         }
+    }
+
+    /**
+     * Get the effective approver user ID for a role (supports OIC)
+     */
+    public function getEffectiveApproverUserId($roleId, $unitHeadUserId = null) {
+        require_once __DIR__ . '/OICDelegation.php';
+        $oicModel = new OICDelegation();
+        return $oicModel->getEffectiveApproverUserId($roleId, $unitHeadUserId);
     }
 
     /**

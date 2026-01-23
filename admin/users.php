@@ -403,7 +403,25 @@ $pendingCount = $userModel->getPendingRegistrationsCount();
                     </div>
                     <div class="form-group">
                         <label class="form-label">Unit/Section</label>
-                        <input type="text" name="employee_office" class="form-control" placeholder="e.g. CID, SGOD">
+                        <select name="employee_office" class="form-control">
+                            <option value="">-- Select Unit/Section --</option>
+                            <option value="OSDS">OSDS - Office of the Schools Division Superintendent</option>
+                            <option value="OASDS">OASDS - Office of the Assistant Schools Division Superintendent</option>
+                            <option value="CID">CID - Curriculum Implementation Division</option>
+                            <option value="SGOD">SGOD - School Governance and Operations Division</option>
+                            <option value="Administrative">Administrative</option>
+                            <option value="Finance">Finance</option>
+                            <option value="Personnel">Personnel</option>
+                            <option value="Records">Records</option>
+                            <option value="Legal">Legal</option>
+                            <option value="ICT">ICT - Information and Communications Technology</option>
+                            <option value="Planning">Planning</option>
+                            <option value="Supply">Supply</option>
+                            <option value="Cashier">Cashier</option>
+                            <option value="Budget">Budget</option>
+                            <option value="Accounting">Accounting</option>
+                            <option value="Other">Other</option>
+                        </select>
                     </div>
                 </div>
 
@@ -483,7 +501,25 @@ $pendingCount = $userModel->getPendingRegistrationsCount();
                     </div>
                     <div class="form-group">
                         <label class="form-label">Unit/Section</label>
-                        <input type="text" name="employee_office" id="edit_employee_office" class="form-control">
+                        <select name="employee_office" id="edit_employee_office" class="form-control">
+                            <option value="">-- Select Unit/Section --</option>
+                            <option value="OSDS">OSDS - Office of the Schools Division Superintendent</option>
+                            <option value="OASDS">OASDS - Office of the Assistant Schools Division Superintendent</option>
+                            <option value="CID">CID - Curriculum Implementation Division</option>
+                            <option value="SGOD">SGOD - School Governance and Operations Division</option>
+                            <option value="Administrative">Administrative</option>
+                            <option value="Finance">Finance</option>
+                            <option value="Personnel">Personnel</option>
+                            <option value="Records">Records</option>
+                            <option value="Legal">Legal</option>
+                            <option value="ICT">ICT - Information and Communications Technology</option>
+                            <option value="Planning">Planning</option>
+                            <option value="Supply">Supply</option>
+                            <option value="Cashier">Cashier</option>
+                            <option value="Budget">Budget</option>
+                            <option value="Accounting">Accounting</option>
+                            <option value="Other">Other</option>
+                        </select>
                     </div>
                 </div>
 

@@ -13,8 +13,11 @@ $atModel = new AuthorityToTravel();
 
 // Get current user's ID for personal stats
 $userId = $auth->getUserId();
-$currentRoleId = $currentUser['role_id'];
-$currentRoleName = $currentUser['role_name'];
+// Use effective role ID/Name which accounts for OIC delegation
+$currentRoleId = $auth->getEffectiveRoleId();
+$currentRoleName = $auth->getEffectiveRoleName();
+$currentRoleDisplayName = $auth->getEffectiveRoleDisplayName();
+$isActingAsOIC = $auth->isActingAsOIC();
 
 // Get statistics based on role
 if ($auth->isEmployee()) {
@@ -24,7 +27,7 @@ if ($auth->isEmployee()) {
     $recentLS = $lsModel->getRecent(5, $userId);
     $recentAT = $atModel->getRecent(5, $userId);
 } elseif ($auth->isUnitHead()) {
-    // Unit heads see stats about requests FROM THEIR UNIT (supervised offices)
+    // Unit heads (or OICs acting as unit heads) see stats about requests FROM THEIR UNIT
     $myLsStats = $lsModel->getStatistics($userId); // Their own LS if any
     $myAtStats = $atModel->getUnitStatistics($currentRoleId); // Stats from their supervised offices
     $pendingLS = $lsModel->getPending(5);
@@ -39,6 +42,15 @@ if ($auth->isEmployee()) {
     $queueCount = ($lsModel->getStatistics()['pending'] ?? 0) + ($atModel->getPendingCountForRole($currentRoleName, $currentRoleId));
 }
 ?>
+
+<?php if ($isActingAsOIC): ?>
+<!-- OIC Notice Banner -->
+<div class="alert" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; margin-bottom: 20px;">
+    <i class="fas fa-user-shield"></i> 
+    <strong>Acting as OIC:</strong> You are currently serving as Officer-In-Charge (<?php echo htmlspecialchars($currentRoleDisplayName); ?>). 
+    You can process requests on behalf of the unit head.
+</div>
+<?php endif; ?>
 
 <?php if ($auth->isEmployee()): ?>
 <!-- ==================== EMPLOYEE DASHBOARD ==================== -->

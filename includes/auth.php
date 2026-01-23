@@ -10,6 +10,7 @@ require_once __DIR__ . '/../config/admin_config.php';
 require_once __DIR__ . '/../models/AdminUser.php';
 require_once __DIR__ . '/../models/SessionToken.php';
 require_once __DIR__ . '/../models/ActivityLog.php';
+require_once __DIR__ . '/../models/OICDelegation.php';
 
 class AdminAuth {
     private static $instance = null;
@@ -18,6 +19,8 @@ class AdminAuth {
     private $adminUserModel;
     private $sessionTokenModel;
     private $activityLog;
+    private $oicDelegation = null;  // Cached OIC delegation info
+    private $oicChecked = false;    // Flag to prevent redundant queries
 
     private function __construct() {
         $this->adminUserModel = new AdminUser();
@@ -247,12 +250,22 @@ class AdminAuth {
 
     /**
      * Check if current user is a unit head (OSDS Chief, CID Chief, SGOD Chief)
+     * Also returns true if user is acting as OIC for a unit head
      */
     public function isUnitHead() {
         if (!$this->user) {
             return false;
         }
-        return isUnitHead($this->user['role_id']);
+        // Check actual role
+        if (isUnitHead($this->user['role_id'])) {
+            return true;
+        }
+        // Check if acting as OIC for a unit head
+        $oicInfo = $this->getActiveOICDelegation();
+        if ($oicInfo) {
+            return isUnitHead($oicInfo['unit_head_role_id']);
+        }
+        return false;
     }
 
     /**
@@ -267,7 +280,7 @@ class AdminAuth {
 
     /**
      * Check if current user can approve/recommend AT requests
-     * Includes unit heads who can recommend
+     * Includes unit heads who can recommend (or OICs acting for them)
      */
     public function canActOnAT() {
         if (!$this->user) {
@@ -278,23 +291,131 @@ class AdminAuth {
 
     /**
      * Check if current user can approve Locator Slips
-     * Includes OSDS_CHIEF in addition to ASDS and Superadmin
+     * Includes OSDS_CHIEF (or OIC acting as OSDS_CHIEF) in addition to ASDS and Superadmin
      */
     public function canApproveLS() {
         if (!$this->user) {
             return false;
         }
-        return $this->isApprover() || $this->user['role_id'] == ROLE_OSDS_CHIEF;
+        if ($this->isApprover()) {
+            return true;
+        }
+        if ($this->user['role_id'] == ROLE_OSDS_CHIEF) {
+            return true;
+        }
+        // Check if acting as OIC for OSDS Chief
+        $oicInfo = $this->getActiveOICDelegation();
+        if ($oicInfo && $oicInfo['unit_head_role_id'] == ROLE_OSDS_CHIEF) {
+            return true;
+        }
+        return false;
     }
 
     /**
-     * Check if current user is a regular employee
+     * Check if current user is a regular employee (not acting as OIC)
      */
     public function isEmployee() {
         if (!$this->user) {
             return false;
         }
-        return isEmployee($this->user['role_id']);
+        // If user has actual employee role AND is not acting as OIC
+        if (isEmployee($this->user['role_id'])) {
+            // Check if they're acting as OIC - if so, they're NOT just an employee
+            $oicInfo = $this->getActiveOICDelegation();
+            if ($oicInfo) {
+                return false; // They're acting as OIC, not a regular employee
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Check if current user is actively serving as OIC
+     */
+    public function isActingAsOIC() {
+        if (!$this->user) {
+            return false;
+        }
+        $oicInfo = $this->getActiveOICDelegation();
+        return $oicInfo !== null;
+    }
+
+    /**
+     * Get the active OIC delegation for current user (cached)
+     */
+    public function getActiveOICDelegation() {
+        if (!$this->user) {
+            return null;
+        }
+        
+        if (!$this->oicChecked) {
+            $this->oicChecked = true;
+            $oicModel = new OICDelegation();
+            // Get all active delegations where this user is the OIC
+            $sql = "SELECT o.*, r.role_name as delegated_role_name
+                    FROM oic_delegations o
+                    JOIN admin_roles r ON o.unit_head_role_id = r.id
+                    WHERE o.oic_user_id = ? 
+                      AND o.is_active = 1 
+                      AND CURDATE() BETWEEN o.start_date AND o.end_date
+                    ORDER BY o.created_at DESC
+                    LIMIT 1";
+            
+            $db = Database::getInstance();
+            $result = $db->query($sql, [$this->user['id']])->fetch();
+            $this->oicDelegation = $result ?: null;
+        }
+        
+        return $this->oicDelegation;
+    }
+
+    /**
+     * Get the effective role ID (actual role or OIC delegated role)
+     */
+    public function getEffectiveRoleId() {
+        if (!$this->user) {
+            return null;
+        }
+        
+        $oicInfo = $this->getActiveOICDelegation();
+        if ($oicInfo) {
+            return $oicInfo['unit_head_role_id'];
+        }
+        
+        return $this->user['role_id'];
+    }
+
+    /**
+     * Get the effective role name for database queries (without OIC suffix)
+     */
+    public function getEffectiveRoleName() {
+        if (!$this->user) {
+            return null;
+        }
+        
+        $oicInfo = $this->getActiveOICDelegation();
+        if ($oicInfo) {
+            return $oicInfo['delegated_role_name'];
+        }
+        
+        return $this->user['role_name'];
+    }
+
+    /**
+     * Get the effective role name for display (with OIC suffix if applicable)
+     */
+    public function getEffectiveRoleDisplayName() {
+        if (!$this->user) {
+            return null;
+        }
+        
+        $oicInfo = $this->getActiveOICDelegation();
+        if ($oicInfo) {
+            return $oicInfo['delegated_role_name'] . ' (OIC)';
+        }
+        
+        return $this->user['role_name'];
     }
 
     /**
