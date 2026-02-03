@@ -638,6 +638,12 @@ body {
     object-fit: cover;
 }
 
+/* Sidebar footer avatar: match profile page avatar icon color */
+.sidebar-footer .user-avatar-placeholder {
+    background: rgb(241, 142, 37);
+    color: white;
+}
+
 .user-avatar-placeholder {
     width: 36px;
     height: 36px;
