@@ -197,14 +197,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <!-- Right column: Avatar, then Account Info (height reference for Edit Profile card) -->
     <div id="profile-sidebar" style="display: flex; flex-direction: column; gap: 20px;">
-        <!-- Avatar (square card) -->
-        <div class="detail-card" style="background: linear-gradient(135deg,rgba(6, 8, 120, 0.76) 0%,rgb(185, 121, 18) 100%); color: white; aspect-ratio: 1; max-height: 350px;">
+        <!-- Avatar (square card) - SDO theme: blue card, orange avatar icon -->
+        <div class="detail-card profile-avatar-card" style="background: var(--primary-gradient); color: white; aspect-ratio: 1; max-height: 350px;">
             <div class="detail-card-body" style="text-align: center; padding: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 0;">
-                <div class="user-avatar-placeholder" style="width: 64px; height: 64px; font-size: 1.75rem; margin: 0 auto 12px; flex-shrink: 0;">
+                <div class="user-avatar-placeholder profile-avatar-icon" style="width: 100px; height: 100px; font-size: 1.85rem; margin: 65px auto 12px; flex-shrink: 0; background:rgb(241, 142, 37); color: white;">
                     <?php echo strtoupper(substr($currentUser['full_name'], 0, 1)); ?>
                 </div>
-                <h3 style="margin: 0 0 4px; font-size: 1rem; line-height: 1.3;"><?php echo htmlspecialchars($currentUser['full_name']); ?></h3>
-                <p style="opacity: 0.8; margin: 0; font-size: 0.85rem;"><?php echo htmlspecialchars($currentUser['employee_position'] ?? 'SDO Employee'); ?></p>
+                <div style="width: 100%; text-align: center; margin-top: 0;">
+                    <h3 style="margin: 0 0 4px; font-size: 1.3rem; line-height: 1.3; text-align: center;"><?php echo htmlspecialchars($currentUser['full_name']); ?></h3>
+                    <p style="opacity: 0.8; margin: 0; font-size: 1rem; text-align: center;"><?php echo htmlspecialchars($currentUser['employee_position'] ?? 'SDO Employee'); ?></p>
+                </div>
             </div>
         </div>
 
