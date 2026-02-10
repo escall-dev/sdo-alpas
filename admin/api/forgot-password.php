@@ -69,10 +69,9 @@ switch ($action) {
 /**
  * Handle verification page access tracking
  */
-function handleTrackAccess($input, $userModel, $resetModel)
-{
+function handleTrackAccess($input, $userModel, $resetModel) {
     $email = trim($input['email'] ?? '');
-
+    
     if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
         echo json_encode(['success' => false, 'message' => 'Invalid email.']);
         return;
@@ -91,8 +90,7 @@ function handleTrackAccess($input, $userModel, $resetModel)
 /**
  * Handle OTP request
  */
-function handleRequestOTP($input, $userModel, $resetModel, $activityLog)
-{
+function handleRequestOTP($input, $userModel, $resetModel, $activityLog) {
     $email = trim($input['email'] ?? '');
 
     if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -187,8 +185,7 @@ function handleRequestOTP($input, $userModel, $resetModel, $activityLog)
 /**
  * Handle OTP verification
  */
-function handleVerifyOTP($input, $userModel, $resetModel, $activityLog)
-{
+function handleVerifyOTP($input, $userModel, $resetModel, $activityLog) {
     $email = trim($input['email'] ?? '');
     $otp = trim($input['otp'] ?? '');
 
@@ -243,7 +240,7 @@ function handleVerifyOTP($input, $userModel, $resetModel, $activityLog)
     } else {
         // Increment OTP input attempt on failure
         $attemptResult = $resetModel->incrementOTPInputAttempt($user['id']);
-
+        
         $response = [
             'success' => false,
             'error' => $result['error'],
@@ -274,8 +271,7 @@ function handleVerifyOTP($input, $userModel, $resetModel, $activityLog)
 /**
  * Handle password reset
  */
-function handleResetPassword($input, $resetModel, $activityLog)
-{
+function handleResetPassword($input, $resetModel, $activityLog) {
     $email = trim($input['email'] ?? '');
     $resetToken = trim($input['reset_token'] ?? '');
     $newPassword = $input['new_password'] ?? '';
@@ -323,8 +319,7 @@ function handleResetPassword($input, $resetModel, $activityLog)
 /**
  * Handle OTP resend with rate limiting (max 3 per hour)
  */
-function handleResendOTP($input, $userModel, $resetModel, $activityLog)
-{
+function handleResendOTP($input, $userModel, $resetModel, $activityLog) {
     $email = trim($input['email'] ?? '');
 
     if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -417,8 +412,7 @@ function handleResendOTP($input, $userModel, $resetModel, $activityLog)
 /**
  * Send OTP via email using PHPMailer
  */
-function sendOTPEmail($email, $fullName, $otp)
-{
+function sendOTPEmail($email, $fullName, $otp) {
     if (!MAIL_ENABLED) {
         // If mail is disabled, log the OTP (for development only)
         error_log("SDO ATLAS - Password Reset OTP for {$email}: {$otp}");
@@ -432,13 +426,13 @@ function sendOTPEmail($email, $fullName, $otp)
 
         // SMTP settings
         $mail->isSMTP();
-        $mail->Host = SMTP_HOST;
-        $mail->SMTPAuth = SMTP_AUTH;
-        $mail->Username = SMTP_USERNAME;
-        $mail->Password = SMTP_PASSWORD;
+        $mail->Host       = SMTP_HOST;
+        $mail->SMTPAuth   = SMTP_AUTH;
+        $mail->Username   = SMTP_USERNAME;
+        $mail->Password   = SMTP_PASSWORD;
         $mail->SMTPSecure = SMTP_ENCRYPTION;
-        $mail->Port = SMTP_PORT;
-        $mail->CharSet = MAIL_CHARSET;
+        $mail->Port       = SMTP_PORT;
+        $mail->CharSet    = MAIL_CHARSET;
 
         // Sender — must match SMTP credentials for Gmail
         $mail->setFrom(MAIL_FROM_ADDRESS, MAIL_FROM_NAME);
@@ -451,7 +445,7 @@ function sendOTPEmail($email, $fullName, $otp)
         // Embed logos as inline attachments for the email
         $sdoLogoPath = __DIR__ . '/../assets/logos/sdo-logo.jpg';
         $bpLogoPath = __DIR__ . '/../assets/logos/bagongpilpinas-logo.png';
-
+        
         if (file_exists($sdoLogoPath)) {
             $mail->addEmbeddedImage($sdoLogoPath, 'sdo-logo', 'sdo-logo.jpg');
         }
@@ -475,8 +469,7 @@ function sendOTPEmail($email, $fullName, $otp)
 /**
  * Build HTML email body for OTP
  */
-function buildOTPEmailHTML($fullName, $otp)
-{
+function buildOTPEmailHTML($fullName, $otp) {
     $expiry = PasswordReset::OTP_EXPIRY_MINUTES;
     return <<<HTML
 <!DOCTYPE html>
@@ -556,8 +549,7 @@ HTML;
 /**
  * Build plain text email body for OTP
  */
-function buildOTPEmailText($fullName, $otp)
-{
+function buildOTPEmailText($fullName, $otp) {
     $expiry = PasswordReset::OTP_EXPIRY_MINUTES;
     return <<<TEXT
 SDO ATLAS - Password Reset Request
