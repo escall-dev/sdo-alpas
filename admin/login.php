@@ -402,7 +402,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </button>
             </form>
 
-            <div class="divider">New Employee?</div>
+            <div class="divider">Don't have an account?</div>
             
             <a href="<?php echo ADMIN_URL; ?>/register.php" class="btn btn-secondary">
                 <i class="fas fa-user-plus"></i> Create Account
