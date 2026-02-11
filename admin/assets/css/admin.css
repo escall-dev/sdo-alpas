@@ -842,6 +842,7 @@ body {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 16px;
+    margin-bottom: 24px;
 }
 
 .stat-card {
@@ -854,6 +855,7 @@ body {
     border: 2px solid rgba(0, 0, 0, 0.12);
     transition: all var(--transition-base);
     box-shadow: 0 6px 28px 4px rgba(0, 0, 0, 0.35), 0 3px 12px 2px rgba(0, 0, 0, 0.25);
+    min-width: 0;
 }
 
 .stat-card:hover {
@@ -871,6 +873,7 @@ body {
     justify-content: center;
     border-radius: var(--radius-md);
     background: var(--bg-secondary);
+    flex-shrink: 0;
 }
 
 .stat-icon i {
@@ -885,6 +888,8 @@ body {
 
 .stat-content {
     flex: 1;
+    min-width: 0;
+    overflow: hidden;
 }
 
 .stat-value {
