@@ -1,5 +1,8 @@
 # Dependencies
-/vendor/
+/vendor/*
+!/vendor/laminas/
+/vendor/laminas/*
+!/vendor/laminas/laminas-escaper/
 /vendor-bin/
 /composer.lock
 /composer.phar
