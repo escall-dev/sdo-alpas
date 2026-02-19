@@ -1,4 +1,4 @@
-# SDO ATLAS - Users Categorization Table
+# SDO ALPAS - Users Categorization Table
 
 **Registered users (active, pending, and inactive) categorized by Name, Office, Unit, and Email.**
 
@@ -17,7 +17,7 @@
 
 ## 1. Overview
 
-This document provides a **reference table of all registered users** in SDO ATLAS, regardless of account status. Users are categorized by:
+This document provides a **reference table of all registered users** in SDO ALPAS, regardless of account status. Users are categorized by:
 
 | Category | Description |
 |----------|-------------|

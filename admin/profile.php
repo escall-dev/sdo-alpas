@@ -1,7 +1,7 @@
 <?php
 /**
  * User Profile Page
- * SDO ATLAS - Office/Division and Unit are read-only except for Superadmin
+ * SDO ALPAS - Office/Division and Unit are read-only except for Superadmin
  */
 
 require_once __DIR__ . '/../includes/header.php';

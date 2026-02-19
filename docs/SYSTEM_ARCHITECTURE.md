@@ -1,6 +1,6 @@
-# SDO ATLAS - System Architecture Documentation
+# SDO ALPAS - System Architecture Documentation
 
-**Schools Division Office - Authority to Travel and Locator Approval System**
+**Schools Division Office - Authority to Travel, Locator and Pass slip Approval System**
 
 ---
 
@@ -17,7 +17,7 @@
 
 ## 1. System Overview
 
-SDO ATLAS is a comprehensive web-based document approval system designed for the Schools Division Office of San Pedro City, Department of Education. The system manages:
+SDO ALPAS is a comprehensive web-based document approval system designed for the Schools Division Office of San Pedro City, Department of Education. The system manages:
 
 - **Authority to Travel (AT)** requests - Official/Personal, Local/International travel
 - **Locator Slips (LS)** - Same-day local movement tracking
@@ -41,7 +41,7 @@ SDO ATLAS is a comprehensive web-based document approval system designed for the
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────┐
-│                              SDO ATLAS SYSTEM ARCHITECTURE                       │
+│                              SDO ALPAS SYSTEM ARCHITECTURE                       │
 └─────────────────────────────────────────────────────────────────────────────────┘
 
                                     ┌─────────────┐
@@ -738,7 +738,7 @@ SDO ATLAS is a comprehensive web-based document approval system designed for the
 │  │     )                                                                       │ │
 │  │                                                                             │ │
 │  │  3. Set cookie                                                              │ │
-│  │     setcookie('atlas_token', $token, ...)                                   │ │
+│  │     setcookie('alpas_token', $token, ...)                                   │ │
 │  │                                                                             │ │
 │  └─────────────────────────────────────────────────────────────────────────────┘ │
 └────────────────────────────────────────────┬─────────────────────────────────────┘
@@ -758,7 +758,7 @@ SDO ATLAS is a comprehensive web-based document approval system designed for the
 │  │  2. POST Parameter: _token                                                  │ │
 │  │  3. Authorization Header: Bearer xxx                                        │ │
 │  │  4. Custom Header: X-Auth-Token                                             │ │
-│  │  5. Cookie: atlas_token                                                     │ │
+│  │  5. Cookie: alpas_token                                                     │ │
 │  │                                                                             │ │
 │  │         ▼                                                                   │ │
 │  │  SessionToken::validate($token)                                             │ │
@@ -1090,7 +1090,7 @@ SDO ATLAS is a comprehensive web-based document approval system designed for the
 ## Appendix: Directory Structure
 
 ```
-SDO-atlas/
+SDO-alpas/
 ├── admin/                          # Admin panel pages
 │   ├── api/                        # AJAX endpoints
 │   │   ├── generate-docx.php
@@ -1145,4 +1145,4 @@ SDO-atlas/
 
 **Document Version:** 1.0  
 **Last Updated:** January 29, 2026  
-**System:** SDO ATLAS - Schools Division Office Authority to Travel and Locator Approval System
+**System:** SDO ALPAS - Schools Division Office Authority to Travel, Locator and Pass slip Approval System

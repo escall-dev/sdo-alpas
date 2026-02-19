@@ -1,7 +1,7 @@
 <?php
 /**
  * Forgot Password API Endpoint
- * SDO ATLAS - Schools Division Office Authority to Travel and Locator Approval System
+ * SDO ALPAS - Schools Division Office Authority to Travel, Locator and Pass slip Approval System
  * 
  * Handles three actions:
  *   - request: Validate email, generate OTP, send via email
@@ -415,7 +415,7 @@ function handleResendOTP($input, $userModel, $resetModel, $activityLog) {
 function sendOTPEmail($email, $fullName, $otp) {
     if (!MAIL_ENABLED) {
         // If mail is disabled, log the OTP (for development only)
-        error_log("SDO ATLAS - Password Reset OTP for {$email}: {$otp}");
+        error_log("SDO ALPAS - Password Reset OTP for {$email}: {$otp}");
         return true;
     }
 
@@ -440,7 +440,7 @@ function sendOTPEmail($email, $fullName, $otp) {
         $mail->addAddress($email, $fullName);
 
         $mail->isHTML(true);
-        $mail->Subject = 'SDO ATLAS - Password Reset OTP';
+        $mail->Subject = 'SDO ALPAS - Password Reset OTP';
 
         // Embed logos as inline attachments for the email
         $sdoLogoPath = __DIR__ . '/../assets/logos/sdo-logo.jpg';
@@ -461,7 +461,7 @@ function sendOTPEmail($email, $fullName, $otp) {
         return true;
 
     } catch (Exception $e) {
-        error_log("SDO ATLAS - Failed to send password reset email to {$email}: " . $e->getMessage());
+        error_log("SDO ALPAS - Failed to send password reset email to {$email}: " . $e->getMessage());
         return false;
     }
 }
@@ -489,7 +489,7 @@ function buildOTPEmailHTML($fullName, $otp) {
                             <img src="cid:sdo-logo" alt="SDO Logo" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;">
                         </td>
                         <td style="text-align: center; vertical-align: middle; padding: 0 10px;">
-                            <h1 style="margin: 0; color: #ffffff; font-size: 22px; font-weight: 700;">SDO ATLAS</h1>
+                            <h1 style="margin: 0; color: #ffffff; font-size: 22px; font-weight: 700;">SDO ALPAS</h1>
                             <p style="margin: 4px 0 0; color: rgba(255,255,255,0.85); font-size: 12px; line-height: 1.4;">
                                 The Schools Division Office of San Pedro City<br>
                                 Password Reset Request
@@ -507,7 +507,7 @@ function buildOTPEmailHTML($fullName, $otp) {
             <td style="padding: 32px;">
                 <p style="margin: 0 0 16px; color: #333; font-size: 15px;">Hello <strong>{$fullName}</strong>,</p>
                 <p style="margin: 0 0 24px; color: #555; font-size: 14px; line-height: 1.6;">
-                    We received a request to reset your password for your SDO ATLAS account. Use the OTP code below to complete the process:
+                    We received a request to reset your password for your SDO ALPAS account. Use the OTP code below to complete the process:
                 </p>
                 <!-- OTP Box -->
                 <div style="text-align: center; margin: 24px 0;">
@@ -534,7 +534,7 @@ function buildOTPEmailHTML($fullName, $otp) {
         <tr>
             <td style="background: #f8fafc; padding: 20px 32px; text-align: center; border-top: 1px solid #eee;">
                 <p style="margin: 0; color: #999; font-size: 12px;">
-                    SDO ATLAS - Department of Education<br>
+                    SDO ALPAS - Department of Education<br>
                     Schools Division Office of San Pedro City<br>
                     <a href="mailto:ict.sanpedrocity@deped.gov.ph" style="color: #1b6ca8;">ict.sanpedrocity@deped.gov.ph</a>
                 </p>
@@ -552,11 +552,11 @@ HTML;
 function buildOTPEmailText($fullName, $otp) {
     $expiry = PasswordReset::OTP_EXPIRY_MINUTES;
     return <<<TEXT
-SDO ATLAS - Password Reset Request
+SDO ALPAS - Password Reset Request
 
 Hello {$fullName},
 
-We received a request to reset your password for your SDO ATLAS account.
+We received a request to reset your password for your SDO ALPAS account.
 
 Your OTP Code: {$otp}
 
@@ -568,7 +568,7 @@ SECURITY NOTICE:
 - Your password will not change unless you complete the reset process.
 
 ---
-SDO ATLAS - Department of Education
+SDO ALPAS - Department of Education
 Schools Division Office of San Pedro City
 
 TEXT;

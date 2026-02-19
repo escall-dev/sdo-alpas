@@ -45,7 +45,7 @@ define('SMTP_AUTH', filter_var(getenv('SMTP_AUTH') ?: 'true', FILTER_VALIDATE_BO
 
 // Sender Configuration
 define('MAIL_FROM_ADDRESS', getenv('MAIL_FROM_ADDRESS') ?: 'ict.sanpedrocity@deped.gov.ph');
-define('MAIL_FROM_NAME', getenv('MAIL_FROM_NAME') ?: 'SDO ATLAS - The Schools Division Office of San Pedro City Authority to Travel and Locator Approval System');
+define('MAIL_FROM_NAME', getenv('MAIL_FROM_NAME') ?: 'SDO ALPAS - The Schools Division Office of San Pedro City Authority to Travel, Locator and Pass slip Approval System');
 define('MAIL_REPLY_TO', getenv('MAIL_REPLY_TO') ?: 'ict.sanpedrocity@deped.gov.ph');
 
 // Admin notification recipients (comma-separated emails)

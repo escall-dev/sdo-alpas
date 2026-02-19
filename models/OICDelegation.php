@@ -2,7 +2,7 @@
 /**
  * OIC Delegation Model
  * Handles OIC (Officer-In-Charge) delegation assignments
- * SDO ATLAS
+ * SDO ALPAS
  */
 
 require_once __DIR__ . '/../config/database.php';

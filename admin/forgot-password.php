@@ -1,7 +1,7 @@
 <?php
 /**
  * Forgot Password Page
- * SDO ATLAS - Schools Division Office Authority to Travel and Locator Approval System
+ * SDO ALPAS - Schools Division Office Authority to Travel, Locator and Pass slip Approval System
  * 
  * Step 1: User enters email to request OTP
  * Step 2: OTP verification (shown after successful request)
@@ -410,7 +410,7 @@ if ($email) {
                     <div class="logo-badge">
                         <img src="assets/logos/sdo-logo.jpg" alt="SDO Logo">
                     </div>
-                    <h1>SDO ATLAS</h1>
+                    <h1>SDO ALPAS</h1>
                     <p>Forgot Password</p>
                     <p style="margin-top: 6px;">Enter your registered email address and we'll send you a one-time password (OTP) to reset your password.</p>
                 </div>
@@ -451,7 +451,7 @@ if ($email) {
                     <div class="logo-badge">
                         <img src="assets/logos/sdo-logo.jpg" alt="SDO Logo">
                     </div>
-                    <h1>SDO ATLAS</h1>
+                    <h1>SDO ALPAS</h1>
                     <p>Verify OTP</p>
                     <p style="margin-top: 6px;">Enter the 6-digit code sent to your email address.</p>
                 </div>
@@ -506,7 +506,7 @@ if ($email) {
                     <div class="logo-badge">
                         <img src="assets/logos/sdo-logo.jpg" alt="SDO Logo">
                     </div>
-                    <h1>SDO ATLAS</h1>
+                    <h1>SDO ALPAS</h1>
                     <p>Request Limit Reached</p>
                 </div>
 
@@ -528,7 +528,7 @@ if ($email) {
         </div>
 
         <div class="brand-footer">
-            <p>&copy; <?php echo date('Y'); ?> SDO ATLAS - Department of Education<br>
+            <p>&copy; <?php echo date('Y'); ?> SDO ALPAS - Department of Education<br>
             Schools Division Office of San Pedro City</p>
         </div>
     </div>

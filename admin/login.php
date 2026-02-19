@@ -1,7 +1,7 @@
 <?php
 /**
  * Admin Login Page
- * SDO ATLAS - Schools Division Office Authority to Travel and Locator Approval System
+ * SDO ALPAS - Schools Division Office Authority to Travel, Locator and Pass slip Approval System
  */
 
 require_once __DIR__ . '/../includes/auth.php';
@@ -359,8 +359,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="logo-badge">
                     <img src="assets/logos/sdo-logo.jpg" alt="SDO Logo">
                 </div>
-                <h1>SDO ATLAS</h1>
-                <p>Authority to Travel and Locator Approval System<br>Schools Division Office of San Pedro City</p>
+                <h1>SDO ALPAS</h1>
+                <p>Authority to Travel, Locator and Pass slip Approval System<br>Schools Division Office of San Pedro City</p>
             </div>
 
             <?php if ($error): ?>
@@ -414,7 +414,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
 
         <div class="brand-footer">
-            <p>&copy; <?php echo date('Y'); ?> SDO ATLAS - Department of Education<br>
+            <p>&copy; <?php echo date('Y'); ?> SDO ALPAS - Department of Education<br>
             Schools Division Office of San Pedro City</p>
         </div>
     </div>

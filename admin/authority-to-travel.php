@@ -1,7 +1,7 @@
 <?php
 /**
  * Authority to Travel Management Page
- * SDO ATLAS - View, create, and approve AT requests
+ * SDO ALPAS - View, create, and approve AT requests
  * With Unit-Based and Role-Based Routing Logic
  */
 ob_start(); // Buffer output to allow header() redirects after HTML output

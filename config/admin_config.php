@@ -1,25 +1,25 @@
 <?php
 /**
  * Admin Panel Configuration
- * SDO ATLAS - Schools Division Office Authority to Travel and Locator Approval System
+ * SDO ALPAS - Schools Division Office Authority to Travel, Locator and Pass slip Approval System
  */
 
 // Set timezone to Manila, Philippines
 date_default_timezone_set('Asia/Manila');
 
 // Session configuration
-define('ADMIN_SESSION_NAME', 'SDO_ATLAS_ADMIN');
+define('ADMIN_SESSION_NAME', 'SDO_ALPAS_ADMIN');
 define('ADMIN_SESSION_LIFETIME', 3600 * 8); // 8 hours
 define('TOKEN_LIFETIME', 3600 * 8); // 8 hours for session tokens
 
 // Admin panel settings
-define('ADMIN_TITLE', 'SDO ATLAS');
-define('ADMIN_FULL_TITLE', 'Schools Division Office - Authority to Travel and Locator Approval System');
+define('ADMIN_TITLE', 'SDO ALPAS');
+define('ADMIN_FULL_TITLE', 'Authority to Travel, Locator and Pass slip Approval System (ALPAS)');
 define('ITEMS_PER_PAGE', 15);
 
 // Base URL
-define('BASE_URL', '/SDO-atlas');
-define('ADMIN_URL', '/SDO-atlas/admin');
+define('BASE_URL', '/SDO-alpas');
+define('ADMIN_URL', '/SDO-alpas/admin');
 
 // Role IDs - Aligned with SQL admin_roles
 define('ROLE_SUPERADMIN', 1);  // System Administrator - Executive Override

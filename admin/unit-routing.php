@@ -1,7 +1,7 @@
 <?php
 /**
  * Unit Routing Configuration Page
- * SDO ATLAS - Superadmin only
+ * SDO ALPAS - Superadmin only
  * Manage unit-to-approver mappings for Authority to Travel approval routing
  */
 

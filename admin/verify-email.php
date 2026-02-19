@@ -1,7 +1,7 @@
 <?php
 /**
  * Email OTP Verification Page (Registration)
- * SDO ATLAS - Schools Division Office Authority to Travel and Locator Approval System
+ * SDO ALPAS - Schools Division Office Authority to Travel, Locator and Pass slip Approval System
  *
  * User lands here after clicking "Verify Email" on register.php.
  * They enter the 6-digit OTP sent to their email.

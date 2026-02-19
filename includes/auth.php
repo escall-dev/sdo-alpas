@@ -2,7 +2,7 @@
 /**
  * Admin Authentication Helper
  * Token-based session management for multi-account support
- * SDO ATLAS - Schools Division Office Authority to Travel and Locator Approval System
+ * SDO ALPAS - Schools Division Office Authority to Travel, Locator and Pass slip Approval System
  */
 
 require_once __DIR__ . '/../config/database.php';
@@ -77,8 +77,8 @@ class AdminAuth {
         }
         
         // 5. Check cookie (fallback)
-        if (!empty($_COOKIE['atlas_token'])) {
-            return $_COOKIE['atlas_token'];
+        if (!empty($_COOKIE['alpas_token'])) {
+            return $_COOKIE['alpas_token'];
         }
         
         return null;
@@ -115,7 +115,7 @@ class AdminAuth {
             $token = $this->sessionTokenModel->create($user['id']);
             
             // Set cookie for convenience (but token in URL takes precedence)
-            setcookie('atlas_token', $token, [
+            setcookie('alpas_token', $token, [
                 'expires' => time() + TOKEN_LIFETIME,
                 'path' => '/',
                 'secure' => isset($_SERVER['HTTPS']),
@@ -146,7 +146,7 @@ class AdminAuth {
             $this->sessionTokenModel->delete($this->token);
             
             // Clear cookie
-            setcookie('atlas_token', '', [
+            setcookie('alpas_token', '', [
                 'expires' => time() - 3600,
                 'path' => '/',
                 'secure' => isset($_SERVER['HTTPS']),
@@ -490,7 +490,7 @@ class AdminAuth {
         }
         
         // Use token + secret as CSRF base
-        return hash('sha256', $this->token . 'ATLAS_CSRF_SECRET');
+        return hash('sha256', $this->token . 'ALPAS_CSRF_SECRET');
     }
 
     /**

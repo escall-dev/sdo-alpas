@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Access Denied - SDO ATLAS</title>
+    <title>Access Denied - SDO ALPAS</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -58,7 +58,7 @@
         <div class="error-code">403</div>
         <h1>Access Denied</h1>
         <p>You don't have permission to access this page. Please contact the administrator if you believe this is an error.</p>
-        <a href="/SDO-atlas/admin/" class="btn">
+        <a href="/SDO-alpas/admin/" class="btn">
             <i class="fas fa-home"></i> Go to Dashboard
         </a>
     </div>

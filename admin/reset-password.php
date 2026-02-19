@@ -1,7 +1,7 @@
 <?php
 /**
  * Reset Password Page
- * SDO ATLAS - Schools Division Office Authority to Travel and Locator Approval System
+ * SDO ALPAS - Schools Division Office Authority to Travel, Locator and Pass slip Approval System
  * 
  * Step 3: User sets a new password after OTP verification
  */
@@ -348,7 +348,7 @@ if (!$valid) {
                     <div class="logo-badge">
                         <img src="assets/logos/sdo-logo.jpg" alt="SDO Logo">
                     </div>
-                    <h1>SDO ATLAS</h1>
+                    <h1>SDO ALPAS</h1>
                     <p>Set New Password</p>
                     <p style="margin-top: 6px;">Create a strong new password for your account<br>
                     <strong style="color: var(--accent);"><?php echo htmlspecialchars($email); ?></strong></p>
@@ -417,7 +417,7 @@ if (!$valid) {
                     <div class="logo-badge">
                         <img src="assets/logos/sdo-logo.jpg" alt="SDO Logo">
                     </div>
-                    <h1>SDO ATLAS</h1>
+                    <h1>SDO ALPAS</h1>
                     <p style="color: var(--success); font-weight: 600;">Password Reset Successful</p>
                     <p style="margin-top: 6px;">Your password has been changed successfully. You can now log in with your new password.</p>
                 </div>
@@ -435,7 +435,7 @@ if (!$valid) {
         </div>
 
         <div class="brand-footer">
-            <p>&copy; <?php echo date('Y'); ?> SDO ATLAS - Department of Education<br>
+            <p>&copy; <?php echo date('Y'); ?> SDO ALPAS - Department of Education<br>
             Schools Division Office of San Pedro City</p>
         </div>
     </div>

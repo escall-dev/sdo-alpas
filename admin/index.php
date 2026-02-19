@@ -1,7 +1,7 @@
 <?php
 /**
  * Admin Dashboard
- * SDO ATLAS - Role-aware dashboard for admins and employees
+ * SDO ALPAS - Role-aware dashboard for admins and employees
  */
 
 require_once __DIR__ . '/../includes/header.php';

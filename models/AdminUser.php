@@ -1,7 +1,7 @@
 <?php
 /**
  * AdminUser Model
- * Handles admin user authentication and management for SDO ATLAS
+ * Handles admin user authentication and management for SDO ALPAS
  */
 
 require_once __DIR__ . '/../config/database.php';

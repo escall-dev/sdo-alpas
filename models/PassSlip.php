@@ -1,7 +1,7 @@
 <?php
 /**
  * Pass Slip Model
- * SDO ATLAS - Handles CRUD, routing, approval, and statistics for Pass Slips
+ * SDO ALPAS - Handles CRUD, routing, approval, and statistics for Pass Slips
  */
 
 require_once __DIR__ . '/../config/database.php';

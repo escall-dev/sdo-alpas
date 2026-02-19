@@ -1,6 +1,6 @@
 {
-    "name": "sdo/atlas",
-    "description": "SDO-ATLAS - Schools Division Office Authority to Travel and Locator Approval System",
+    "name": "sdo/alpas",
+    "description": "SDO-ALPAS - Schools Division Office Authority to Travel, Locator and Pass slip Approval System",
     "type": "project",
     "require": {
         "php": ">=7.4",
@@ -9,7 +9,7 @@
     },
     "autoload": {
         "psr-4": {
-            "SDO\\Atlas\\": "src/"
+            "SDO\\Alpas\\": "src/"
         }
     },
     "config": {

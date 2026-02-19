@@ -1,7 +1,7 @@
 <?php
 /**
  * Registration OTP API Endpoint
- * SDO ATLAS - Schools Division Office Authority to Travel and Locator Approval System
+ * SDO ALPAS - Schools Division Office Authority to Travel, Locator and Pass slip Approval System
  *
  * Handles three actions:
  *   - request : Validate form data, store temp registration, generate & send OTP
@@ -272,7 +272,7 @@ function handleResend($input, $userModel, $verifyModel, $activityLog) {
  */
 function sendRegistrationOTPEmail($email, $fullName, $otp) {
     if (!MAIL_ENABLED) {
-        error_log("SDO ATLAS - Registration OTP for {$email}: {$otp}");
+        error_log("SDO ALPAS - Registration OTP for {$email}: {$otp}");
         return true;
     }
 
@@ -295,7 +295,7 @@ function sendRegistrationOTPEmail($email, $fullName, $otp) {
         $mail->addAddress($email, $fullName);
 
         $mail->isHTML(true);
-        $mail->Subject = 'SDO ATLAS - Email Verification OTP';
+        $mail->Subject = 'SDO ALPAS - Email Verification OTP';
 
         // Embed logos
         $sdoLogoPath = __DIR__ . '/../assets/logos/sdo-logo.jpg';
@@ -309,7 +309,7 @@ function sendRegistrationOTPEmail($email, $fullName, $otp) {
         $mail->send();
         return true;
     } catch (Exception $e) {
-        error_log("SDO ATLAS - Failed to send registration OTP email to {$email}: " . $e->getMessage());
+        error_log("SDO ALPAS - Failed to send registration OTP email to {$email}: " . $e->getMessage());
         return false;
     }
 }
@@ -336,7 +336,7 @@ function buildRegistrationOTPEmailHTML($fullName, $otp) {
                             <img src="cid:sdo-logo" alt="SDO Logo" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;">
                         </td>
                         <td style="text-align: center; vertical-align: middle; padding: 0 10px;">
-                            <h1 style="margin: 0; color: #ffffff; font-size: 22px; font-weight: 700;">SDO ATLAS</h1>
+                            <h1 style="margin: 0; color: #ffffff; font-size: 22px; font-weight: 700;">SDO ALPAS</h1>
                             <p style="margin: 4px 0 0; color: rgba(255,255,255,0.85); font-size: 12px; line-height: 1.4;">
                                 The Schools Division Office of San Pedro City<br>
                                 Account Registration Verification
@@ -354,7 +354,7 @@ function buildRegistrationOTPEmailHTML($fullName, $otp) {
             <td style="padding: 32px;">
                 <p style="margin: 0 0 16px; color: #333; font-size: 15px;">Hello <strong>{$fullName}</strong>,</p>
                 <p style="margin: 0 0 24px; color: #555; font-size: 14px; line-height: 1.6;">
-                    Thank you for registering with SDO ATLAS! To complete your account registration, please use the One-Time Password (OTP) below to verify your email address:
+                    Thank you for registering with SDO ALPAS! To complete your account registration, please use the One-Time Password (OTP) below to verify your email address:
                 </p>
                 <!-- OTP Box -->
                 <div style="text-align: center; margin: 24px 0;">
@@ -372,7 +372,7 @@ function buildRegistrationOTPEmailHTML($fullName, $otp) {
                 </p>
                 <ul style="margin: 0; padding: 0 0 0 20px; color: #888; font-size: 13px; line-height: 1.8;">
                     <li>Do not share this OTP with anyone.</li>
-                    <li>If you did not register for an SDO ATLAS account, please ignore this email.</li>
+                    <li>If you did not register for an SDO ALPAS account, please ignore this email.</li>
                     <li>You have up to 5 attempts to enter the correct OTP.</li>
                     <li>After successful verification, your account will be activated immediately.</li>
                 </ul>
@@ -382,7 +382,7 @@ function buildRegistrationOTPEmailHTML($fullName, $otp) {
         <tr>
             <td style="background: #f8fafc; padding: 20px 32px; text-align: center; border-top: 1px solid #eee;">
                 <p style="margin: 0; color: #999; font-size: 12px;">
-                    SDO ATLAS - Department of Education<br>
+                    SDO ALPAS - Department of Education<br>
                     Schools Division Office of San Pedro City<br>
                     <a href="mailto:ict.sanpedrocity@deped.gov.ph" style="color: #1b6ca8;">ict.sanpedrocity@deped.gov.ph</a>
                 </p>
@@ -397,11 +397,11 @@ HTML;
 function buildRegistrationOTPEmailText($fullName, $otp) {
     $expiry = EmailVerification::OTP_EXPIRY_MINUTES;
     return <<<TEXT
-SDO ATLAS - Account Registration Verification
+SDO ALPAS - Account Registration Verification
 
 Hello {$fullName},
 
-Thank you for registering with SDO ATLAS! To complete your account registration, please use the One-Time Password (OTP) below to verify your email address:
+Thank you for registering with SDO ALPAS! To complete your account registration, please use the One-Time Password (OTP) below to verify your email address:
 
 Your Verification Code: {$otp}
 
@@ -409,12 +409,12 @@ This code expires in {$expiry} minutes.
 
 IMPORTANT:
 - Do not share this OTP with anyone.
-- If you did not register for an SDO ATLAS account, please ignore this email.
+- If you did not register for an SDO ALPAS account, please ignore this email.
 - You have up to 5 attempts to enter the correct OTP.
 - After successful verification, your account will be activated immediately.
 
 ---
-SDO ATLAS - Department of Education
+SDO ALPAS - Department of Education
 Schools Division Office of San Pedro City
 ict.sanpedrocity@deped.gov.ph
 TEXT;

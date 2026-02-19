@@ -1,7 +1,7 @@
 <?php
 /**
  * Locator Slips Management Page
- * SDO ATLAS - View, create, and approve Locator Slips
+ * SDO ALPAS - View, create, and approve Locator Slips
  */
 
 require_once __DIR__ . '/../includes/header.php';

@@ -1,4 +1,4 @@
-# SDO ATLAS – Offices, Units, and Chiefs (System Architecture)
+# SDO ALPAS – Offices, Units, and Chiefs (System Architecture)
 
 This document describes the **organizational hierarchy**, **Office Chiefs**, and **request routing** so you can clarify and correct routing (especially for **unit personnel**).
 

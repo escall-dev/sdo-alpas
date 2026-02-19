@@ -1,7 +1,7 @@
 <?php
 /**
  * OIC Management Page
- * SDO ATLAS - Unit heads can assign and manage OIC delegations
+ * SDO ALPAS - Unit heads can assign and manage OIC delegations
  */
 
 // Check authentication BEFORE header.php outputs anything

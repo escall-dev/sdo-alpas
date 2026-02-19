@@ -1,7 +1,7 @@
 <?php
 /**
  * Password Reset Management Page
- * SDO ATLAS - Superadmin only
+ * SDO ALPAS - Superadmin only
  * 
  * View and manage forgot password rate limits per user.
  * Reset blocked users' request limits.

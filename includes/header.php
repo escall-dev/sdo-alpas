@@ -1,7 +1,7 @@
 <?php
 /**
  * Admin Panel Header
- * SDO ATLAS - Schools Division Office Authority to Travel and Locator Approval System
+ * SDO ALPAS - Schools Division Office Authority to Travel, Locator and Pass slip Approval System
  */
 
 require_once __DIR__ . '/auth.php';
@@ -115,7 +115,7 @@ function navUrl($path)
                     <img src="<?php echo ADMIN_URL; ?>/assets/logos/sdo-logo.jpg" alt="SDO Logo" class="logo-img"
                         style="width: 45px; height: 45px; border-radius: 50%; object-fit: contain; background: transparent; border: none; box-shadow: none;">
                     <div class="logo-text">
-                        <span class="logo-title">SDO ATLAS</span>
+                        <span class="logo-title">SDO ALPAS</span>
                         <span class="logo-subtitle">Travel & Locator</span>
                     </div>
                 </div>

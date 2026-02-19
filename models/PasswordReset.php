@@ -2,7 +2,7 @@
 /**
  * PasswordReset Model
  * Handles forgot password OTP generation, validation, and attempt tracking
- * SDO ATLAS - Schools Division Office Authority to Travel and Locator Approval System
+ * SDO ALPAS - Schools Division Office Authority to Travel, Locator and Pass slip Approval System
  */
 
 require_once __DIR__ . '/../config/database.php';

@@ -1,12 +1,12 @@
-# SDO ATLAS
+# SDO ALPAS
 
-**Schools Division Office of San Pedro City - Authority to Travel and Locator Approval System**
+**Schools Division Office of San Pedro City - Authority to Travel, Locator and Pass slip Approval System**
 
 A comprehensive web-based system for managing Authority to Travel (AT) requests and Locator Slips for the Schools Division Office of San Pedro City, Department of Education.
 
 ## Overview
 
-SDO ATLAS streamlines the approval workflow for employee travel requests and location tracking, providing role-based access control and automated routing based on organizational units.
+SDO ALPAS streamlines the approval workflow for employee travel requests and location tracking, providing role-based access control and automated routing based on organizational units.
 
 ## Features
 
@@ -48,8 +48,8 @@ SDO ATLAS streamlines the approval workflow for employee travel requests and loc
 
 ### 1. Clone or Download the Repository
 ```bash
-git clone https://github.com/escall-dev/sdo-atlas.git
-cd sdo-atlas
+git clone https://github.com/escall-dev/sdo-alpas.git
+cd sdo-alpas
 ```
 
 ### 2. Install Dependencies
@@ -85,7 +85,7 @@ chmod -R 755 uploads/generated/
 ```
 
 ### 7. Access the System
-Navigate to `http://localhost/SDO-atlas/admin/` in your web browser.
+Navigate to `http://localhost/SDO-alpas/admin/` in your web browser.
 
 **Default Credentials:**
 - Username: `admin`
@@ -140,7 +140,7 @@ Navigate to `http://localhost/SDO-atlas/admin/` in your web browser.
 ## Project Structure
 
 ```
-SDO-atlas/
+SDO-alpas/
 ├── admin/                  # Main application pages
 │   ├── api/               # API endpoints
 │   ├── assets/            # CSS, JS, logos

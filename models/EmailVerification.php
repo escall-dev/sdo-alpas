@@ -2,7 +2,7 @@
 /**
  * EmailVerification Model
  * Handles registration email verification via OTP
- * SDO ATLAS - Schools Division Office Authority to Travel and Locator Approval System
+ * SDO ALPAS - Schools Division Office Authority to Travel, Locator and Pass slip Approval System
  *
  * Reuses patterns from PasswordReset model but stores temporary registration data
  * until the email is verified, then creates the real user account.

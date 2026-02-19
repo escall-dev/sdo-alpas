@@ -1,7 +1,7 @@
 <?php
 /**
  * Pass Slips Management Page
- * SDO ATLAS - View, create, approve, reject, cancel Pass Slips, and update guard times
+ * SDO ALPAS - View, create, approve, reject, cancel Pass Slips, and update guard times
  */
 
 require_once __DIR__ . '/../includes/header.php';

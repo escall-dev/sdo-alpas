@@ -1,7 +1,7 @@
 <?php
 /**
  * Activity Logs Page
- * SDO ATLAS - View system activity logs
+ * SDO ALPAS - View system activity logs
  */
 
 require_once __DIR__ . '/../includes/header.php';

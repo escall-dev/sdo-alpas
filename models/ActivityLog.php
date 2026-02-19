@@ -1,7 +1,7 @@
 <?php
 /**
  * ActivityLog Model
- * Handles activity logging for SDO ATLAS
+ * Handles activity logging for SDO ALPAS
  */
 
 require_once __DIR__ . '/../config/database.php';

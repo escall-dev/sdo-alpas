@@ -1,7 +1,7 @@
 <?php
 /**
  * Employee Self-Registration Page
- * SDO ATLAS - Schools Division Office Authority to Travel and Locator Approval System
+ * SDO ALPAS - Schools Division Office Authority to Travel, Locator and Pass slip Approval System
  *
  * Flow:
  *  1. User fills out the form.

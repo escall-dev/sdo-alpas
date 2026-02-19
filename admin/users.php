@@ -1,7 +1,7 @@
 <?php
 /**
  * User Management Page
- * SDO ATLAS - Superadmin only
+ * SDO ALPAS - Superadmin only
  */
 
 // Prevent caching
