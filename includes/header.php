@@ -144,6 +144,18 @@ function navUrl($path)
                     </a>
                 <?php endif; ?>
 
+                <?php if ($auth->isGuard()): ?>
+                    <!-- Guard-only navigation -->
+                    <a href="<?php echo navUrl('/pass-slips.php'); ?>"
+                        class="nav-item <?php echo $currentPage === 'pass-slips' ? 'active' : ''; ?>"
+                        data-tooltip="Pass Slips">
+                        <span class="nav-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </span>
+                        <span class="nav-text">Pass Slips</span>
+                    </a>
+                <?php endif; ?>
+
                 <?php if ($auth->isApprover() || $auth->isUnitHead()): ?>
                     <!-- Approver/Unit Head navigation -->
                     <a href="<?php echo navUrl('/locator-slips.php'); ?>"

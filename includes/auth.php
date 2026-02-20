@@ -364,6 +364,10 @@ class AdminAuth
         if (!$this->user) {
             return false;
         }
+        // Guards are NOT employees for dashboard purposes
+        if (isGuard($this->user['role_id'])) {
+            return false;
+        }
         // If user has actual employee role AND is not acting as OIC
         if (isEmployee($this->user['role_id'])) {
             // Check if they're acting as OIC - if so, they're NOT just an employee
@@ -374,6 +378,17 @@ class AdminAuth
             return true;
         }
         return false;
+    }
+
+    /**
+     * Check if current user is a Guard on Duty
+     */
+    public function isGuard()
+    {
+        if (!$this->user) {
+            return false;
+        }
+        return isGuard($this->user['role_id']);
     }
 
     /**

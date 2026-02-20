@@ -22,7 +22,11 @@ $currentRoleDisplayName = $auth->getEffectiveRoleDisplayName();
 $isActingAsOIC = $auth->isActingAsOIC();
 
 // Get statistics based on role
-if ($auth->isEmployee()) {
+if ($auth->isGuard()) {
+    // Guard sees pass slip stats for today
+    $guardTodayStats = $psModelDash->getGuardTodayStats();
+    $guardTodaySlips = $psModelDash->getForGuardDashboard(['date' => date('Y-m-d'), 'status' => 'approved'], 10, 0);
+} elseif ($auth->isEmployee()) {
     // Employee sees only their own stats
     $myLsStats = $lsModel->getStatistics($userId);
     $myAtStats = $atModel->getMyStatistics($userId);
@@ -61,7 +65,139 @@ if ($auth->isEmployee()) {
     </div>
 <?php endif; ?>
 
-<?php if ($auth->isEmployee()): ?>
+<?php if ($auth->isGuard()): ?>
+    <!-- ==================== GUARD DASHBOARD ==================== -->
+    <div class="dashboard-grid">
+        <!-- Today's Summary Stats -->
+        <div class="stats-row" style="grid-template-columns: repeat(4, 1fr);">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: var(--success-bg); color: #047857;">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-value"><?php echo $guardTodayStats['approved'] ?? 0; ?></span>
+                    <span class="stat-label">Approved Today</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white;">
+                    <i class="fas fa-sign-out-alt"></i>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-value"><?php echo $guardTodayStats['departed'] ?? 0; ?></span>
+                    <span class="stat-label">Departed</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #d1fae5; color: #047857;">
+                    <i class="fas fa-sign-in-alt"></i>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-value"><?php echo $guardTodayStats['returned'] ?? 0; ?></span>
+                    <span class="stat-label">Returned</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: var(--warning-bg); color: #b45309;">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-value"><?php echo $guardTodayStats['pending'] ?? 0; ?></span>
+                    <span class="stat-label">Pending</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Action -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h2><i class="fas fa-shield-alt"></i> Today's Approved Pass Slips</h2>
+                <a href="<?php echo navUrl('/pass-slips.php'); ?>" class="btn btn-sm btn-primary">
+                    <i class="fas fa-list"></i> View All Pass Slips
+                </a>
+            </div>
+            <div class="card-body">
+                <?php if (empty($guardTodaySlips)): ?>
+                    <div class="empty-state small">
+                        <span class="empty-icon"><i class="fas fa-shield-alt"></i></span>
+                        <h3>No approved pass slips today</h3>
+                        <p>Approved pass slips will appear here for gate monitoring</p>
+                    </div>
+                <?php else: ?>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Employee</th>
+                                    <th>Destination</th>
+                                    <th>IDT / IAT</th>
+                                    <th>Departure</th>
+                                    <th>Arrival</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($guardTodaySlips as $gps): ?>
+                                    <tr>
+                                        <td>
+                                            <div class="cell-primary"><?php echo htmlspecialchars($gps['employee_name']); ?></div>
+                                            <div class="cell-secondary"><?php echo htmlspecialchars($gps['employee_office'] ?? ''); ?></div>
+                                        </td>
+                                        <td><?php echo htmlspecialchars($gps['destination']); ?></td>
+                                        <td>
+                                            <div class="cell-primary"><?php echo date('g:i A', strtotime($gps['idt'])); ?></div>
+                                            <div class="cell-secondary"><?php echo date('g:i A', strtotime($gps['iat'])); ?></div>
+                                        </td>
+                                        <td>
+                                            <?php if (!empty($gps['actual_departure_time'])): ?>
+                                                <span class="guard-badge guard-badge-departed"><?php echo date('g:i A', strtotime($gps['actual_departure_time'])); ?></span>
+                                            <?php else: ?>
+                                                <span style="color: var(--text-muted);">—</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td>
+                                            <?php if (!empty($gps['actual_arrival_time'])): ?>
+                                                <span class="guard-badge guard-badge-arrived"><?php echo date('g:i A', strtotime($gps['actual_arrival_time'])); ?></span>
+                                            <?php elseif (!empty($gps['actual_departure_time'])): ?>
+                                                <span style="color: var(--warning);">Out</span>
+                                            <?php else: ?>
+                                                <span style="color: var(--text-muted);">—</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td>
+                                            <?php if (empty($gps['actual_departure_time'])): ?>
+                                                <form method="POST" action="<?php echo navUrl('/pass-slips.php'); ?>" style="display:inline;">
+                                                    <input type="hidden" name="_token" value="<?php echo $currentToken; ?>">
+                                                    <input type="hidden" name="action" value="guard_depart">
+                                                    <input type="hidden" name="id" value="<?php echo $gps['id']; ?>">
+                                                    <button type="submit" class="btn btn-guard-depart btn-sm" data-confirm="Mark departed: <?php echo htmlspecialchars($gps['employee_name']); ?>?">
+                                                        <i class="fas fa-sign-out-alt"></i>
+                                                    </button>
+                                                </form>
+                                            <?php elseif (empty($gps['actual_arrival_time'])): ?>
+                                                <form method="POST" action="<?php echo navUrl('/pass-slips.php'); ?>" style="display:inline;">
+                                                    <input type="hidden" name="_token" value="<?php echo $currentToken; ?>">
+                                                    <input type="hidden" name="action" value="guard_arrive">
+                                                    <input type="hidden" name="id" value="<?php echo $gps['id']; ?>">
+                                                    <button type="submit" class="btn btn-guard-arrive btn-sm" data-confirm="Mark arrived: <?php echo htmlspecialchars($gps['employee_name']); ?>?">
+                                                        <i class="fas fa-sign-in-alt"></i>
+                                                    </button>
+                                                </form>
+                                            <?php else: ?>
+                                                <span style="color: var(--success);"><i class="fas fa-check-double"></i></span>
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+
+<?php elseif ($auth->isEmployee()): ?>
     <!-- ==================== EMPLOYEE DASHBOARD ==================== -->
     <div class="dashboard-grid">
         <!-- File New Request Section -->

@@ -952,7 +952,10 @@ function validateDateTime(form) {
     const selectedDateTime = dateTimeInput.value;
     
     if (selectedDateTime < minDateTime) {
-        alert('The selected date and time is in the past. Please select a current or future time.');
+        showAlertModal('The selected date and time is in the past. Please select a current or future time.', {
+            title: 'Invalid Date/Time',
+            tone: 'error'
+        });
         dateTimeInput.value = minDateTime;
         dateTimeInput.focus();
         return false;

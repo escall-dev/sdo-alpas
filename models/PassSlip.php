@@ -144,6 +144,7 @@ class PassSlip
 
     /**
      * Update guard times (actual departure/arrival) — only when approved
+     * @deprecated Use recordDeparture() and recordArrival() instead
      */
     public function updateGuardTimes($id, $departureTime, $arrivalTime)
     {
@@ -153,6 +154,294 @@ class PassSlip
                 WHERE id = ? AND status = 'approved'";
 
         $this->db->query($sql, [$departureTime ?: null, $arrivalTime ?: null, $id]);
+    }
+
+    /**
+     * Record departure — guard clicks "Mark Departed"
+     * Sets actual_departure_time and departed_at to current server time
+     * Only works if status = 'approved' and actual_departure_time is NULL
+     */
+    public function recordDeparture($id, $guardUserId)
+    {
+        $sql = "UPDATE pass_slips SET 
+                actual_departure_time = CURTIME(),
+                departed_at = NOW(),
+                guard_departed_by = ?
+                WHERE id = ? AND status = 'approved' AND actual_departure_time IS NULL";
+
+        $this->db->query($sql, [$guardUserId, $id]);
+        return $this->getById($id);
+    }
+
+    /**
+     * Record arrival — guard clicks "Mark Arrived"
+     * Sets actual_arrival_time and arrived_at to current server time
+     * Only works if actual_departure_time is set and actual_arrival_time is NULL
+     */
+    public function recordArrival($id, $guardUserId)
+    {
+        // Calculate excess hours if arrival is after IAT
+        $ps = $this->getById($id);
+        if (!$ps || empty($ps['actual_departure_time']) || !empty($ps['actual_arrival_time'])) {
+            return null;
+        }
+
+        $now = date('H:i:s');
+        $excessHours = null;
+        if (!empty($ps['iat'])) {
+            $iat = strtotime($ps['iat']);
+            $actualArrival = strtotime($now);
+            if ($actualArrival > $iat) {
+                $excessHours = round(($actualArrival - $iat) / 3600, 2);
+            }
+        }
+
+        $sql = "UPDATE pass_slips SET 
+                actual_arrival_time = CURTIME(),
+                arrived_at = NOW(),
+                guard_arrived_by = ?,
+                excess_hours = ?
+                WHERE id = ? AND actual_departure_time IS NOT NULL AND actual_arrival_time IS NULL";
+
+        $this->db->query($sql, [$guardUserId, $excessHours, $id]);
+        return $this->getById($id);
+    }
+
+    /**
+     * Get accumulated pass slip hours for display.
+     * Rule: every full 8 hours = 1 VL credit deduction,
+     * and progress resets for the next 8-hour cycle.
+     */
+    public function getAccumulatedHours($userId)
+    {
+        $sql = "SELECT 
+                COALESCE(SUM(
+                    GREATEST(
+                        0,
+                        TIMESTAMPDIFF(
+                            SECOND,
+                            CONCAT(date, ' ', idt),
+                            CASE
+                                WHEN iat >= idt THEN CONCAT(date, ' ', iat)
+                                ELSE DATE_ADD(CONCAT(date, ' ', iat), INTERVAL 1 DAY)
+                            END
+                        )
+                    )
+                ) / 3600, 0) as lifetime_hours,
+                COUNT(*) as slip_count
+                FROM pass_slips 
+                WHERE user_id = ? 
+                AND status = 'approved' 
+                AND actual_departure_time IS NOT NULL 
+                AND actual_arrival_time IS NOT NULL";
+
+        $stmt = $this->db->query($sql, [$userId]);
+        $result = $stmt->fetch();
+
+        $lifetimeHours = (float) ($result['lifetime_hours'] ?? 0);
+        $vlCreditsDeducted = (int) floor($lifetimeHours / 8);
+        $cycleHours = fmod($lifetimeHours, 8.0);
+
+        if ($cycleHours < 0) {
+            $cycleHours = 0;
+        }
+
+        return [
+            'total_hours' => round($cycleHours, 2),
+            'slip_count' => (int) ($result['slip_count'] ?? 0),
+            'lifetime_hours' => round($lifetimeHours, 2),
+            'vl_credits_deducted' => $vlCreditsDeducted
+        ];
+    }
+
+    private function getCompletedSlipIntendedHours($passSlipId)
+    {
+        $sql = "SELECT 
+                GREATEST(
+                    0,
+                    TIMESTAMPDIFF(
+                        SECOND,
+                        CONCAT(date, ' ', idt),
+                        CASE
+                            WHEN iat >= idt THEN CONCAT(date, ' ', iat)
+                            ELSE DATE_ADD(CONCAT(date, ' ', iat), INTERVAL 1 DAY)
+                        END
+                    )
+                ) / 3600 as hours_used
+                FROM pass_slips
+                WHERE id = ?
+                AND status = 'approved'
+                AND actual_departure_time IS NOT NULL
+                AND actual_arrival_time IS NOT NULL";
+
+        $stmt = $this->db->query($sql, [$passSlipId]);
+        $row = $stmt->fetch();
+        return (float) ($row['hours_used'] ?? 0);
+    }
+
+    /**
+     * Get breakdown of accumulated hours per pass slip for an employee
+     */
+    public function getAccumulatedHoursBreakdown($userId)
+    {
+        $sql = "SELECT id, ps_control_no, date, 
+                actual_departure_time, actual_arrival_time,
+                GREATEST(
+                    0,
+                    TIMESTAMPDIFF(
+                        SECOND,
+                        CONCAT(date, ' ', idt),
+                        CASE
+                            WHEN iat >= idt THEN CONCAT(date, ' ', iat)
+                            ELSE DATE_ADD(CONCAT(date, ' ', iat), INTERVAL 1 DAY)
+                        END
+                    )
+                ) / 3600 as hours_used,
+                vl_deduction_note
+                FROM pass_slips 
+                WHERE user_id = ? 
+                AND status = 'approved' 
+                AND actual_departure_time IS NOT NULL 
+                AND actual_arrival_time IS NOT NULL
+                ORDER BY date DESC, actual_departure_time DESC";
+
+        $stmt = $this->db->query($sql, [$userId]);
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Check accumulated hours and flag VL deduction when a new 8hr block is crossed
+     * Called after recording arrival.
+     * Returns the note string if one or more new VL credits are deducted, null otherwise.
+     */
+    public function checkAndFlagVLDeduction($userId, $passSlipId)
+    {
+        $accumulated = $this->getAccumulatedHours($userId);
+        $lifetimeHours = (float) ($accumulated['lifetime_hours'] ?? 0);
+        $currentSlipHours = $this->getCompletedSlipIntendedHours($passSlipId);
+
+        if ($currentSlipHours <= 0) {
+            return null;
+        }
+
+        $beforeHours = max(0, $lifetimeHours - $currentSlipHours);
+        $creditsBefore = (int) floor($beforeHours / 8);
+        $creditsAfter = (int) floor($lifetimeHours / 8);
+        $newCredits = $creditsAfter - $creditsBefore;
+
+        if ($newCredits > 0) {
+            $note = "8hrs = 1 VL credit. Deducted " . $newCredits . " VL credit(s). Total deducted: " . $creditsAfter . ".";
+
+            $sql = "UPDATE pass_slips SET vl_deduction_note = ? WHERE id = ?";
+            $this->db->query($sql, [$note, $passSlipId]);
+
+            return $note;
+        }
+
+        return null;
+    }
+
+    /**
+     * Get pass slips for guard dashboard view
+     * Guards see ALL approved pass slips + pending (read-only)
+     */
+    public function getForGuardDashboard($filters = [], $limit = 20, $offset = 0)
+    {
+        $where = [];
+        $params = [];
+
+        // Guards see approved and pending slips
+        if (!empty($filters['status'])) {
+            $where[] = "ps.status = ?";
+            $params[] = $filters['status'];
+        }
+
+        if (!empty($filters['date'])) {
+            $where[] = "ps.date = ?";
+            $params[] = $filters['date'];
+        }
+        if (!empty($filters['search'])) {
+            $where[] = "(ps.ps_control_no LIKE ? OR ps.employee_name LIKE ? OR ps.destination LIKE ?)";
+            $searchTerm = '%' . $filters['search'] . '%';
+            $params[] = $searchTerm;
+            $params[] = $searchTerm;
+            $params[] = $searchTerm;
+        }
+        if (!empty($filters['unit'])) {
+            $where[] = "ps.employee_office = ?";
+            $params[] = $filters['unit'];
+        }
+
+        $whereClause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
+
+        $sql = "SELECT ps.*, 
+                u.full_name as filed_by_name, 
+                u.email as filed_by_email,
+                gd.full_name as departed_guard_name,
+                ga.full_name as arrived_guard_name
+                FROM pass_slips ps
+                LEFT JOIN admin_users u ON ps.user_id = u.id
+                LEFT JOIN admin_users gd ON ps.guard_departed_by = gd.id
+                LEFT JOIN admin_users ga ON ps.guard_arrived_by = ga.id
+                $whereClause
+                ORDER BY ps.date DESC, ps.created_at DESC
+                LIMIT ? OFFSET ?";
+        $params[] = $limit;
+        $params[] = $offset;
+
+        $stmt = $this->db->query($sql, $params);
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Get count for guard dashboard
+     */
+    public function getGuardDashboardCount($filters = [])
+    {
+        $where = [];
+        $params = [];
+
+        if (!empty($filters['status'])) {
+            $where[] = "ps.status = ?";
+            $params[] = $filters['status'];
+        }
+        if (!empty($filters['date'])) {
+            $where[] = "ps.date = ?";
+            $params[] = $filters['date'];
+        }
+        if (!empty($filters['search'])) {
+            $where[] = "(ps.ps_control_no LIKE ? OR ps.employee_name LIKE ? OR ps.destination LIKE ?)";
+            $searchTerm = '%' . $filters['search'] . '%';
+            $params[] = $searchTerm;
+            $params[] = $searchTerm;
+            $params[] = $searchTerm;
+        }
+        if (!empty($filters['unit'])) {
+            $where[] = "ps.employee_office = ?";
+            $params[] = $filters['unit'];
+        }
+
+        $whereClause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
+        $sql = "SELECT COUNT(*) as total FROM pass_slips ps $whereClause";
+        $stmt = $this->db->query($sql, $params);
+        $result = $stmt->fetch();
+        return $result['total'];
+    }
+
+    /**
+     * Get today's guard statistics
+     */
+    public function getGuardTodayStats()
+    {
+        $today = date('Y-m-d');
+        $sql = "SELECT 
+                SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) as approved,
+                SUM(CASE WHEN status = 'approved' AND actual_departure_time IS NOT NULL THEN 1 ELSE 0 END) as departed,
+                SUM(CASE WHEN status = 'approved' AND actual_arrival_time IS NOT NULL THEN 1 ELSE 0 END) as returned,
+                SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending
+                FROM pass_slips WHERE date = ?";
+        $stmt = $this->db->query($sql, [$today]);
+        return $stmt->fetch();
     }
 
     /**
@@ -206,6 +495,9 @@ class PassSlip
         if ($viewerRoleId !== null && $viewerUserId !== null) {
             if ($viewerRoleId == ROLE_SUPERADMIN || $viewerRoleId == ROLE_SDS) {
                 // Superadmin and SDS can see all
+            } elseif ($viewerRoleId == ROLE_GUARD) {
+                // Guards can see all approved + pending pass slips
+                $where[] = "ps.status IN ('approved', 'pending')";
             } elseif ($viewerRoleId == ROLE_ASDS) {
                 // ASDS sees own + requests assigned to ASDS role
                 $where[] = "(ps.user_id = ? OR ps.assigned_approver_role_id = ?)";
@@ -294,6 +586,9 @@ class PassSlip
         if ($viewerRoleId !== null && $viewerUserId !== null) {
             if ($viewerRoleId == ROLE_SUPERADMIN || $viewerRoleId == ROLE_SDS) {
                 // See all
+            } elseif ($viewerRoleId == ROLE_GUARD) {
+                // Guards see approved + pending
+                $where[] = "ps.status IN ('approved', 'pending')";
             } elseif ($viewerRoleId == ROLE_ASDS) {
                 $where[] = "(ps.user_id = ? OR ps.assigned_approver_role_id = ?)";
                 $params[] = $viewerUserId;
@@ -462,6 +757,10 @@ class PassSlip
             return true;
         // Superadmin and SDS can view all
         if ($viewerRoleId == ROLE_SUPERADMIN || $viewerRoleId == ROLE_SDS)
+            return true;        // Guards can view all pass slips
+        if ($viewerRoleId == ROLE_GUARD)
+            return true;        // Guards can view all pass slips
+        if ($viewerRoleId == ROLE_GUARD)
             return true;
         // ASDS can view assigned
         if ($viewerRoleId == ROLE_ASDS)
@@ -511,6 +810,20 @@ class PassSlip
         }
         if (empty($data['purpose'])) {
             $errors[] = 'Purpose is required.';
+        }
+
+        // Validate 3-hour max duration
+        if (!empty($data['idt']) && !empty($data['iat'])) {
+            $idt = strtotime($data['idt']);
+            $iat = strtotime($data['iat']);
+            if ($iat <= $idt) {
+                $errors[] = 'Intended arrival time must be after departure time.';
+            } else {
+                $diffHours = ($iat - $idt) / 3600;
+                if ($diffHours > 3) {
+                    $errors[] = 'Pass slip duration cannot exceed 3 hours. Current duration: ' . round($diffHours, 1) . ' hours.';
+                }
+            }
         }
 
         return ['valid' => empty($errors), 'errors' => $errors];

@@ -29,6 +29,7 @@ define('ROLE_CID_CHIEF', 4);   // CID Chief - Recommending for CID
 define('ROLE_SGOD_CHIEF', 5);  // SGOD Chief - Recommending for SGOD
 define('ROLE_USER', 6);        // Regular Employee
 define('ROLE_SDS', 7);         // SDS - Final approver for all travel requests
+define('ROLE_GUARD', 8);       // Guard on Duty - Pass Slip monitoring
 
 // Unit Head Roles Array
 define('UNIT_HEAD_ROLES', [ROLE_OSDS_CHIEF, ROLE_CID_CHIEF, ROLE_SGOD_CHIEF]);
@@ -501,6 +502,14 @@ function isUnitHead($roleId)
 function isEmployee($roleId)
 {
     return $roleId == ROLE_USER;
+}
+
+/**
+ * Helper function to check if user is a guard
+ */
+function isGuard($roleId)
+{
+    return $roleId == ROLE_GUARD;
 }
 
 /**

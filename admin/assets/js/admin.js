@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initFlashMessages();
     initFormValidation();
     initFilterEnterSubmit();
+    initModalNotificationHandlers();
 });
 
 /**
@@ -216,10 +217,201 @@ function showNotification(message, type = 'info') {
  * Confirm Action
  */
 function confirmAction(message, callback) {
-    if (confirm(message)) {
-        callback();
-    }
+    showConfirmModal(message).then(function(confirmed) {
+        if (confirmed) {
+            callback();
+        }
+    });
 }
+
+/**
+ * Modal Notifications (alert/confirm style)
+ */
+let modalDialogState = null;
+
+function createModalDialog() {
+    if (modalDialogState) return modalDialogState;
+
+    const overlay = document.createElement('div');
+    overlay.className = 'alpas-modal-overlay';
+    overlay.innerHTML = `
+        <div class="alpas-modal" role="dialog" aria-modal="true" aria-live="assertive">
+            <div class="alpas-modal-header">
+                <h3 class="alpas-modal-title">Confirm Action</h3>
+            </div>
+            <div class="alpas-modal-body">
+                <p class="alpas-modal-message"></p>
+            </div>
+            <div class="alpas-modal-footer">
+                <button type="button" class="btn btn-secondary alpas-modal-cancel">Cancel</button>
+                <button type="button" class="btn btn-primary alpas-modal-confirm">OK</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    const state = {
+        overlay,
+        title: overlay.querySelector('.alpas-modal-title'),
+        message: overlay.querySelector('.alpas-modal-message'),
+        cancel: overlay.querySelector('.alpas-modal-cancel'),
+        confirm: overlay.querySelector('.alpas-modal-confirm'),
+        resolver: null,
+        previousActive: null
+    };
+
+    const close = function(result) {
+        if (!state.resolver) return;
+        const resolve = state.resolver;
+        state.resolver = null;
+        overlay.classList.remove('active');
+        document.body.classList.remove('alpas-modal-open');
+        if (state.previousActive && typeof state.previousActive.focus === 'function') {
+            state.previousActive.focus();
+        }
+        resolve(result);
+    };
+
+    state.cancel.addEventListener('click', function() {
+        close(false);
+    });
+
+    state.confirm.addEventListener('click', function() {
+        close(true);
+    });
+
+    overlay.addEventListener('click', function(e) {
+        if (e.target === overlay) {
+            close(false);
+        }
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (!overlay.classList.contains('active')) return;
+        if (e.key === 'Escape') {
+            e.preventDefault();
+            close(false);
+        }
+    });
+
+    modalDialogState = state;
+    return state;
+}
+
+function openModalDialog(options = {}) {
+    const state = createModalDialog();
+    const title = options.title || 'Confirm Action';
+    const message = options.message || '';
+    const confirmText = options.confirmText || 'OK';
+    const cancelText = options.cancelText || 'Cancel';
+    const hideCancel = options.hideCancel === true;
+    const tone = options.tone || 'info';
+
+    state.previousActive = document.activeElement;
+    state.title.textContent = title;
+    state.message.textContent = message;
+    state.confirm.textContent = confirmText;
+    state.cancel.textContent = cancelText;
+    state.cancel.style.display = hideCancel ? 'none' : 'inline-flex';
+
+    state.overlay.classList.remove('tone-info', 'tone-success', 'tone-warning', 'tone-error');
+    state.overlay.classList.add('tone-' + tone);
+    state.overlay.classList.add('active');
+    document.body.classList.add('alpas-modal-open');
+
+    setTimeout(function() {
+        state.confirm.focus();
+    }, 10);
+
+    return new Promise(function(resolve) {
+        state.resolver = resolve;
+    });
+}
+
+function showConfirmModal(message, options = {}) {
+    return openModalDialog({
+        title: options.title || 'Please Confirm',
+        message,
+        confirmText: options.confirmText || 'OK',
+        cancelText: options.cancelText || 'Cancel',
+        hideCancel: false,
+        tone: options.tone || 'warning'
+    });
+}
+
+function showAlertModal(message, options = {}) {
+    return openModalDialog({
+        title: options.title || 'Notice',
+        message,
+        confirmText: options.confirmText || 'OK',
+        hideCancel: true,
+        tone: options.tone || 'info'
+    });
+}
+
+function initModalNotificationHandlers() {
+    document.addEventListener('click', function(e) {
+        const trigger = e.target.closest('[data-confirm]');
+        if (!trigger || trigger.tagName === 'FORM') return;
+
+        const message = trigger.getAttribute('data-confirm');
+        if (!message) return;
+
+        const href = trigger.getAttribute('href');
+        const triggerForm = trigger.closest('form') || trigger.form;
+        const isSubmitButton = trigger.tagName === 'BUTTON' && (trigger.type === 'submit' || !trigger.type);
+
+        e.preventDefault();
+
+        showConfirmModal(message).then(function(confirmed) {
+            if (!confirmed) return;
+
+            if (triggerForm && isSubmitButton) {
+                triggerForm.dataset.skipModalConfirm = '1';
+                if (typeof triggerForm.requestSubmit === 'function') {
+                    triggerForm.requestSubmit(trigger);
+                } else {
+                    triggerForm.submit();
+                }
+                return;
+            }
+
+            if (href) {
+                window.location.href = href;
+            }
+        });
+    });
+
+    document.addEventListener('submit', function(e) {
+        const form = e.target;
+        if (!(form instanceof HTMLFormElement)) return;
+        if (!form.hasAttribute('data-confirm')) return;
+
+        if (form.dataset.skipModalConfirm === '1') {
+            delete form.dataset.skipModalConfirm;
+            return;
+        }
+
+        const message = form.getAttribute('data-confirm');
+        if (!message) return;
+
+        e.preventDefault();
+        showConfirmModal(message).then(function(confirmed) {
+            if (!confirmed) return;
+
+            form.dataset.skipModalConfirm = '1';
+            if (typeof form.requestSubmit === 'function') {
+                form.requestSubmit();
+            } else {
+                form.submit();
+            }
+        });
+    });
+}
+
+window.showConfirmModal = showConfirmModal;
+window.showAlertModal = showAlertModal;
 
 /**
  * Format Date
@@ -409,6 +601,86 @@ async function ajaxRequest(url, options = {}) {
         .form-control.error {
             border-color: #ef4444;
             animation: shake 0.4s ease;
+        }
+
+        .alpas-modal-open {
+            overflow: hidden;
+        }
+
+        .alpas-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            padding: 16px;
+        }
+
+        .alpas-modal-overlay.active {
+            display: flex;
+        }
+
+        .alpas-modal {
+            width: 100%;
+            max-width: 520px;
+            background: #0f172a;
+            color: #f8fafc;
+            border-radius: 16px;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            box-shadow: 0 24px 60px rgba(2, 6, 23, 0.55);
+            overflow: hidden;
+        }
+
+        .alpas-modal-header {
+            padding: 20px 24px 10px;
+        }
+
+        .alpas-modal-title {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .alpas-modal-body {
+            padding: 0 24px 16px;
+        }
+
+        .alpas-modal-message {
+            margin: 0;
+            color: #e2e8f0;
+            line-height: 1.55;
+        }
+
+        .alpas-modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 0 24px 20px;
+        }
+
+        .alpas-modal-footer .btn {
+            min-width: 110px;
+            border-radius: 999px;
+        }
+
+        .alpas-modal-overlay.tone-error .alpas-modal {
+            border-color: rgba(239, 68, 68, 0.5);
+        }
+
+        .alpas-modal-overlay.tone-warning .alpas-modal {
+            border-color: rgba(245, 158, 11, 0.5);
+        }
+
+        .alpas-modal-overlay.tone-success .alpas-modal {
+            border-color: rgba(16, 185, 129, 0.5);
+        }
+
+        .alpas-modal-overlay.tone-info .alpas-modal {
+            border-color: rgba(14, 165, 233, 0.5);
         }
         
         @keyframes shake {
