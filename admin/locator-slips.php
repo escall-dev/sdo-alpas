@@ -251,10 +251,20 @@ if ($auth->isSuperAdmin() || $auth->isASDS() || $auth->isSDS()) {
 }
 
 // Pre-fill form with user data
+$employeeUnitSection = '';
+if (!empty($currentUser['office_id'])) {
+    $officeInfo = getOfficeById((int) $currentUser['office_id']);
+    $employeeUnitSection = $officeInfo['office_name'] ?? '';
+}
+if ($employeeUnitSection === '' && !empty($currentUser['employee_office'])) {
+    $employeeUnitSection = SDO_OFFICES[$currentUser['employee_office']] ?? $currentUser['employee_office'];
+}
+
 $formData = [
     'employee_name' => $currentUser['full_name'],
     'employee_position' => $currentUser['employee_position'] ?? '',
-    'employee_office' => $currentUser['employee_office'] ?? ''
+    'employee_office' => $currentUser['employee_office'] ?? '',
+    'employee_unit_section' => $employeeUnitSection
 ];
 ?>
 
@@ -319,9 +329,9 @@ if (!$editData || !$lsModel->canUserEdit($editData, $auth->getUserId())) {
             </div>
             
             <div class="form-group">
-                <label class="form-label">Office/Division</label>
+                <label class="form-label">Unit/Section</label>
                 <select name="employee_office" class="form-control">
-                    <option value="">-- Select Office --</option>
+                    <option value="">-- Select Unit/Section --</option>
                     <?php foreach (SDO_OFFICES as $code => $name): ?>
                     <option value="<?php echo $code; ?>" <?php echo ($editData['employee_office'] ?? '') === $code ? 'selected' : ''; ?>>
                         <?php echo htmlspecialchars($name); ?>
@@ -411,8 +421,16 @@ if (!$editData || !$lsModel->canUserEdit($editData, $auth->getUserId())) {
                         <span><?php echo htmlspecialchars($viewData['employee_position'] ?: '-'); ?></span>
                     </div>
                     <div class="detail-item">
-                        <label>Office/Division</label>
-                        <span><?php echo htmlspecialchars($viewData['employee_office'] ?: '-'); ?></span>
+                        <label>Unit/Section</label>
+                        <span>
+                            <?php
+                            $employeeUnitLabel = '-';
+                            if (!empty($viewData['employee_office'])) {
+                                $employeeUnitLabel = SDO_OFFICES[$viewData['employee_office']] ?? $viewData['employee_office'];
+                            }
+                            echo htmlspecialchars($employeeUnitLabel);
+                            ?>
+                        </span>
                     </div>
                     <div class="detail-item">
                         <label>Destination</label>
@@ -857,15 +875,11 @@ function closeRejectModal() {
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label">Office/Division</label>
-                    <select name="employee_office" class="form-control">
-                        <option value="">-- Select Office --</option>
-                        <?php foreach (SDO_OFFICES as $code => $name): ?>
-                        <option value="<?php echo $code; ?>" <?php echo $formData['employee_office'] === $code ? 'selected' : ''; ?>>
-                            <?php echo htmlspecialchars($name); ?>
-                        </option>
-                        <?php endforeach; ?>
-                    </select>
+                    <label class="form-label">Unit/Section</label>
+                    <input type="text" class="form-control" readonly
+                           value="<?php echo htmlspecialchars($formData['employee_unit_section'] ?: '-'); ?>">
+                    <input type="hidden" name="employee_office"
+                           value="<?php echo htmlspecialchars($formData['employee_office']); ?>">
                 </div>
                 
                 <div class="form-row">

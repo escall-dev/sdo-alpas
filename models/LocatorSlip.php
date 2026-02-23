@@ -88,7 +88,8 @@ class LocatorSlip {
 
     /**
      * Create a new Locator Slip request with routing
-     * - If requestor is an Office Chief (SGOD, CID, OSDS Chief): route to ASDS for approval.
+     * - If requestor is an Office Chief (OSDS, CID, SGOD): route to ASDS for approval.
+     * - If requestor is ASDS or SDS: route to SDS for approval.
      * - All other employees: route to OSDS Chief (AO V) as the sole approver.
      */
     public function create($data, $requesterRoleId = null, $requesterOffice = null, $requesterOfficeId = null) {
@@ -111,8 +112,26 @@ class LocatorSlip {
             }
         }
 
-        // Office Chief / ASDS / SDS as requestor: route to SDS
-        if ($requesterRoleId && (in_array($requesterRoleId, UNIT_HEAD_ROLES) || $requesterRoleId == ROLE_ASDS || $requesterRoleId == ROLE_SDS)) {
+        // Office Chief (OSDS, CID, SGOD) as requestor: route to ASDS
+        if ($requesterRoleId && in_array($requesterRoleId, UNIT_HEAD_ROLES)) {
+            $approverRoleId = ROLE_ASDS;
+            $asdsUsers = $userModel->getByRole(ROLE_ASDS, true);
+            if (!empty($asdsUsers)) {
+                $primaryAsdsUserId = null;
+                foreach ($asdsUsers as $asdsUser) {
+                    if ((int)$asdsUser['id'] !== (int)$data['user_id']) {
+                        $primaryAsdsUserId = $asdsUser['id'];
+                        break;
+                    }
+                }
+                if ($primaryAsdsUserId === null) {
+                    $primaryAsdsUserId = $asdsUsers[0]['id'];
+                }
+                $assignedApproverUserId = $this->getEffectiveApproverUserId(ROLE_ASDS, $primaryAsdsUserId);
+            }
+        }
+        // ASDS / SDS as requestor: route to SDS
+        elseif ($requesterRoleId && ($requesterRoleId == ROLE_ASDS || $requesterRoleId == ROLE_SDS)) {
             $approverRoleId = ROLE_SDS;
             $sdsUsers = $userModel->getByRole(ROLE_SDS, true);
             if (!empty($sdsUsers)) {
