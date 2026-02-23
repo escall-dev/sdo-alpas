@@ -354,10 +354,20 @@ if ($auth->isSuperAdmin() || $auth->isASDS() || $auth->isSDS()) {
 }
 
 // Pre-fill form with user data
+$employeeUnitSection = '';
+if (!empty($currentUser['office_id'])) {
+    $officeInfo = getOfficeById((int) $currentUser['office_id']);
+    $employeeUnitSection = $officeInfo['office_name'] ?? '';
+}
+if ($employeeUnitSection === '' && !empty($currentUser['employee_office'])) {
+    $employeeUnitSection = SDO_OFFICES[$currentUser['employee_office']] ?? $currentUser['employee_office'];
+}
+
 $formData = [
     'employee_name' => $currentUser['full_name'],
     'employee_position' => $currentUser['employee_position'] ?? '',
-    'employee_office' => $currentUser['employee_office'] ?? ''
+    'employee_office' => $currentUser['employee_office'] ?? '',
+    'employee_unit_section' => $employeeUnitSection
 ];
 ?>
 
@@ -1493,16 +1503,10 @@ $formData = [
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Office/Division</label>
-                        <select name="employee_office" class="form-control" disabled>
-                            <option value="">-- Select Office --</option>
-                            <?php foreach (SDO_OFFICES as $code => $name): ?>
-                                <option value="<?php echo $code; ?>" <?php echo $formData['employee_office'] === $code ? 'selected' : ''; ?>>
-                                    <?php echo htmlspecialchars($name); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                        <!-- Hidden input to send the value since disabled selects don't submit -->
+                        <label class="form-label">Unit/Section</label>
+                        <input type="text" class="form-control" readonly
+                            value="<?php echo htmlspecialchars($formData['employee_unit_section'] ?: '-'); ?>">
+                        <!-- Hidden input keeps existing submission field for backend compatibility -->
                         <input type="hidden" name="employee_office"
                             value="<?php echo htmlspecialchars($formData['employee_office']); ?>">
                     </div>
