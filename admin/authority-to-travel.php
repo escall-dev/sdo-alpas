@@ -28,6 +28,21 @@ $currentOffice = $currentUser['employee_office'] ?? '';
 $currentOfficeId = $currentUser['office_id'] ?? null;
 $isActingAsOIC = $auth->isActingAsOIC();
 
+/**
+ * Convert technical database errors into plain-language messages
+ * so non-technical users can understand what went wrong.
+ */
+function friendlyDbErrorAT($exceptionMessage) {
+    if (stripos($exceptionMessage, "employee_no") !== false && stripos($exceptionMessage, "cannot be null") !== false) {
+        return "This action could not be completed because the employee's Employee Number is not yet saved in the system. "
+             . "Please ask HR or your system administrator to update the employee's profile with their Employee Number, then try again.";
+    }
+    if (stripos($exceptionMessage, "Duplicate entry") !== false) {
+        return "This record was already processed. Please refresh the page and try again.";
+    }
+    return "Something went wrong while processing your request. Please try again or contact your system administrator if the problem continues.";
+}
+
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $postAction = $_POST['action'] ?? '';
@@ -113,13 +128,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Check if this is an OIC approval
                 $isOIC = $auth->isActingAsOIC();
 
-                $atModel->approve($id, $auth->getUserId(), $currentUser['full_name'], $currentRoleId, $isOIC);
+                try {
+                    $atModel->approve($id, $auth->getUserId(), $currentUser['full_name'], $currentRoleId, $isOIC);
 
-                // Log with OIC prefix if applicable
-                $actionType = $isOIC ? 'OIC-APPROVAL' : 'APPROVE_AT';
-                $auth->logActivity($actionType, 'AT', $id, 'Approved AT: ' . $at['at_tracking_no']);
-                header('Location: ' . navUrl('/authority-to-travel.php?view=' . $id) . '&msg=' . urlencode('Authority to Travel approved successfully!'));
-                exit;
+                    // Log with OIC prefix if applicable
+                    $actionType = $isOIC ? 'OIC-APPROVAL' : 'APPROVE_AT';
+                    $auth->logActivity($actionType, 'AT', $id, 'Approved AT: ' . $at['at_tracking_no']);
+                    header('Location: ' . navUrl('/authority-to-travel.php?view=' . $id) . '&msg=' . urlencode('Authority to Travel approved successfully!'));
+                    exit;
+                } catch (Exception $e) {
+                    $error = friendlyDbErrorAT($e->getMessage());
+                }
             } else {
                 $error = 'You do not have permission to approve this request.';
             }
@@ -214,7 +233,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 header('Location: ' . navUrl('/authority-to-travel.php?view=' . $id) . '&msg=' . urlencode('Authority to Travel approved by SDS (Executive Override)!'));
                 exit;
             } catch (Exception $e) {
-                $error = $e->getMessage();
+                $error = friendlyDbErrorAT($e->getMessage());
             }
         }
     }
@@ -395,6 +414,16 @@ if ($type === 'outside_region') {
     <div class="alert alert-error">
         <i class="fas fa-exclamation-triangle"></i> <?php echo htmlspecialchars($error); ?>
     </div>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof showAlertModal === 'function') {
+            showAlertModal(<?php echo json_encode($error); ?>, {
+                title: 'Unable to Complete Action',
+                tone: 'error'
+            });
+        }
+    });
+    </script>
 <?php endif; ?>
 
 <?php if ($viewData): ?>

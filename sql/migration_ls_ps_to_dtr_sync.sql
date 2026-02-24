@@ -16,48 +16,47 @@ CREATE TRIGGER trg_locator_slips_ai_to_dtr
 AFTER INSERT ON locator_slips
 FOR EACH ROW
 BEGIN
+    DECLARE v_employee_no VARCHAR(50);
     IF NEW.status = 'approved' THEN
-        UPDATE dtr_system.todtr
-           SET employee_no = (SELECT au.employee_no FROM sdo_atlas.admin_users au WHERE au.id = NEW.user_id LIMIT 1),
-               full_name = NEW.employee_name,
-               travel_type = 'Locator Slip',
-               date_filed = COALESCE(NEW.date_filed, NEW.request_date, DATE(NEW.created_at)),
-               departure_date = DATE(COALESCE(NEW.date_time, NEW.created_at)),
-               arrival_date = DATE(COALESCE(NEW.date_time, NEW.created_at)),
-               departure_time = TIME(COALESCE(NEW.date_time, NEW.created_at)),
-               arrival_time = TIME(COALESCE(NEW.date_time, NEW.created_at)),
-               updated_at = NOW()
-         WHERE source_table = 'locator_slips'
-           AND source_id = NEW.id;
-
-        IF ROW_COUNT() = 0 THEN
-            INSERT INTO dtr_system.todtr (
-                employee_no,
-                full_name,
-                travel_type,
-                date_filed,
-                departure_date,
-                arrival_date,
-                departure_time,
-                arrival_time,
-                source_table,
-                source_id,
-                created_at,
-                updated_at
-            ) VALUES (
-                (SELECT au.employee_no FROM sdo_atlas.admin_users au WHERE au.id = NEW.user_id LIMIT 1),
-                NEW.employee_name,
-                'Locator Slip',
-                COALESCE(NEW.date_filed, NEW.request_date, DATE(NEW.created_at)),
-                DATE(COALESCE(NEW.date_time, NEW.created_at)),
-                DATE(COALESCE(NEW.date_time, NEW.created_at)),
-                TIME(COALESCE(NEW.date_time, NEW.created_at)),
-                TIME(COALESCE(NEW.date_time, NEW.created_at)),
-                'locator_slips',
-                NEW.id,
-                NOW(),
-                NOW()
-            );
+        SELECT au.employee_no INTO v_employee_no
+          FROM sdo_atlas.admin_users au WHERE au.id = NEW.user_id LIMIT 1;
+        IF v_employee_no IS NOT NULL THEN
+        INSERT INTO dtr_system.todtr (
+            employee_no,
+            full_name,
+            travel_type,
+            date_filed,
+            departure_date,
+            arrival_date,
+            departure_time,
+            arrival_time,
+            source_table,
+            source_id,
+            created_at,
+            updated_at
+        ) VALUES (
+            v_employee_no,
+            NEW.employee_name,
+            'Locator Slip',
+            COALESCE(NEW.date_filed, NEW.request_date, DATE(NEW.created_at)),
+            DATE(COALESCE(NEW.date_time, NEW.created_at)),
+            DATE(COALESCE(NEW.date_time, NEW.created_at)),
+            TIME(COALESCE(NEW.date_time, NEW.created_at)),
+            TIME(COALESCE(NEW.date_time, NEW.created_at)),
+            'locator_slips',
+            NEW.id,
+            NOW(),
+            NOW()
+        ) ON DUPLICATE KEY UPDATE
+            employee_no    = VALUES(employee_no),
+            full_name      = VALUES(full_name),
+            travel_type    = VALUES(travel_type),
+            date_filed     = VALUES(date_filed),
+            departure_date = VALUES(departure_date),
+            arrival_date   = VALUES(arrival_date),
+            departure_time = VALUES(departure_time),
+            arrival_time   = VALUES(arrival_time),
+            updated_at     = VALUES(updated_at);
         END IF;
     END IF;
 END$$
@@ -66,48 +65,47 @@ CREATE TRIGGER trg_locator_slips_au_to_dtr
 AFTER UPDATE ON locator_slips
 FOR EACH ROW
 BEGIN
+    DECLARE v_employee_no VARCHAR(50);
     IF NEW.status = 'approved' THEN
-        UPDATE dtr_system.todtr
-           SET employee_no = (SELECT au.employee_no FROM sdo_atlas.admin_users au WHERE au.id = NEW.user_id LIMIT 1),
-               full_name = NEW.employee_name,
-               travel_type = 'Locator Slip',
-               date_filed = COALESCE(NEW.date_filed, NEW.request_date, DATE(NEW.created_at)),
-               departure_date = DATE(COALESCE(NEW.date_time, NEW.created_at)),
-               arrival_date = DATE(COALESCE(NEW.date_time, NEW.created_at)),
-               departure_time = TIME(COALESCE(NEW.date_time, NEW.created_at)),
-               arrival_time = TIME(COALESCE(NEW.date_time, NEW.created_at)),
-               updated_at = NOW()
-         WHERE source_table = 'locator_slips'
-           AND source_id = NEW.id;
-
-        IF ROW_COUNT() = 0 THEN
-            INSERT INTO dtr_system.todtr (
-                employee_no,
-                full_name,
-                travel_type,
-                date_filed,
-                departure_date,
-                arrival_date,
-                departure_time,
-                arrival_time,
-                source_table,
-                source_id,
-                created_at,
-                updated_at
-            ) VALUES (
-                (SELECT au.employee_no FROM sdo_atlas.admin_users au WHERE au.id = NEW.user_id LIMIT 1),
-                NEW.employee_name,
-                'Locator Slip',
-                COALESCE(NEW.date_filed, NEW.request_date, DATE(NEW.created_at)),
-                DATE(COALESCE(NEW.date_time, NEW.created_at)),
-                DATE(COALESCE(NEW.date_time, NEW.created_at)),
-                TIME(COALESCE(NEW.date_time, NEW.created_at)),
-                TIME(COALESCE(NEW.date_time, NEW.created_at)),
-                'locator_slips',
-                NEW.id,
-                NOW(),
-                NOW()
-            );
+        SELECT au.employee_no INTO v_employee_no
+          FROM sdo_atlas.admin_users au WHERE au.id = NEW.user_id LIMIT 1;
+        IF v_employee_no IS NOT NULL THEN
+        INSERT INTO dtr_system.todtr (
+            employee_no,
+            full_name,
+            travel_type,
+            date_filed,
+            departure_date,
+            arrival_date,
+            departure_time,
+            arrival_time,
+            source_table,
+            source_id,
+            created_at,
+            updated_at
+        ) VALUES (
+            v_employee_no,
+            NEW.employee_name,
+            'Locator Slip',
+            COALESCE(NEW.date_filed, NEW.request_date, DATE(NEW.created_at)),
+            DATE(COALESCE(NEW.date_time, NEW.created_at)),
+            DATE(COALESCE(NEW.date_time, NEW.created_at)),
+            TIME(COALESCE(NEW.date_time, NEW.created_at)),
+            TIME(COALESCE(NEW.date_time, NEW.created_at)),
+            'locator_slips',
+            NEW.id,
+            NOW(),
+            NOW()
+        ) ON DUPLICATE KEY UPDATE
+            employee_no    = VALUES(employee_no),
+            full_name      = VALUES(full_name),
+            travel_type    = VALUES(travel_type),
+            date_filed     = VALUES(date_filed),
+            departure_date = VALUES(departure_date),
+            arrival_date   = VALUES(arrival_date),
+            departure_time = VALUES(departure_time),
+            arrival_time   = VALUES(arrival_time),
+            updated_at     = VALUES(updated_at);
         END IF;
     ELSE
         DELETE FROM dtr_system.todtr
@@ -120,48 +118,47 @@ CREATE TRIGGER trg_pass_slips_ai_to_dtr
 AFTER INSERT ON pass_slips
 FOR EACH ROW
 BEGIN
+    DECLARE v_employee_no VARCHAR(50);
     IF NEW.status = 'approved' THEN
-        UPDATE dtr_system.todtr
-           SET employee_no = (SELECT au.employee_no FROM sdo_atlas.admin_users au WHERE au.id = NEW.user_id LIMIT 1),
-               full_name = NEW.employee_name,
-               travel_type = 'Pass Slip',
-               date_filed = COALESCE(NEW.request_date, NEW.date, DATE(NEW.created_at)),
-               departure_date = COALESCE(NEW.date, DATE(NEW.created_at)),
-               arrival_date = COALESCE(NEW.date, DATE(NEW.created_at)),
-               departure_time = COALESCE(NEW.idt, '00:00:00'),
-               arrival_time = COALESCE(NEW.iat, '00:00:00'),
-               updated_at = NOW()
-         WHERE source_table = 'pass_slips'
-           AND source_id = NEW.id;
-
-        IF ROW_COUNT() = 0 THEN
-            INSERT INTO dtr_system.todtr (
-                employee_no,
-                full_name,
-                travel_type,
-                date_filed,
-                departure_date,
-                arrival_date,
-                departure_time,
-                arrival_time,
-                source_table,
-                source_id,
-                created_at,
-                updated_at
-            ) VALUES (
-                (SELECT au.employee_no FROM sdo_atlas.admin_users au WHERE au.id = NEW.user_id LIMIT 1),
-                NEW.employee_name,
-                'Pass Slip',
-                COALESCE(NEW.request_date, NEW.date, DATE(NEW.created_at)),
-                COALESCE(NEW.date, DATE(NEW.created_at)),
-                COALESCE(NEW.date, DATE(NEW.created_at)),
-                COALESCE(NEW.idt, '00:00:00'),
-                COALESCE(NEW.iat, '00:00:00'),
-                'pass_slips',
-                NEW.id,
-                NOW(),
-                NOW()
-            );
+        SELECT au.employee_no INTO v_employee_no
+          FROM sdo_atlas.admin_users au WHERE au.id = NEW.user_id LIMIT 1;
+        IF v_employee_no IS NOT NULL THEN
+        INSERT INTO dtr_system.todtr (
+            employee_no,
+            full_name,
+            travel_type,
+            date_filed,
+            departure_date,
+            arrival_date,
+            departure_time,
+            arrival_time,
+            source_table,
+            source_id,
+            created_at,
+            updated_at
+        ) VALUES (
+            v_employee_no,
+            NEW.employee_name,
+            'Pass Slip',
+            COALESCE(NEW.request_date, NEW.date, DATE(NEW.created_at)),
+            COALESCE(NEW.date, DATE(NEW.created_at)),
+            COALESCE(NEW.date, DATE(NEW.created_at)),
+            NEW.actual_departure_time,
+            NEW.actual_arrival_time,
+            'pass_slips',
+            NEW.id,
+            NOW(),
+            NOW()
+        ) ON DUPLICATE KEY UPDATE
+            employee_no    = VALUES(employee_no),
+            full_name      = VALUES(full_name),
+            travel_type    = VALUES(travel_type),
+            date_filed     = VALUES(date_filed),
+            departure_date = VALUES(departure_date),
+            arrival_date   = VALUES(arrival_date),
+            departure_time = VALUES(departure_time),
+            arrival_time   = VALUES(arrival_time),
+            updated_at     = VALUES(updated_at);
         END IF;
     END IF;
 END$$
@@ -170,48 +167,47 @@ CREATE TRIGGER trg_pass_slips_au_to_dtr
 AFTER UPDATE ON pass_slips
 FOR EACH ROW
 BEGIN
+    DECLARE v_employee_no VARCHAR(50);
     IF NEW.status = 'approved' THEN
-        UPDATE dtr_system.todtr
-           SET employee_no = (SELECT au.employee_no FROM sdo_atlas.admin_users au WHERE au.id = NEW.user_id LIMIT 1),
-               full_name = NEW.employee_name,
-               travel_type = 'Pass Slip',
-               date_filed = COALESCE(NEW.request_date, NEW.date, DATE(NEW.created_at)),
-               departure_date = COALESCE(NEW.date, DATE(NEW.created_at)),
-               arrival_date = COALESCE(NEW.date, DATE(NEW.created_at)),
-               departure_time = COALESCE(NEW.idt, '00:00:00'),
-               arrival_time = COALESCE(NEW.iat, '00:00:00'),
-               updated_at = NOW()
-         WHERE source_table = 'pass_slips'
-           AND source_id = NEW.id;
-
-        IF ROW_COUNT() = 0 THEN
-            INSERT INTO dtr_system.todtr (
-                employee_no,
-                full_name,
-                travel_type,
-                date_filed,
-                departure_date,
-                arrival_date,
-                departure_time,
-                arrival_time,
-                source_table,
-                source_id,
-                created_at,
-                updated_at
-            ) VALUES (
-                (SELECT au.employee_no FROM sdo_atlas.admin_users au WHERE au.id = NEW.user_id LIMIT 1),
-                NEW.employee_name,
-                'Pass Slip',
-                COALESCE(NEW.request_date, NEW.date, DATE(NEW.created_at)),
-                COALESCE(NEW.date, DATE(NEW.created_at)),
-                COALESCE(NEW.date, DATE(NEW.created_at)),
-                COALESCE(NEW.idt, '00:00:00'),
-                COALESCE(NEW.iat, '00:00:00'),
-                'pass_slips',
-                NEW.id,
-                NOW(),
-                NOW()
-            );
+        SELECT au.employee_no INTO v_employee_no
+          FROM sdo_atlas.admin_users au WHERE au.id = NEW.user_id LIMIT 1;
+        IF v_employee_no IS NOT NULL THEN
+        INSERT INTO dtr_system.todtr (
+            employee_no,
+            full_name,
+            travel_type,
+            date_filed,
+            departure_date,
+            arrival_date,
+            departure_time,
+            arrival_time,
+            source_table,
+            source_id,
+            created_at,
+            updated_at
+        ) VALUES (
+            v_employee_no,
+            NEW.employee_name,
+            'Pass Slip',
+            COALESCE(NEW.request_date, NEW.date, DATE(NEW.created_at)),
+            COALESCE(NEW.date, DATE(NEW.created_at)),
+            COALESCE(NEW.date, DATE(NEW.created_at)),
+            NEW.actual_departure_time,
+            NEW.actual_arrival_time,
+            'pass_slips',
+            NEW.id,
+            NOW(),
+            NOW()
+        ) ON DUPLICATE KEY UPDATE
+            employee_no    = VALUES(employee_no),
+            full_name      = VALUES(full_name),
+            travel_type    = VALUES(travel_type),
+            date_filed     = VALUES(date_filed),
+            departure_date = VALUES(departure_date),
+            arrival_date   = VALUES(arrival_date),
+            departure_time = VALUES(departure_time),
+            arrival_time   = VALUES(arrival_time),
+            updated_at     = VALUES(updated_at);
         END IF;
     ELSE
         DELETE FROM dtr_system.todtr
@@ -278,7 +274,8 @@ BEGIN
       ON d.source_table = 'locator_slips'
      AND d.source_id = s.id
     WHERE s.status = 'approved'
-      AND d.source_id IS NULL;
+      AND d.source_id IS NULL
+      AND (SELECT au.employee_no FROM sdo_atlas.admin_users au WHERE au.id = s.user_id LIMIT 1) IS NOT NULL;
 
     DELETE d
     FROM dtr_system.todtr d
@@ -303,8 +300,8 @@ BEGIN
            d.date_filed = COALESCE(s.request_date, s.date, DATE(s.created_at)),
            d.departure_date = COALESCE(s.date, DATE(s.created_at)),
            d.arrival_date = COALESCE(s.date, DATE(s.created_at)),
-           d.departure_time = COALESCE(s.idt, '00:00:00'),
-           d.arrival_time = COALESCE(s.iat, '00:00:00'),
+           d.departure_time = s.actual_departure_time,
+           d.arrival_time = s.actual_arrival_time,
            d.updated_at = NOW()
      WHERE s.status = 'approved';
 
@@ -329,8 +326,8 @@ BEGIN
         COALESCE(s.request_date, s.date, DATE(s.created_at)),
         COALESCE(s.date, DATE(s.created_at)),
         COALESCE(s.date, DATE(s.created_at)),
-        COALESCE(s.idt, '00:00:00'),
-        COALESCE(s.iat, '00:00:00'),
+        s.actual_departure_time,
+        s.actual_arrival_time,
         'pass_slips',
         s.id,
         NOW(),
@@ -340,7 +337,8 @@ BEGIN
       ON d.source_table = 'pass_slips'
      AND d.source_id = s.id
     WHERE s.status = 'approved'
-      AND d.source_id IS NULL;
+      AND d.source_id IS NULL
+      AND (SELECT au.employee_no FROM sdo_atlas.admin_users au WHERE au.id = s.user_id LIMIT 1) IS NOT NULL;
 
     DELETE d
     FROM dtr_system.todtr d
@@ -386,7 +384,8 @@ LEFT JOIN dtr_system.todtr d
   ON d.source_table = 'locator_slips'
  AND d.source_id = s.id
 WHERE s.status = 'approved'
-  AND d.source_id IS NULL;
+  AND d.source_id IS NULL
+  AND (SELECT au.employee_no FROM sdo_atlas.admin_users au WHERE au.id = s.user_id LIMIT 1) IS NOT NULL;
 
 -- One-time backfill for approved Pass Slips
 INSERT INTO dtr_system.todtr (
@@ -410,8 +409,8 @@ SELECT
     COALESCE(s.request_date, s.date, DATE(s.created_at)),
     COALESCE(s.date, DATE(s.created_at)),
     COALESCE(s.date, DATE(s.created_at)),
-    COALESCE(s.idt, '00:00:00'),
-    COALESCE(s.iat, '00:00:00'),
+    s.actual_departure_time,
+    s.actual_arrival_time,
     'pass_slips',
     s.id,
     NOW(),
@@ -421,4 +420,5 @@ LEFT JOIN dtr_system.todtr d
   ON d.source_table = 'pass_slips'
  AND d.source_id = s.id
 WHERE s.status = 'approved'
-  AND d.source_id IS NULL;
+  AND d.source_id IS NULL
+  AND (SELECT au.employee_no FROM sdo_atlas.admin_users au WHERE au.id = s.user_id LIMIT 1) IS NOT NULL;

@@ -48,6 +48,22 @@ function buildPassSlipRedirectUrl($overrides = [], $removeKeys = ['msg', 'err'])
     return $path . ($queryString ? '?' . $queryString : '');
 }
 
+/**
+ * Convert technical database errors into plain-language messages
+ * so non-technical users can understand what went wrong.
+ */
+function friendlyDbError($exceptionMessage) {
+    if (stripos($exceptionMessage, "employee_no") !== false && stripos($exceptionMessage, "cannot be null") !== false) {
+        return "This action could not be completed because the employee's Employee Number is not yet saved in the system. "
+             . "Please ask HR or your system administrator to update the employee's profile with their Employee Number, then try again.";
+    }
+    if (stripos($exceptionMessage, "Duplicate entry") !== false) {
+        return "This record was already processed. Please refresh the page and try again.";
+    }
+    // Fallback: generic user-friendly message
+    return "Something went wrong while processing your request. Please try again or contact your system administrator if the problem continues.";
+}
+
 function redirectPassSlipWithFlash($url, $message = '', $error = '')
 {
     $parts = parse_url($url);
@@ -171,25 +187,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if ($ps && $ps['status'] === 'pending' && $canApprove) {
-            $isOIC = $auth->isActingAsOIC();
+            try {
+                $isOIC = $auth->isActingAsOIC();
 
-            $posRaw = trim($currentUser['employee_position'] ?? '');
-            $posKey = strtoupper($posRaw);
-            $positionMap = [
-                'ASDS' => 'Assistant Schools Division Superintendent',
-                'AOV' => 'Administrative Officer V',
-                'AO V' => 'Administrative Officer V',
-                'SDS' => 'Schools Division Superintendent',
-                'SUPERADMIN' => 'Superadmin',
-                'OSDS_CHIEF' => 'Administrative Officer V',
-            ];
-            $approverPosition = $positionMap[$posKey] ?? $positionMap[$currentUser['role_name']] ?? ($posRaw ?: $currentUser['role_name'] ?? '');
+                $posRaw = trim($currentUser['employee_position'] ?? '');
+                $posKey = strtoupper($posRaw);
+                $positionMap = [
+                    'ASDS' => 'Assistant Schools Division Superintendent',
+                    'AOV' => 'Administrative Officer V',
+                    'AO V' => 'Administrative Officer V',
+                    'SDS' => 'Schools Division Superintendent',
+                    'SUPERADMIN' => 'Superadmin',
+                    'OSDS_CHIEF' => 'Administrative Officer V',
+                ];
+                $approverPosition = $positionMap[$posKey] ?? $positionMap[$currentUser['role_name']] ?? ($posRaw ?: $currentUser['role_name'] ?? '');
 
-            $psModel->approve($id, $auth->getUserId(), $currentUser['full_name'], $approverPosition, $isOIC);
+                $psModel->approve($id, $auth->getUserId(), $currentUser['full_name'], $approverPosition, $isOIC);
 
-            $actionType = $isOIC ? 'OIC-APPROVAL' : 'approve';
-            $auth->logActivity($actionType, 'pass_slip', $id, 'Approved Pass Slip: ' . $ps['ps_control_no']);
-            $message = 'Pass Slip approved successfully!';
+                $actionType = $isOIC ? 'OIC-APPROVAL' : 'approve';
+                $auth->logActivity($actionType, 'pass_slip', $id, 'Approved Pass Slip: ' . $ps['ps_control_no']);
+                $message = 'Pass Slip approved successfully!';
+            } catch (Exception $e) {
+                $error = friendlyDbError($e->getMessage());
+            }
         } else {
             $error = 'You do not have permission to approve this request.';
         }
@@ -254,12 +274,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!$auth->isGuard() && !$auth->isSuperAdmin()) {
             $error = 'Only guards or superadmins can record departure.';
         } elseif ($ps && $ps['status'] === 'approved' && empty($ps['actual_departure_time'])) {
-            $result = $psModel->recordDeparture($id, $auth->getUserId());
-            if (!empty($result['actual_departure_time'])) {
-                $auth->logActivity('guard_depart', 'pass_slip', $id, 'Guard recorded departure for Pass Slip: ' . $ps['ps_control_no']);
-                $message = 'Departure recorded at ' . date('g:i A') . ' for ' . $ps['employee_name'];
-            } else {
-                $error = 'Departure was already recorded by another action.';
+            try {
+                $result = $psModel->recordDeparture($id, $auth->getUserId());
+                if (!empty($result['actual_departure_time'])) {
+                    $auth->logActivity('guard_depart', 'pass_slip', $id, 'Guard recorded departure for Pass Slip: ' . $ps['ps_control_no']);
+                    $message = 'Departure recorded at ' . date('g:i A') . ' for ' . $ps['employee_name'];
+                } else {
+                    $error = 'Departure was already recorded by another action.';
+                }
+            } catch (Exception $e) {
+                $error = friendlyDbError($e->getMessage());
             }
         } else {
             $error = 'Cannot record departure. Pass slip must be approved with no prior departure recorded.';
@@ -273,19 +297,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!$auth->isGuard() && !$auth->isSuperAdmin()) {
             $error = 'Only guards or superadmins can record arrival.';
         } elseif ($ps && !empty($ps['actual_departure_time']) && empty($ps['actual_arrival_time'])) {
-            $result = $psModel->recordArrival($id, $auth->getUserId());
-            if (!empty($result['actual_arrival_time'])) {
-                $auth->logActivity('guard_arrive', 'pass_slip', $id, 'Guard recorded arrival for Pass Slip: ' . $ps['ps_control_no']);
+            try {
+                $result = $psModel->recordArrival($id, $auth->getUserId());
+                if (!empty($result['actual_arrival_time'])) {
+                    $auth->logActivity('guard_arrive', 'pass_slip', $id, 'Guard recorded arrival for Pass Slip: ' . $ps['ps_control_no']);
 
-                // Check for VL deduction threshold
-                $vlNote = $psModel->checkAndFlagVLDeduction($ps['user_id'], $id);
-                if ($vlNote) {
-                    $message = 'Arrival recorded at ' . date('g:i A') . '. ⚠️ ' . $vlNote;
+                    // Check for VL deduction threshold
+                    $vlNote = $psModel->checkAndFlagVLDeduction($ps['user_id'], $id);
+                    if ($vlNote) {
+                        $message = 'Arrival recorded at ' . date('g:i A') . '. ⚠️ ' . $vlNote;
+                    } else {
+                        $message = 'Arrival recorded at ' . date('g:i A') . ' for ' . $ps['employee_name'];
+                    }
                 } else {
-                    $message = 'Arrival recorded at ' . date('g:i A') . ' for ' . $ps['employee_name'];
+                    $error = 'Arrival was already recorded by another action.';
                 }
-            } else {
-                $error = 'Arrival was already recorded by another action.';
+            } catch (Exception $e) {
+                $error = friendlyDbError($e->getMessage());
             }
         } else {
             $error = 'Cannot record arrival. Departure must be recorded first and no prior arrival.';
@@ -393,6 +421,16 @@ $formData = [
         <i class="fas fa-exclamation-triangle"></i>
         <?php echo htmlspecialchars($error); ?>
     </div>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof showAlertModal === 'function') {
+            showAlertModal(<?php echo json_encode($error); ?>, {
+                title: 'Unable to Complete Action',
+                tone: 'error'
+            });
+        }
+    });
+    </script>
 <?php endif; ?>
 
 <?php if ($editId): ?>

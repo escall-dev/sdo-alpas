@@ -16,48 +16,26 @@ CREATE TRIGGER trg_authority_to_travel_ai_to_dtr
 AFTER INSERT ON authority_to_travel
 FOR EACH ROW
 BEGIN
+    DECLARE v_employee_no VARCHAR(50);
     IF NEW.status = 'approved' THEN
-        UPDATE dtr_system.todtr
-           SET employee_no = (SELECT au.employee_no FROM sdo_atlas.admin_users au WHERE au.id = NEW.user_id LIMIT 1),
-               full_name = NEW.employee_name,
-               travel_type = 'Authority to Travel',
-               date_filed = NEW.date_filed,
-               departure_date = NEW.date_from,
-               arrival_date = NEW.date_to,
-               departure_time = NULL,
-               arrival_time = NULL,
-               updated_at = NOW()
-         WHERE source_table = 'authority_to_travel'
-           AND source_id = NEW.id;
-
-        IF ROW_COUNT() = 0 THEN
-            INSERT INTO dtr_system.todtr (
-                employee_no,
-                full_name,
-                travel_type,
-                date_filed,
-                departure_date,
-                arrival_date,
-                departure_time,
-                arrival_time,
-                source_table,
-                source_id,
-                created_at,
-                updated_at
-            ) VALUES (
-                (SELECT au.employee_no FROM sdo_atlas.admin_users au WHERE au.id = NEW.user_id LIMIT 1),
-                NEW.employee_name,
-                'Authority to Travel',
-                NEW.date_filed,
-                NEW.date_from,
-                NEW.date_to,
-                NULL,
-                NULL,
-                'authority_to_travel',
-                NEW.id,
-                NOW(),
-                NOW()
-            );
+        SELECT au.employee_no INTO v_employee_no
+          FROM sdo_atlas.admin_users au WHERE au.id = NEW.user_id LIMIT 1;
+        IF v_employee_no IS NOT NULL THEN
+        INSERT INTO dtr_system.todtr (
+            employee_no, full_name, travel_type, date_filed,
+            departure_date, arrival_date, departure_time, arrival_time,
+            source_table, source_id, created_at, updated_at
+        ) VALUES (
+            v_employee_no, NEW.employee_name, 'Authority to Travel',
+            NEW.date_filed, NEW.date_from, NEW.date_to,
+            NULL, NULL,
+            'authority_to_travel', NEW.id, NOW(), NOW()
+        ) ON DUPLICATE KEY UPDATE
+            employee_no = VALUES(employee_no), full_name = VALUES(full_name),
+            travel_type = VALUES(travel_type), date_filed = VALUES(date_filed),
+            departure_date = VALUES(departure_date), arrival_date = VALUES(arrival_date),
+            departure_time = VALUES(departure_time), arrival_time = VALUES(arrival_time),
+            updated_at = VALUES(updated_at);
         END IF;
     END IF;
 END$$
@@ -66,48 +44,26 @@ CREATE TRIGGER trg_authority_to_travel_au_to_dtr
 AFTER UPDATE ON authority_to_travel
 FOR EACH ROW
 BEGIN
+    DECLARE v_employee_no VARCHAR(50);
     IF NEW.status = 'approved' THEN
-        UPDATE dtr_system.todtr
-           SET employee_no = (SELECT au.employee_no FROM sdo_atlas.admin_users au WHERE au.id = NEW.user_id LIMIT 1),
-               full_name = NEW.employee_name,
-               travel_type = 'Authority to Travel',
-               date_filed = NEW.date_filed,
-               departure_date = NEW.date_from,
-               arrival_date = NEW.date_to,
-               departure_time = NULL,
-               arrival_time = NULL,
-               updated_at = NOW()
-         WHERE source_table = 'authority_to_travel'
-           AND source_id = NEW.id;
-
-        IF ROW_COUNT() = 0 THEN
-            INSERT INTO dtr_system.todtr (
-                employee_no,
-                full_name,
-                travel_type,
-                date_filed,
-                departure_date,
-                arrival_date,
-                departure_time,
-                arrival_time,
-                source_table,
-                source_id,
-                created_at,
-                updated_at
-            ) VALUES (
-                (SELECT au.employee_no FROM sdo_atlas.admin_users au WHERE au.id = NEW.user_id LIMIT 1),
-                NEW.employee_name,
-                'Authority to Travel',
-                NEW.date_filed,
-                NEW.date_from,
-                NEW.date_to,
-                NULL,
-                NULL,
-                'authority_to_travel',
-                NEW.id,
-                NOW(),
-                NOW()
-            );
+        SELECT au.employee_no INTO v_employee_no
+          FROM sdo_atlas.admin_users au WHERE au.id = NEW.user_id LIMIT 1;
+        IF v_employee_no IS NOT NULL THEN
+        INSERT INTO dtr_system.todtr (
+            employee_no, full_name, travel_type, date_filed,
+            departure_date, arrival_date, departure_time, arrival_time,
+            source_table, source_id, created_at, updated_at
+        ) VALUES (
+            v_employee_no, NEW.employee_name, 'Authority to Travel',
+            NEW.date_filed, NEW.date_from, NEW.date_to,
+            NULL, NULL,
+            'authority_to_travel', NEW.id, NOW(), NOW()
+        ) ON DUPLICATE KEY UPDATE
+            employee_no = VALUES(employee_no), full_name = VALUES(full_name),
+            travel_type = VALUES(travel_type), date_filed = VALUES(date_filed),
+            departure_date = VALUES(departure_date), arrival_date = VALUES(arrival_date),
+            departure_time = VALUES(departure_time), arrival_time = VALUES(arrival_time),
+            updated_at = VALUES(updated_at);
         END IF;
     ELSE
         DELETE FROM dtr_system.todtr
@@ -177,7 +133,8 @@ BEGIN
             ON d.source_table = 'authority_to_travel'
      AND d.source_id = s.id
         WHERE s.status = 'approved'
-            AND d.source_id IS NULL;
+            AND d.source_id IS NULL
+            AND (SELECT au.employee_no FROM sdo_atlas.admin_users au WHERE au.id = s.user_id LIMIT 1) IS NOT NULL;
 
         DELETE d
         FROM dtr_system.todtr d

@@ -23,6 +23,21 @@ $editId = $_GET['edit'] ?? '';
 $message = '';
 $error = '';
 
+/**
+ * Convert technical database errors into plain-language messages
+ * so non-technical users can understand what went wrong.
+ */
+function friendlyDbErrorLS($exceptionMessage) {
+    if (stripos($exceptionMessage, "employee_no") !== false && stripos($exceptionMessage, "cannot be null") !== false) {
+        return "This action could not be completed because the employee's Employee Number is not yet saved in the system. "
+             . "Please ask HR or your system administrator to update the employee's profile with their Employee Number, then try again.";
+    }
+    if (stripos($exceptionMessage, "Duplicate entry") !== false) {
+        return "This record was already processed. Please refresh the page and try again.";
+    }
+    return "Something went wrong while processing your request. Please try again or contact your system administrator if the problem continues.";
+}
+
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $postAction = $_POST['action'] ?? '';
@@ -125,26 +140,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Check if this is an OIC approval
             $isOIC = $auth->isActingAsOIC();
             
-            // Expand common acronyms to full titles for approver position
-            $posRaw = trim($currentUser['employee_position'] ?? '');
-            $posKey = strtoupper($posRaw);
-            $positionMap = [
-                'ASDS' => 'Assistant Schools Division Superintendent',
-                'AOV'  => 'Administrative Officer V',
-                'AO V' => 'Administrative Officer V',
-                'SDS'  => 'Schools Division Superintendent',
-                'SUPERADMIN' => 'Superadmin',
-                'OSDS_CHIEF' => 'Administrative Officer V',
-            ];
-            // Also check role_name for position
-            $approverPosition = $positionMap[$posKey] ?? $positionMap[$currentUser['role_name']] ?? ($posRaw ?: $currentUser['role_name'] ?? '');
+            try {
+                // Expand common acronyms to full titles for approver position
+                $posRaw = trim($currentUser['employee_position'] ?? '');
+                $posKey = strtoupper($posRaw);
+                $positionMap = [
+                    'ASDS' => 'Assistant Schools Division Superintendent',
+                    'AOV'  => 'Administrative Officer V',
+                    'AO V' => 'Administrative Officer V',
+                    'SDS'  => 'Schools Division Superintendent',
+                    'SUPERADMIN' => 'Superadmin',
+                    'OSDS_CHIEF' => 'Administrative Officer V',
+                ];
+                // Also check role_name for position
+                $approverPosition = $positionMap[$posKey] ?? $positionMap[$currentUser['role_name']] ?? ($posRaw ?: $currentUser['role_name'] ?? '');
 
-            $lsModel->approve($id, $auth->getUserId(), $currentUser['full_name'], $approverPosition, $isOIC);
-            
-            // Log with OIC prefix if applicable
-            $actionType = $isOIC ? 'OIC-APPROVAL' : 'approve';
-            $auth->logActivity($actionType, 'locator_slip', $id, 'Approved Locator Slip: ' . $ls['ls_control_no']);
-            $message = 'Locator Slip approved successfully!';
+                $lsModel->approve($id, $auth->getUserId(), $currentUser['full_name'], $approverPosition, $isOIC);
+                
+                // Log with OIC prefix if applicable
+                $actionType = $isOIC ? 'OIC-APPROVAL' : 'approve';
+                $auth->logActivity($actionType, 'locator_slip', $id, 'Approved Locator Slip: ' . $ls['ls_control_no']);
+                $message = 'Locator Slip approved successfully!';
+            } catch (Exception $e) {
+                $error = friendlyDbErrorLS($e->getMessage());
+            }
         } else {
             $error = 'You do not have permission to approve this request.';
         }
@@ -287,6 +306,16 @@ $formData = [
 <div class="alert alert-error">
     <i class="fas fa-exclamation-triangle"></i> <?php echo htmlspecialchars($error); ?>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof showAlertModal === 'function') {
+        showAlertModal(<?php echo json_encode($error); ?>, {
+            title: 'Unable to Complete Action',
+            tone: 'error'
+        });
+    }
+});
+</script>
 <?php endif; ?>
 
 <?php if ($editId): ?>
