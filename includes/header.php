@@ -103,7 +103,7 @@ function navUrl($path)
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="<?php echo ADMIN_URL; ?>/assets/css/admin.css">
+    <link rel="stylesheet" href="<?php echo ADMIN_URL; ?>/assets/css/admin.css?v=<?php echo time(); ?>">
 </head>
 
 <body>
@@ -264,9 +264,14 @@ function navUrl($path)
 
             <div class="sidebar-footer">
                 <div class="user-info">
+                    <?php if (!empty($currentUser['avatar_url'])): ?>
+                    <img src="<?php echo BASE_URL . '/uploads/avatars/' . htmlspecialchars($currentUser['avatar_url']); ?>" 
+                         alt="Avatar" class="user-avatar sidebar-user-avatar">
+                    <?php else: ?>
                     <div class="user-avatar-placeholder">
                         <?php echo strtoupper(substr($currentUser['full_name'], 0, 1)); ?>
                     </div>
+                    <?php endif; ?>
                     <div class="user-details">
                         <span class="user-name"><?php echo htmlspecialchars($currentUser['full_name']); ?></span>
                         <span class="user-role"><?php echo htmlspecialchars($currentUser['role_name']); ?></span>
@@ -290,6 +295,7 @@ function navUrl($path)
                 </div>
                 <div class="top-bar-right">
                     <span class="current-date"><?php echo date('l, F j, Y'); ?></span>
+                    <span class="live-clock" id="liveClock"></span>
                 </div>
             </header>
 

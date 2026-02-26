@@ -331,9 +331,14 @@ $pendingCount = $userModel->getPendingRegistrationsCount();
                 <tr>
                     <td>
                         <div class="user-cell">
+                            <?php if (!empty($user['avatar_url'])): ?>
+                            <img src="<?php echo BASE_URL . '/uploads/avatars/' . htmlspecialchars($user['avatar_url']); ?>" 
+                                 alt="" class="user-avatar-sm">
+                            <?php else: ?>
                             <div class="user-avatar-placeholder-sm">
                                 <?php echo strtoupper(substr($user['full_name'], 0, 1)); ?>
                             </div>
+                            <?php endif; ?>
                             <div>
                                 <div class="cell-primary"><?php echo htmlspecialchars($user['full_name']); ?></div>
                                 <div class="cell-secondary"><?php echo htmlspecialchars($user['email']); ?></div>

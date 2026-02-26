@@ -352,7 +352,8 @@ class AdminUser {
 
         $allowedFields = [
             'email', 'full_name', 'employee_no', 'employee_position', 
-            'employee_office', 'office_id', 'role_id', 'status', 'is_active', 'avatar_url'
+            'employee_office', 'office_id', 'role_id', 'status', 'is_active', 'avatar_url',
+            'avatar_updated_at'
         ];
 
         foreach ($allowedFields as $field) {

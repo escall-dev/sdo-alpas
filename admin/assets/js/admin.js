@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initFormValidation();
     initFilterEnterSubmit();
     initModalNotificationHandlers();
+    initAvatarUpload();
 });
 
 /**
@@ -518,6 +519,248 @@ async function ajaxRequest(url, options = {}) {
     } catch (error) {
         showNotification(error.message, 'error');
         throw error;
+    }
+}
+
+/**
+ * Avatar Upload Handler
+ */
+function initAvatarUpload() {
+    // Skip if inline script on profile page already initialized avatar upload
+    if (window.__avatarUploadInitialized) return;
+
+    const avatarInput = document.getElementById('avatarInput');
+    const avatarOverlay = document.getElementById('avatarOverlay');
+    const avatarWrapper = document.getElementById('avatarWrapper');
+    const changeBtn = document.getElementById('changeAvatarBtn');
+    const removeBtn = document.getElementById('removeAvatarBtn');
+
+    if (!avatarInput) return;
+
+    // Trigger file input from overlay, wrapper, or button click
+    function triggerFileSelect(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        avatarInput.click();
+    }
+
+    if (avatarOverlay) avatarOverlay.addEventListener('click', triggerFileSelect);
+    if (avatarWrapper) avatarWrapper.addEventListener('click', triggerFileSelect);
+    if (changeBtn) changeBtn.addEventListener('click', triggerFileSelect);
+
+    // Hover effect for wrapper (inline fallback)
+    if (avatarWrapper && avatarOverlay) {
+        avatarWrapper.addEventListener('mouseenter', function() {
+            avatarOverlay.style.opacity = '1';
+        });
+        avatarWrapper.addEventListener('mouseleave', function() {
+            avatarOverlay.style.opacity = '0';
+        });
+    }
+
+    // Handle file selection
+    avatarInput.addEventListener('change', function() {
+        const file = avatarInput.files[0];
+        if (!file) return;
+
+        // Client-side validation
+        const allowedTypes = ['image/jpeg', 'image/png'];
+        if (!allowedTypes.includes(file.type)) {
+            showNotification('Invalid file type. Only JPG and PNG are allowed.', 'error');
+            avatarInput.value = '';
+            return;
+        }
+
+        const maxSize = 5 * 1024 * 1024; // 5 MB
+        if (file.size > maxSize) {
+            showNotification('File size exceeds 5 MB limit.', 'error');
+            avatarInput.value = '';
+            return;
+        }
+
+        // Show loading state on avatar
+        const wrapper = document.querySelector('.profile-avatar-wrapper');
+        if (wrapper) wrapper.classList.add('avatar-uploading');
+
+        // Build FormData and upload
+        const formData = new FormData();
+        formData.append('avatar', file);
+
+        fetch(ADMIN_URL + '/api/avatar-upload.php', {
+            method: 'POST',
+            body: formData
+            // Do NOT set Content-Type — let browser set multipart boundary
+            // X-Auth-Token is auto-injected by the monkey-patched fetch in footer.php
+        })
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
+            if (wrapper) wrapper.classList.remove('avatar-uploading');
+
+            if (data.success) {
+                showNotification(data.message, 'success');
+                updateAvatarDisplay(data.avatar_url);
+                updateSidebarAvatar(data.avatar_url);
+            } else {
+                showNotification(data.message || 'Upload failed.', 'error');
+            }
+        })
+        .catch(function(err) {
+            if (wrapper) wrapper.classList.remove('avatar-uploading');
+            showNotification('Upload failed. Please try again.', 'error');
+        })
+        .finally(function() {
+            avatarInput.value = '';
+        });
+    });
+
+    // Handle remove avatar
+    if (removeBtn) {
+        removeBtn.addEventListener('click', function() {
+            if (!confirm('Remove your profile avatar?')) return;
+
+            const formData = new FormData();
+            formData.append('action', 'remove');
+
+            fetch(ADMIN_URL + '/api/avatar-upload.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    showNotification(data.message, 'success');
+                    revertToInitials();
+                    updateSidebarAvatar(null);
+                } else {
+                    showNotification(data.message || 'Failed to remove avatar.', 'error');
+                }
+            })
+            .catch(function() {
+                showNotification('Failed to remove avatar. Please try again.', 'error');
+            });
+        });
+    }
+}
+
+/**
+ * Update avatar display on profile page after successful upload
+ */
+function updateAvatarDisplay(avatarUrl) {
+    const wrapper = document.querySelector('.profile-avatar-wrapper');
+    if (!wrapper) return;
+
+    const cacheBuster = '?t=' + Date.now();
+    const fullUrl = avatarUrl + cacheBuster;
+
+    // Check if img already exists
+    let img = document.getElementById('profileAvatarImg');
+    const placeholder = document.getElementById('profileAvatarPlaceholder');
+
+    if (img) {
+        // Update existing image
+        img.src = fullUrl;
+    } else {
+        // Replace placeholder with image
+        if (placeholder) placeholder.style.display = 'none';
+        img = document.createElement('img');
+        img.src = fullUrl;
+        img.alt = 'Avatar';
+        img.className = 'user-avatar profile-avatar-img';
+        img.id = 'profileAvatarImg';
+        wrapper.insertBefore(img, wrapper.firstChild);
+    }
+
+    // Show remove button if it doesn't exist
+    if (!document.getElementById('removeAvatarBtn')) {
+        const cardBody = wrapper.closest('.detail-card-body');
+        if (cardBody) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'btn-avatar-remove';
+            btn.id = 'removeAvatarBtn';
+            btn.title = 'Remove avatar';
+            btn.innerHTML = '<i class="fas fa-trash-alt"></i> Remove Avatar';
+            cardBody.appendChild(btn);
+            // Re-initialize to attach event
+            btn.addEventListener('click', function() {
+                if (!confirm('Remove your profile avatar?')) return;
+                const fd = new FormData();
+                fd.append('action', 'remove');
+                fetch(ADMIN_URL + '/api/avatar-upload.php', { method: 'POST', body: fd })
+                    .then(function(r) { return r.json(); })
+                    .then(function(d) {
+                        if (d.success) {
+                            showNotification(d.message, 'success');
+                            revertToInitials();
+                            updateSidebarAvatar(null);
+                        } else {
+                            showNotification(d.message || 'Failed to remove avatar.', 'error');
+                        }
+                    })
+                    .catch(function() {
+                        showNotification('Failed to remove avatar.', 'error');
+                    });
+            });
+        }
+    }
+}
+
+/**
+ * Revert profile avatar to initials placeholder
+ */
+function revertToInitials() {
+    const img = document.getElementById('profileAvatarImg');
+    const placeholder = document.getElementById('profileAvatarPlaceholder');
+    const removeBtn = document.getElementById('removeAvatarBtn');
+
+    if (img) img.remove();
+    if (placeholder) {
+        placeholder.style.display = '';
+    } else {
+        // Create placeholder if it doesn't exist
+        const wrapper = document.querySelector('.profile-avatar-wrapper');
+        if (wrapper) {
+            const div = document.createElement('div');
+            div.className = 'user-avatar-placeholder profile-avatar-icon';
+            div.id = 'profileAvatarPlaceholder';
+            div.style.cssText = 'width: 100px; height: 100px; font-size: 1.85rem; background:rgb(241, 142, 37); color: white;';
+            // Get first letter of name from the page
+            const nameEl = wrapper.closest('.detail-card-body')?.querySelector('h3');
+            div.textContent = nameEl ? nameEl.textContent.trim().charAt(0).toUpperCase() : '?';
+            wrapper.insertBefore(div, wrapper.firstChild);
+        }
+    }
+    if (removeBtn) removeBtn.remove();
+}
+
+/**
+ * Update sidebar avatar display
+ */
+function updateSidebarAvatar(avatarUrl) {
+    const sidebarFooter = document.querySelector('.sidebar-footer .user-info');
+    if (!sidebarFooter) return;
+
+    const existingImg = sidebarFooter.querySelector('.sidebar-user-avatar');
+    const existingPlaceholder = sidebarFooter.querySelector('.user-avatar-placeholder');
+
+    if (avatarUrl) {
+        const cacheBuster = '?t=' + Date.now();
+        if (existingImg) {
+            existingImg.src = avatarUrl + cacheBuster;
+        } else {
+            if (existingPlaceholder) existingPlaceholder.style.display = 'none';
+            const img = document.createElement('img');
+            img.src = avatarUrl + cacheBuster;
+            img.alt = 'Avatar';
+            img.className = 'user-avatar sidebar-user-avatar';
+            sidebarFooter.insertBefore(img, sidebarFooter.firstChild);
+        }
+    } else {
+        // Remove image, show placeholder
+        if (existingImg) existingImg.remove();
+        if (existingPlaceholder) {
+            existingPlaceholder.style.display = '';
+        }
     }
 }
 

@@ -200,9 +200,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <!-- Avatar (square card) - SDO theme: blue card, orange avatar icon -->
         <div class="detail-card profile-avatar-card" style="flex-shrink: 0; background: var(--primary-gradient); color: white; aspect-ratio: 1; max-height: 350px;">
             <div class="detail-card-body" style="text-align: center; padding: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 0;">
-                <div class="user-avatar-placeholder profile-avatar-icon" style="width: 100px; height: 100px; font-size: 1.85rem; margin: 65px auto 12px; flex-shrink: 0; background:rgb(241, 142, 37); color: white;">
-                    <?php echo strtoupper(substr($currentUser['full_name'], 0, 1)); ?>
+                <div class="profile-avatar-wrapper" id="avatarWrapper" style="position: relative; width: 120px; height: 120px; border-radius: 50%; cursor: pointer; margin: 35px auto 14px; flex-shrink: 0;">
+                    <?php if (!empty($currentUser['avatar_url'])): ?>
+                    <img src="<?php echo BASE_URL . '/uploads/avatars/' . htmlspecialchars($currentUser['avatar_url']); ?>" 
+                         alt="Avatar" 
+                         class="profile-avatar-img" 
+                         id="profileAvatarImg"
+                         style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; display: block; border: 3px solid rgba(255,255,255,0.25);">
+                    <?php else: ?>
+                    <div class="user-avatar-placeholder profile-avatar-icon" id="profileAvatarPlaceholder" 
+                         style="width: 120px; height: 120px; font-size: 2.4rem; background:rgb(241, 142, 37); color: white;">
+                        <?php echo strtoupper(substr($currentUser['full_name'], 0, 1)); ?>
+                    </div>
+                    <?php endif; ?>
+                    <!-- Camera badge at bottom-right -->
+                    <div id="avatarCameraBadge" title="Change avatar"
+                         style="position: absolute; bottom: 2px; right: 2px; width: 34px; height: 34px; border-radius: 50%; background: #2563eb; display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; font-size: 0.85rem; border: 2.5px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.25); transition: background 0.2s ease;">
+                        <i class="fas fa-camera"></i>
+                    </div>
                 </div>
+                <input type="file" id="avatarInput" accept="image/jpeg,image/png" style="display: none;">
                 <div style="width: 100%; text-align: center; margin-top: 0;">
                     <h3 style="margin: 0 0 4px; font-size: 1.3rem; line-height: 1.3; text-align: center;"><?php echo htmlspecialchars($currentUser['full_name']); ?></h3>
                     <p style="opacity: 0.8; margin: 0; font-size: 1rem; text-align: center;"><?php echo htmlspecialchars($currentUser['employee_position'] ?? 'SDO Employee'); ?></p>
@@ -246,6 +263,175 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     display: none;
 }
 </style>
+
+<!-- Avatar Confirmation Modal -->
+<div id="avatarConfirmModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:10000; align-items:center; justify-content:center;">
+    <div style="background:white; border-radius:12px; padding:28px 32px; max-width:380px; width:90%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.3); animation: modalFadeIn 0.2s ease;">
+        <div style="width:56px; height:56px; border-radius:50%; background:#EBF5FF; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;">
+            <i class="fas fa-user-edit" style="font-size:1.5rem; color:#2563eb;"></i>
+        </div>
+        <h3 style="margin:0 0 8px; font-size:1.15rem; color:#1e293b;">Change Profile Avatar</h3>
+        <p style="margin:0 0 20px; font-size:0.9rem; color:#64748b;">Are you sure you want to change your profile avatar?</p>
+        <div style="margin:0 auto 20px; width:80px; height:80px; border-radius:50%; overflow:hidden; border:3px solid #e2e8f0;">
+            <img id="avatarPreviewImg" src="" alt="Preview" style="width:100%; height:100%; object-fit:cover; display:block;">
+        </div>
+        <div style="display:flex; gap:10px; justify-content:center;">
+            <button type="button" id="avatarConfirmCancel" style="flex:1; padding:10px 20px; border:1px solid #e2e8f0; background:white; color:#64748b; border-radius:8px; font-size:0.9rem; cursor:pointer; font-weight:500; transition:background 0.15s;">Cancel</button>
+            <button type="button" id="avatarConfirmYes" style="flex:1; padding:10px 20px; border:none; background:linear-gradient(135deg,#2563eb,#1d4ed8); color:white; border-radius:8px; font-size:0.9rem; cursor:pointer; font-weight:600; transition:opacity 0.15s;">Yes, Change</button>
+        </div>
+    </div>
+</div>
+<style>
+@keyframes modalFadeIn { from { opacity:0; transform:scale(0.95); } to { opacity:1; transform:scale(1); } }
+#avatarConfirmModal > div { animation: modalFadeIn 0.2s ease; }
+#avatarConfirmCancel:hover { background:#f8fafc; }
+#avatarConfirmYes:hover { opacity:0.9; }
+</style>
+
+<!-- Avatar Upload Script (inline to avoid caching issues) -->
+<script>
+(function() {
+    // Flag to prevent admin.js initAvatarUpload from double-binding
+    window.__avatarUploadInitialized = true;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var avatarInput = document.getElementById('avatarInput');
+        var avatarWrapper = document.getElementById('avatarWrapper');
+        var cameraBadge = document.getElementById('avatarCameraBadge');
+        var modal = document.getElementById('avatarConfirmModal');
+        var confirmYes = document.getElementById('avatarConfirmYes');
+        var confirmCancel = document.getElementById('avatarConfirmCancel');
+        var previewImg = document.getElementById('avatarPreviewImg');
+        var pendingFile = null;
+
+        if (!avatarInput) return;
+
+        function openFilePicker(e) {
+            if (e) { e.preventDefault(); e.stopPropagation(); }
+            avatarInput.click();
+        }
+
+        // Both the avatar wrapper and camera badge open the file picker
+        if (avatarWrapper) avatarWrapper.addEventListener('click', openFilePicker);
+        if (cameraBadge) cameraBadge.addEventListener('click', openFilePicker);
+
+        // Hover glow on badge
+        if (cameraBadge) {
+            cameraBadge.addEventListener('mouseenter', function() { cameraBadge.style.background = '#1d4ed8'; });
+            cameraBadge.addEventListener('mouseleave', function() { cameraBadge.style.background = '#2563eb'; });
+        }
+
+        // Show modal
+        function showModal() { modal.style.display = 'flex'; }
+        function hideModal() { modal.style.display = 'none'; pendingFile = null; }
+
+        // Close modal on cancel or backdrop click
+        confirmCancel.addEventListener('click', function() {
+            hideModal();
+            avatarInput.value = '';
+        });
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                hideModal();
+                avatarInput.value = '';
+            }
+        });
+
+        // File selected → validate → show confirmation modal with preview
+        avatarInput.addEventListener('change', function() {
+            var file = avatarInput.files[0];
+            if (!file) return;
+
+            // Client validation
+            if (['image/jpeg','image/png'].indexOf(file.type) === -1) {
+                if (typeof showNotification === 'function') showNotification('Only JPG and PNG are allowed.', 'error');
+                avatarInput.value = '';
+                return;
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                if (typeof showNotification === 'function') showNotification('File size exceeds 5 MB limit.', 'error');
+                avatarInput.value = '';
+                return;
+            }
+
+            // Show preview in modal
+            pendingFile = file;
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                previewImg.src = e.target.result;
+                showModal();
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // Confirm upload
+        confirmYes.addEventListener('click', function() {
+            if (!pendingFile) return;
+
+            // Grab file reference before hideModal clears it
+            var fileToUpload = pendingFile;
+            modal.style.display = 'none';
+            pendingFile = null;
+
+            var formData = new FormData();
+            formData.append('avatar', fileToUpload);
+
+            var apiUrl = '<?php echo ADMIN_URL; ?>/api/avatar-upload.php';
+
+            fetch(apiUrl, { method: 'POST', body: formData })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    if (typeof showNotification === 'function') showNotification(data.message, 'success');
+                    // Update profile avatar
+                    var wrapper = document.getElementById('avatarWrapper');
+                    var img = document.getElementById('profileAvatarImg');
+                    var placeholder = document.getElementById('profileAvatarPlaceholder');
+                    var bust = '?t=' + Date.now();
+                    if (img) {
+                        img.src = data.avatar_url + bust;
+                    } else {
+                        if (placeholder) placeholder.style.display = 'none';
+                        img = document.createElement('img');
+                        img.src = data.avatar_url + bust;
+                        img.alt = 'Avatar';
+                        img.id = 'profileAvatarImg';
+                        img.className = 'profile-avatar-img';
+                        img.style.cssText = 'width:120px;height:120px;border-radius:50%;object-fit:cover;display:block;border:3px solid rgba(255,255,255,0.25);';
+                        wrapper.insertBefore(img, wrapper.firstChild);
+                    }
+                    // Update sidebar avatar
+                    var sidebarInfo = document.querySelector('.sidebar-footer .user-info');
+                    if (sidebarInfo) {
+                        var sImg = sidebarInfo.querySelector('.sidebar-user-avatar');
+                        var sPlaceholder = sidebarInfo.querySelector('.user-avatar-placeholder');
+                        if (sImg) {
+                            sImg.src = data.avatar_url + bust;
+                        } else {
+                            if (sPlaceholder) sPlaceholder.style.display = 'none';
+                            sImg = document.createElement('img');
+                            sImg.src = data.avatar_url + bust;
+                            sImg.alt = 'Avatar';
+                            sImg.className = 'sidebar-user-avatar';
+                            sImg.style.cssText = 'width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0;';
+                            sidebarInfo.insertBefore(sImg, sidebarInfo.firstChild);
+                        }
+                    }
+                } else {
+                    if (typeof showNotification === 'function') showNotification(data.message || 'Upload failed.', 'error');
+                }
+            })
+            .catch(function(err) {
+                console.error('Avatar upload error:', err);
+                if (typeof showNotification === 'function') showNotification('Upload failed. Please try again.', 'error');
+            })
+            .finally(function() {
+                avatarInput.value = '';
+            });
+        });
+    });
+})();
+</script>
 
 
 <?php if ($isSuperAdmin && !empty($unitsByOffice)): ?>
