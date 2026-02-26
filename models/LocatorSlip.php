@@ -90,7 +90,9 @@ class LocatorSlip {
      * Create a new Locator Slip request with routing
      * - If requestor is an Office Chief (OSDS, CID, SGOD): route to ASDS for approval.
      * - If requestor is ASDS or SDS: route to SDS for approval.
-     * - All other employees: route to OSDS Chief (AO V) as the sole approver.
+     * - CID employees: route to CID Chief for approval.
+     * - SGOD employees: route to SGOD Chief for approval.
+     * - OSDS employees / default: route to OSDS Chief (AO V) for approval.
      */
     public function create($data, $requesterRoleId = null, $requesterOffice = null, $requesterOfficeId = null) {
         $approverRoleId = null;
@@ -156,15 +158,27 @@ class LocatorSlip {
                 $assignedApproverUserId = $this->getEffectiveApproverUserId(ROLE_SDS, $sdsUsers[0]['id']);
             }
         }
-        // All other employees: route to OSDS Chief (AO V) as sole approver
+        // All other employees: route based on office (CID→CID Chief, SGOD→SGOD Chief, OSDS→AO V)
         else {
-            $approverRoleId = ROLE_OSDS_CHIEF;
-            $unitHeads = $userModel->getByRole(ROLE_OSDS_CHIEF, true);
+            // Use office_id for DB-based routing if available
+            if ($requesterOfficeId !== null) {
+                $approverRoleId = getApproverRoleByOfficeId($requesterOfficeId);
+            }
+            // Fall back to office name matching
+            elseif ($requesterOffice) {
+                $approverRoleId = $this->getApproverRoleForOffice($requesterOffice);
+            }
+            // Default fallback
+            else {
+                $approverRoleId = ROLE_OSDS_CHIEF;
+            }
+
+            $unitHeads = $userModel->getByRole($approverRoleId, true);
             if (!empty($unitHeads)) {
                 $unitHeadUserId = $unitHeads[0]['id'];
                 require_once __DIR__ . '/OICDelegation.php';
                 $oicModel = new OICDelegation();
-                $assignedApproverUserId = $oicModel->getEffectiveApproverUserId(ROLE_OSDS_CHIEF, $unitHeadUserId);
+                $assignedApproverUserId = $oicModel->getEffectiveApproverUserId($approverRoleId, $unitHeadUserId);
             }
         }
         
@@ -268,9 +282,11 @@ class LocatorSlip {
             $params[] = $viewerUserId;
             $params[] = ROLE_OSDS_CHIEF;
         } elseif ($viewerRoleId && in_array($viewerRoleId, [ROLE_CID_CHIEF, ROLE_SGOD_CHIEF])) {
-            // CID/SGOD Chiefs: their submissions route to ASDS, so they see nothing in main Locator Slips page
-            // Their own requests appear only in My Requests page
-            $sql .= " AND 1=0";  // No records shown
+            // CID/SGOD Chiefs see locator slips assigned to them for approval (from their unit employees)
+            // Their own submissions route to ASDS and appear in My Requests page
+            $sql .= " AND (ls.assigned_approver_user_id = ? OR ls.assigned_approver_role_id = ?)";
+            $params[] = $viewerUserId;
+            $params[] = $viewerRoleId;
         } elseif ($viewerRoleId == ROLE_ASDS) {
             // ASDS sees only Locator Slips assigned to ASDS (i.e. requests filed by Office Chiefs)
             $sql .= " AND ls.assigned_approver_role_id = ?";
