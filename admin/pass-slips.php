@@ -196,9 +196,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'ASDS' => 'Assistant Schools Division Superintendent',
                     'AOV' => 'Administrative Officer V',
                     'AO V' => 'Administrative Officer V',
+                    'AO V - ADMINISTRATIVE' => 'Administrative Officer V',
                     'SDS' => 'Schools Division Superintendent',
                     'SUPERADMIN' => 'Superadmin',
-                    'OSDS_CHIEF' => 'Administrative Officer V',
+                    'GENERAL SERVICES' => 'General Services',
                 ];
                 $approverPosition = $positionMap[$posKey] ?? $positionMap[$currentUser['role_name']] ?? ($posRaw ?: $currentUser['role_name'] ?? '');
 

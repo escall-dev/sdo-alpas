@@ -351,9 +351,9 @@ class AuthorityToTravel {
         $roleMap = [
             ROLE_SUPERADMIN => 'SUPERADMIN',
             ROLE_ASDS => 'ASDS',
-            ROLE_OSDS_CHIEF => 'OSDS_CHIEF',
-            ROLE_CID_CHIEF => 'CID_CHIEF',
-            ROLE_SGOD_CHIEF => 'SGOD_CHIEF',
+            ROLE_OSDS_CHIEF => 'AO V - ADMINISTRATIVE',
+            ROLE_CID_CHIEF => 'CID CHIEF',
+            ROLE_SGOD_CHIEF => 'SGOD CHIEF',
             ROLE_USER => 'USER',
             ROLE_SDS => 'SDS'
         ];
@@ -367,11 +367,16 @@ class AuthorityToTravel {
         $nameMap = [
             'SUPERADMIN' => ROLE_SUPERADMIN,
             'ASDS' => ROLE_ASDS,
+            'AO V - ADMINISTRATIVE' => ROLE_OSDS_CHIEF,
+            'CID CHIEF' => ROLE_CID_CHIEF,
+            'SGOD CHIEF' => ROLE_SGOD_CHIEF,
+            'USER' => ROLE_USER,
+            'SDS' => ROLE_SDS,
+            // Legacy mappings for existing records
             'OSDS_CHIEF' => ROLE_OSDS_CHIEF,
             'CID_CHIEF' => ROLE_CID_CHIEF,
             'SGOD_CHIEF' => ROLE_SGOD_CHIEF,
-            'USER' => ROLE_USER,
-            'SDS' => ROLE_SDS
+            'AO V' => ROLE_OSDS_CHIEF
         ];
         return $nameMap[$roleName] ?? null;
     }

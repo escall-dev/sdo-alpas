@@ -118,7 +118,7 @@ define('UNIT_HEAD_OFFICES', [
 define('RECOMMENDING_AUTHORITY_MAP', [
     ROLE_CID_CHIEF => 'CID Chief',
     ROLE_SGOD_CHIEF => 'SGOD Chief',
-    ROLE_OSDS_CHIEF => 'AO V',
+    ROLE_OSDS_CHIEF => 'AO V - Administrative',
     ROLE_ASDS => 'ASDS',
     ROLE_SDS => 'SDS'
 ]);
@@ -130,7 +130,7 @@ define('APPROVING_AUTHORITY_MAP', [
     ROLE_SDS => 'SDS',
     ROLE_CID_CHIEF => 'CID Chief',
     ROLE_SGOD_CHIEF => 'SGOD Chief',
-    ROLE_OSDS_CHIEF => 'AO V'
+    ROLE_OSDS_CHIEF => 'AO V - Administrative'
 ]);
 
 // Status configuration for requests
