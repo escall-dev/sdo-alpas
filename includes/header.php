@@ -283,14 +283,16 @@ function navUrl($path)
 
             <div class="sidebar-footer">
                 <div class="user-info">
-                    <?php if (!empty($currentUser['avatar_url'])): ?>
-                    <img src="<?php echo BASE_URL . '/uploads/avatars/' . htmlspecialchars($currentUser['avatar_url']); ?>" 
-                         alt="Avatar" class="user-avatar sidebar-user-avatar">
-                    <?php else: ?>
-                    <div class="user-avatar-placeholder">
-                        <?php echo strtoupper(substr($currentUser['full_name'], 0, 1)); ?>
+                    <div id="sidebarAvatarTrigger" class="sidebar-avatar-clickable" title="Profile picture options">
+                        <?php if (!empty($currentUser['avatar_url'])): ?>
+                        <img src="<?php echo BASE_URL . '/uploads/avatars/' . htmlspecialchars($currentUser['avatar_url']); ?>" 
+                             alt="Avatar" class="user-avatar sidebar-user-avatar">
+                        <?php else: ?>
+                        <div class="user-avatar-placeholder">
+                            <?php echo strtoupper(substr($currentUser['full_name'], 0, 1)); ?>
+                        </div>
+                        <?php endif; ?>
                     </div>
-                    <?php endif; ?>
                     <div class="user-details">
                         <span class="user-name"><?php echo htmlspecialchars($currentUser['full_name']); ?></span>
                         <span class="user-role"><?php echo htmlspecialchars($currentUser['role_name']); ?></span>
@@ -319,3 +321,76 @@ function navUrl($path)
             </header>
 
             <div class="content-wrapper">
+
+<!-- Avatar Options Modal (triggered from sidebar avatar click) -->
+<div id="avatarOptionsModal" class="avatar-options-overlay">
+    <div class="avatar-options-modal">
+        <div class="avatar-options-header">
+            <div class="avatar-options-preview">
+                <?php if (!empty($currentUser['avatar_url'])): ?>
+                <img src="<?php echo BASE_URL . '/uploads/avatars/' . htmlspecialchars($currentUser['avatar_url']); ?>" 
+                     alt="Avatar" id="avatarOptionsPreviewImg">
+                <?php else: ?>
+                <div class="avatar-options-placeholder" id="avatarOptionsPlaceholderEl">
+                    <?php echo strtoupper(substr($currentUser['full_name'], 0, 1)); ?>
+                </div>
+                <?php endif; ?>
+            </div>
+            <h3><?php echo htmlspecialchars($currentUser['full_name']); ?></h3>
+            <p>Profile Picture</p>
+        </div>
+        <div class="avatar-options-actions">
+            <button type="button" id="avatarOptView" class="avatar-option-btn">
+                <i class="fas fa-eye"></i>
+                <span>View Profile Picture</span>
+            </button>
+            <button type="button" id="avatarOptChange" class="avatar-option-btn">
+                <i class="fas fa-camera"></i>
+                <span>Change Profile Picture</span>
+            </button>
+        </div>
+        <button type="button" id="avatarOptClose" class="avatar-options-close">&times;</button>
+    </div>
+</div>
+
+<!-- Avatar Lightbox (full-screen view) -->
+<div id="avatarLightbox" class="avatar-lightbox-overlay">
+    <button type="button" id="avatarLightboxClose" class="avatar-lightbox-close">&times;</button>
+    <div class="avatar-lightbox-content">
+        <?php if (!empty($currentUser['avatar_url'])): ?>
+        <img src="<?php echo BASE_URL . '/uploads/avatars/' . htmlspecialchars($currentUser['avatar_url']); ?>" 
+             alt="Profile Picture" id="avatarLightboxImg">
+        <?php else: ?>
+        <div class="avatar-lightbox-placeholder" id="avatarLightboxPlaceholderEl">
+            <?php echo strtoupper(substr($currentUser['full_name'], 0, 1)); ?>
+        </div>
+        <?php endif; ?>
+    </div>
+</div>
+
+<!-- Hidden file input for sidebar avatar change -->
+<input type="file" id="sidebarAvatarInput" accept="image/jpeg,image/png" style="display:none;">
+
+<!-- Sidebar Avatar Change Confirm Modal -->
+<div id="sidebarAvatarConfirmModal" class="avatar-options-overlay">
+    <div class="avatar-options-modal">
+        <div class="avatar-options-header">
+            <div class="avatar-options-preview">
+                <img src="" alt="Preview" id="sidebarAvatarPreviewImg">
+            </div>
+            <h3>Change Profile Picture</h3>
+            <p>Are you sure you want to use this photo?</p>
+        </div>
+        <div class="avatar-options-actions">
+            <button type="button" id="sidebarAvatarConfirmYes" class="avatar-option-btn avatar-option-btn-primary">
+                <i class="fas fa-check"></i>
+                <span>Yes, Change</span>
+            </button>
+            <button type="button" id="sidebarAvatarConfirmCancel" class="avatar-option-btn">
+                <i class="fas fa-times"></i>
+                <span>Cancel</span>
+            </button>
+        </div>
+        <button type="button" id="sidebarAvatarConfirmClose" class="avatar-options-close">&times;</button>
+    </div>
+</div>

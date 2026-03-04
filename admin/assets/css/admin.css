@@ -2812,3 +2812,262 @@ textarea.form-control {
     flex-shrink: 0;
 }
 
+/* Sidebar Avatar Clickable Trigger */
+.sidebar-avatar-clickable {
+    cursor: pointer;
+    position: relative;
+    border-radius: 50%;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    flex-shrink: 0;
+}
+
+.sidebar-avatar-clickable:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+}
+
+.sidebar-avatar-clickable:active {
+    transform: scale(1.05);
+}
+
+/* Avatar Options Modal Overlay */
+.avatar-options-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 10001;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.avatar-options-overlay.active {
+    display: flex;
+}
+
+.avatar-options-modal {
+    background: white;
+    border-radius: 16px;
+    padding: 0;
+    max-width: 340px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: avatarModalSlideIn 0.25s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+@keyframes avatarModalSlideIn {
+    from { opacity: 0; transform: translateY(20px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.avatar-options-header {
+    background: var(--primary-gradient, linear-gradient(135deg, #1e3a5f, #2563eb));
+    padding: 28px 24px 20px;
+    text-align: center;
+    color: white;
+}
+
+.avatar-options-preview {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin: 0 auto 12px;
+    overflow: hidden;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.avatar-options-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.avatar-options-preview .avatar-options-placeholder {
+    width: 100%;
+    height: 100%;
+    background: rgb(241, 142, 37);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.avatar-options-header h3 {
+    margin: 0 0 2px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: white;
+}
+
+.avatar-options-header p {
+    margin: 0;
+    font-size: 0.85rem;
+    opacity: 0.75;
+}
+
+.avatar-options-actions {
+    padding: 12px 16px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.avatar-option-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 16px;
+    border: none;
+    background: transparent;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #334155;
+    transition: background 0.15s ease, color 0.15s ease;
+    text-align: left;
+    font-family: inherit;
+}
+
+.avatar-option-btn:hover {
+    background: #f1f5f9;
+    color: #1e3a5f;
+}
+
+.avatar-option-btn i {
+    width: 20px;
+    text-align: center;
+    font-size: 1rem;
+    color: #64748b;
+    transition: color 0.15s ease;
+}
+
+.avatar-option-btn:hover i {
+    color: #2563eb;
+}
+
+.avatar-option-btn-primary {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: white;
+}
+
+.avatar-option-btn-primary:hover {
+    background: linear-gradient(135deg, #1d4ed8, #1e40af);
+    color: white;
+}
+
+.avatar-option-btn-primary i {
+    color: white;
+}
+
+.avatar-option-btn-primary:hover i {
+    color: white;
+}
+
+.avatar-options-close {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 4px;
+    line-height: 1;
+    transition: color 0.15s ease;
+}
+
+.avatar-options-close:hover {
+    color: white;
+}
+
+/* Avatar Lightbox (full-screen view) */
+.avatar-lightbox-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 10002;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.avatar-lightbox-overlay.active {
+    display: flex;
+}
+
+.avatar-lightbox-content {
+    animation: avatarLightboxFadeIn 0.3s ease;
+}
+
+@keyframes avatarLightboxFadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.avatar-lightbox-content img {
+    max-width: 92vw;
+    max-height: 92vh;
+    border-radius: 8px;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+    object-fit: contain;
+}
+
+.avatar-lightbox-placeholder {
+    width: 55vmin;
+    height: 55vmin;
+    max-width: 500px;
+    max-height: 500px;
+    border-radius: 50%;
+    background: rgb(241, 142, 37);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10rem;
+    font-weight: 700;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.avatar-lightbox-close {
+    position: fixed;
+    top: 20px;
+    right: 24px;
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    color: white;
+    font-size: 2rem;
+    cursor: pointer;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease;
+    z-index: 10003;
+}
+
+.avatar-lightbox-close:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+

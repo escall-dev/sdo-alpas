@@ -264,171 +264,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 </style>
 
-<!-- Avatar Confirmation Modal -->
-<div id="avatarConfirmModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:10000; align-items:center; justify-content:center;">
-    <div style="background:white; border-radius:12px; padding:28px 32px; max-width:380px; width:90%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.3); animation: modalFadeIn 0.2s ease;">
-        <div style="width:56px; height:56px; border-radius:50%; background:#EBF5FF; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;">
-            <i class="fas fa-user-edit" style="font-size:1.5rem; color:#2563eb;"></i>
-        </div>
-        <h3 style="margin:0 0 8px; font-size:1.15rem; color:#1e293b;">Change Profile Avatar</h3>
-        <p style="margin:0 0 20px; font-size:0.9rem; color:#64748b;">Are you sure you want to change your profile avatar?</p>
-        <div style="margin:0 auto 20px; width:80px; height:80px; border-radius:50%; overflow:hidden; border:3px solid #e2e8f0;">
-            <img id="avatarPreviewImg" src="" alt="Preview" style="width:100%; height:100%; object-fit:cover; display:block;">
-        </div>
-        <div style="display:flex; gap:10px; justify-content:center;">
-            <button type="button" id="avatarConfirmCancel" style="flex:1; padding:10px 20px; border:1px solid #e2e8f0; background:white; color:#64748b; border-radius:8px; font-size:0.9rem; cursor:pointer; font-weight:500; transition:background 0.15s;">Cancel</button>
-            <button type="button" id="avatarConfirmYes" style="flex:1; padding:10px 20px; border:none; background:linear-gradient(135deg,#2563eb,#1d4ed8); color:white; border-radius:8px; font-size:0.9rem; cursor:pointer; font-weight:600; transition:opacity 0.15s;">Yes, Change</button>
-        </div>
-    </div>
-</div>
-<style>
-@keyframes modalFadeIn { from { opacity:0; transform:scale(0.95); } to { opacity:1; transform:scale(1); } }
-#avatarConfirmModal > div { animation: modalFadeIn 0.2s ease; }
-#avatarConfirmCancel:hover { background:#f8fafc; }
-#avatarConfirmYes:hover { opacity:0.9; }
-</style>
-
-<!-- Avatar Upload Script (inline to avoid caching issues) -->
+<!-- Profile Avatar Script: open options modal on avatar/camera click -->
 <script>
 (function() {
     // Flag to prevent admin.js initAvatarUpload from double-binding
     window.__avatarUploadInitialized = true;
 
     document.addEventListener('DOMContentLoaded', function() {
-        var avatarInput = document.getElementById('avatarInput');
         var avatarWrapper = document.getElementById('avatarWrapper');
         var cameraBadge = document.getElementById('avatarCameraBadge');
-        var modal = document.getElementById('avatarConfirmModal');
-        var confirmYes = document.getElementById('avatarConfirmYes');
-        var confirmCancel = document.getElementById('avatarConfirmCancel');
-        var previewImg = document.getElementById('avatarPreviewImg');
-        var pendingFile = null;
+        var optionsModal = document.getElementById('avatarOptionsModal');
 
-        if (!avatarInput) return;
+        if (!avatarWrapper || !optionsModal) return;
 
-        function openFilePicker(e) {
+        // Click avatar wrapper → open options modal (View / Change)
+        function openOptionsModal(e) {
             if (e) { e.preventDefault(); e.stopPropagation(); }
-            avatarInput.click();
+            optionsModal.classList.add('active');
         }
 
-        // Both the avatar wrapper and camera badge open the file picker
-        if (avatarWrapper) avatarWrapper.addEventListener('click', openFilePicker);
-        if (cameraBadge) cameraBadge.addEventListener('click', openFilePicker);
+        avatarWrapper.addEventListener('click', openOptionsModal);
+        if (cameraBadge) cameraBadge.addEventListener('click', openOptionsModal);
 
         // Hover glow on badge
         if (cameraBadge) {
             cameraBadge.addEventListener('mouseenter', function() { cameraBadge.style.background = '#1d4ed8'; });
             cameraBadge.addEventListener('mouseleave', function() { cameraBadge.style.background = '#2563eb'; });
         }
-
-        // Show modal
-        function showModal() { modal.style.display = 'flex'; }
-        function hideModal() { modal.style.display = 'none'; pendingFile = null; }
-
-        // Close modal on cancel or backdrop click
-        confirmCancel.addEventListener('click', function() {
-            hideModal();
-            avatarInput.value = '';
-        });
-        modal.addEventListener('click', function(e) {
-            if (e.target === modal) {
-                hideModal();
-                avatarInput.value = '';
-            }
-        });
-
-        // File selected → validate → show confirmation modal with preview
-        avatarInput.addEventListener('change', function() {
-            var file = avatarInput.files[0];
-            if (!file) return;
-
-            // Client validation
-            if (['image/jpeg','image/png'].indexOf(file.type) === -1) {
-                if (typeof showNotification === 'function') showNotification('Only JPG and PNG are allowed.', 'error');
-                avatarInput.value = '';
-                return;
-            }
-            if (file.size > 5 * 1024 * 1024) {
-                if (typeof showNotification === 'function') showNotification('File size exceeds 5 MB limit.', 'error');
-                avatarInput.value = '';
-                return;
-            }
-
-            // Show preview in modal
-            pendingFile = file;
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                previewImg.src = e.target.result;
-                showModal();
-            };
-            reader.readAsDataURL(file);
-        });
-
-        // Confirm upload
-        confirmYes.addEventListener('click', function() {
-            if (!pendingFile) return;
-
-            // Grab file reference before hideModal clears it
-            var fileToUpload = pendingFile;
-            modal.style.display = 'none';
-            pendingFile = null;
-
-            var formData = new FormData();
-            formData.append('avatar', fileToUpload);
-
-            var apiUrl = '<?php echo ADMIN_URL; ?>/api/avatar-upload.php';
-
-            fetch(apiUrl, { method: 'POST', body: formData })
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                if (data.success) {
-                    if (typeof showNotification === 'function') showNotification(data.message, 'success');
-                    // Update profile avatar
-                    var wrapper = document.getElementById('avatarWrapper');
-                    var img = document.getElementById('profileAvatarImg');
-                    var placeholder = document.getElementById('profileAvatarPlaceholder');
-                    var bust = '?t=' + Date.now();
-                    if (img) {
-                        img.src = data.avatar_url + bust;
-                    } else {
-                        if (placeholder) placeholder.style.display = 'none';
-                        img = document.createElement('img');
-                        img.src = data.avatar_url + bust;
-                        img.alt = 'Avatar';
-                        img.id = 'profileAvatarImg';
-                        img.className = 'profile-avatar-img';
-                        img.style.cssText = 'width:120px;height:120px;border-radius:50%;object-fit:cover;display:block;border:3px solid rgba(255,255,255,0.25);';
-                        wrapper.insertBefore(img, wrapper.firstChild);
-                    }
-                    // Update sidebar avatar
-                    var sidebarInfo = document.querySelector('.sidebar-footer .user-info');
-                    if (sidebarInfo) {
-                        var sImg = sidebarInfo.querySelector('.sidebar-user-avatar');
-                        var sPlaceholder = sidebarInfo.querySelector('.user-avatar-placeholder');
-                        if (sImg) {
-                            sImg.src = data.avatar_url + bust;
-                        } else {
-                            if (sPlaceholder) sPlaceholder.style.display = 'none';
-                            sImg = document.createElement('img');
-                            sImg.src = data.avatar_url + bust;
-                            sImg.alt = 'Avatar';
-                            sImg.className = 'sidebar-user-avatar';
-                            sImg.style.cssText = 'width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0;';
-                            sidebarInfo.insertBefore(sImg, sidebarInfo.firstChild);
-                        }
-                    }
-                } else {
-                    if (typeof showNotification === 'function') showNotification(data.message || 'Upload failed.', 'error');
-                }
-            })
-            .catch(function(err) {
-                console.error('Avatar upload error:', err);
-                if (typeof showNotification === 'function') showNotification('Upload failed. Please try again.', 'error');
-            })
-            .finally(function() {
-                avatarInput.value = '';
-            });
-        });
     });
 })();
 </script>
