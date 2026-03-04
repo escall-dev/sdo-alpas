@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initModalNotificationHandlers();
     initAvatarUpload();
     initSPANavigation();
+    initMyRequestsAjaxNav();
 });
 
 /**
@@ -1210,6 +1211,8 @@ function spaReinitHandlers() {
     // Re-init avatar upload if profile page loaded
     window.__avatarUploadInitialized = false;
     initAvatarUpload();
+    // Re-init my-requests AJAX tabs/pagination/filters
+    initMyRequestsAjaxNav();
 }
 
 /**
@@ -1315,6 +1318,70 @@ function spaUpdateBadges(newDoc) {
                 currentBadge.textContent = newBadge.textContent;
             }
         }
+    });
+}
+
+/**
+ * =========================================
+ * My Requests AJAX Tab / Pagination / Filter
+ * =========================================
+ * Intercepts request-tab clicks, pagination links,
+ * and filter form submissions on the my-requests page
+ * so they use SPA navigation instead of full page reloads.
+ * This keeps the sidebar intact and avoids scroll resets.
+ */
+function initMyRequestsAjaxNav() {
+    const contentWrapper = document.querySelector('.content-wrapper');
+    if (!contentWrapper) return;
+
+    // 1) Request type tabs (.request-tab)
+    contentWrapper.querySelectorAll('.request-tab').forEach(function(tab) {
+        if (tab.dataset.spaHooked) return;
+        tab.dataset.spaHooked = '1';
+        tab.addEventListener('click', function(e) {
+            if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+            e.preventDefault();
+            spaNavigateTo(tab.getAttribute('href'));
+        });
+    });
+
+    // 2) Pagination links inside my-requests page
+    contentWrapper.querySelectorAll('.pagination .page-link').forEach(function(link) {
+        if (link.dataset.spaHooked) return;
+        link.dataset.spaHooked = '1';
+        link.addEventListener('click', function(e) {
+            if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+            e.preventDefault();
+            spaNavigateTo(link.getAttribute('href'));
+        });
+    });
+
+    // 3) Filter form submission
+    contentWrapper.querySelectorAll('.filter-form').forEach(function(form) {
+        if (form.dataset.spaHooked) return;
+        form.dataset.spaHooked = '1';
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(form);
+            const params = new URLSearchParams();
+            formData.forEach(function(value, key) {
+                if (value) params.append(key, value);
+            });
+            const action = form.getAttribute('action') || window.location.pathname;
+            const url = action + (params.toString() ? '?' + params.toString() : '');
+            spaNavigateTo(url);
+        });
+    });
+
+    // 4) Clear filter button (btn-secondary inside filter-actions)
+    contentWrapper.querySelectorAll('.filter-actions .btn-secondary').forEach(function(btn) {
+        if (btn.dataset.spaHooked || btn.tagName !== 'A') return;
+        btn.dataset.spaHooked = '1';
+        btn.addEventListener('click', function(e) {
+            if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+            e.preventDefault();
+            spaNavigateTo(btn.getAttribute('href'));
+        });
     });
 }
 
