@@ -415,9 +415,15 @@ if (!$editData || !$lsModel->canUserEdit($editData, $auth->getUserId())) {
 <?php elseif ($viewData): ?>
 <!-- View Single Request -->
 <div class="page-header">
-    <a href="<?php echo navUrl('/locator-slips.php'); ?>" class="back-link">
-        <i class="fas fa-arrow-left"></i> Back to List
-    </a>
+    <?php if (isset($_GET['from']) && $_GET['from'] === 'my-requests'): ?>
+        <a href="<?php echo navUrl('/my-requests.php'); ?>" class="back-link">
+            <i class="fas fa-arrow-left"></i> Back to My Requests
+        </a>
+    <?php else: ?>
+        <a href="<?php echo navUrl('/locator-slips.php'); ?>" class="back-link">
+            <i class="fas fa-arrow-left"></i> Back to List
+        </a>
+    <?php endif; ?>
 </div>
 
 <div class="complaint-detail-grid">

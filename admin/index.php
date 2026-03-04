@@ -209,7 +209,7 @@ if ($auth->isGuard()) {
                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;">
                     <!-- Locator Slip -->
                     <a href="<?php echo navUrl('/locator-slips.php?action=new'); ?>" class="request-type-card"
-                        style="display: flex; flex-direction: column; align-items: center; padding: 24px; background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); border-radius: 12px; text-decoration: none; color: white; transition: transform 0.2s, box-shadow 0.2s;">
+                        style="display: flex; flex-direction: column; align-items: center; padding: 24px; background: #1e3a8a; border-radius: 12px; text-decoration: none; color: white; transition: transform 0.2s, box-shadow 0.2s;">
                         <i class="fas fa-map-marker-alt" style="font-size: 2.5rem; margin-bottom: 12px;"></i>
                         <span style="font-weight: 600; font-size: 1rem;">Locator Slip</span>
                         <span style="font-size: 0.8rem; opacity: 0.8; margin-top: 4px;">For local movement</span>
@@ -217,7 +217,7 @@ if ($auth->isGuard()) {
 
                     <!-- Authority to Travel (single card: Local/International and Official/Personal chosen on form) -->
                     <a href="<?php echo navUrl('/authority-to-travel.php?action=new'); ?>" class="request-type-card"
-                        style="display: flex; flex-direction: column; align-items: center; padding: 24px; background: linear-gradient(135deg, #c2410c 0%, #f59e0b 100%); border-radius: 12px; text-decoration: none; color: white; transition: transform 0.2s, box-shadow 0.2s;">
+                        style="display: flex; flex-direction: column; align-items: center; padding: 24px; background: #c2410c; border-radius: 12px; text-decoration: none; color: white; transition: transform 0.2s, box-shadow 0.2s;">
                         <i class="fas fa-plane" style="font-size: 2.5rem; margin-bottom: 12px;"></i>
                         <span style="font-weight: 600; font-size: 1rem;">Authority to Travel</span>
                         <span style="font-size: 0.8rem; opacity: 0.8; margin-top: 4px;">Within/Outside Region or International</span>
@@ -225,7 +225,7 @@ if ($auth->isGuard()) {
 
                     <!-- Pass Slip -->
                     <a href="<?php echo navUrl('/pass-slips.php?action=new'); ?>" class="request-type-card"
-                        style="display: flex; flex-direction: column; align-items: center; padding: 24px; background: linear-gradient(135deg, #1e3a8a 0%, #ea580c 100%); border-radius: 12px; text-decoration: none; color: white; transition: transform 0.2s, box-shadow 0.2s;">
+                        style="display: flex; flex-direction: column; align-items: center; padding: 24px; background: #ea580c; border-radius: 12px; text-decoration: none; color: white; transition: transform 0.2s, box-shadow 0.2s;">
                         <i class="fas fa-ticket-alt" style="font-size: 2.5rem; margin-bottom: 12px;"></i>
                         <span style="font-weight: 600; font-size: 1rem;">Pass Slip</span>
                         <span style="font-size: 0.8rem; opacity: 0.8; margin-top: 4px;">For short-term travel</span>

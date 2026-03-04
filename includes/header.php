@@ -135,12 +135,31 @@ function navUrl($path)
                 </a>
 
                 <?php if ($auth->isEmployee()): ?>
-                    <!-- Employee-only navigation -->
+                    <!-- Employee navigation with request type links -->
+                    <?php $myReqType = ($currentPage === 'my-requests') ? ($_GET['type'] ?? 'all') : ''; ?>
                     <a href="<?php echo navUrl('/my-requests.php'); ?>"
-                        class="nav-item <?php echo $currentPage === 'my-requests' ? 'active' : ''; ?>"
-                        data-tooltip="My Requests">
-                        <span class="nav-icon"><i class="fas fa-file-alt"></i></span>
-                        <span class="nav-text">My Requests</span>
+                        class="nav-item <?php echo ($currentPage === 'my-requests' && $myReqType === 'all') ? 'active' : ''; ?>"
+                        data-tooltip="All Requests">
+                        <span class="nav-icon"><i class="fas fa-folder-open"></i></span>
+                        <span class="nav-text">All Requests</span>
+                    </a>
+                    <a href="<?php echo navUrl('/my-requests.php?type=ls'); ?>"
+                        class="nav-item nav-item-sub <?php echo ($currentPage === 'my-requests' && $myReqType === 'ls') || ($currentPage === 'locator-slips' && !$auth->isApprover() && !$auth->isUnitHead()) ? 'active' : ''; ?>"
+                        data-tooltip="Locator Slips">
+                        <span class="nav-icon"><i class="fas fa-map-marker-alt"></i></span>
+                        <span class="nav-text">Locator Slips</span>
+                    </a>
+                    <a href="<?php echo navUrl('/my-requests.php?type=at'); ?>"
+                        class="nav-item nav-item-sub <?php echo ($currentPage === 'my-requests' && $myReqType === 'at') || ($currentPage === 'authority-to-travel' && !$auth->isApprover() && !$auth->isUnitHead()) ? 'active' : ''; ?>"
+                        data-tooltip="Authority to Travel">
+                        <span class="nav-icon"><i class="fas fa-plane"></i></span>
+                        <span class="nav-text">Authority to Travel</span>
+                    </a>
+                    <a href="<?php echo navUrl('/my-requests.php?type=ps'); ?>"
+                        class="nav-item nav-item-sub <?php echo ($currentPage === 'my-requests' && $myReqType === 'ps') || ($currentPage === 'pass-slips' && !$auth->isApprover() && !$auth->isUnitHead()) ? 'active' : ''; ?>"
+                        data-tooltip="Pass Slips">
+                        <span class="nav-icon"><i class="fas fa-ticket-alt"></i></span>
+                        <span class="nav-text">Pass Slips</span>
                     </a>
                 <?php endif; ?>
 

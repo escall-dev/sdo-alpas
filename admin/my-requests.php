@@ -84,22 +84,52 @@ if ($type === 'all') {
 $totalPages = ceil($totalRequests / $perPage);
 ?>
 
-<div class="page-header">
-    <div>
+<!-- Request Type Tabs -->
+<div class="request-tabs">
+    <a href="<?php echo navUrl('/my-requests.php?type=all' . ($status ? '&status=' . $status : '')); ?>"
+       class="request-tab <?php echo $type === 'all' ? 'active' : ''; ?>">
+        <i class="fas fa-layer-group"></i>
+        <span>All Requests</span>
+    </a>
+    <a href="<?php echo navUrl('/my-requests.php?type=ls' . ($status ? '&status=' . $status : '')); ?>"
+       class="request-tab <?php echo $type === 'ls' ? 'active' : ''; ?>">
+        <i class="fas fa-map-marker-alt"></i>
+        <span>Locator Slips</span>
+    </a>
+    <a href="<?php echo navUrl('/my-requests.php?type=at' . ($status ? '&status=' . $status : '')); ?>"
+       class="request-tab <?php echo $type === 'at' ? 'active' : ''; ?>">
+        <i class="fas fa-plane"></i>
+        <span>Authority to Travel</span>
+    </a>
+    <a href="<?php echo navUrl('/my-requests.php?type=ps' . ($status ? '&status=' . $status : '')); ?>"
+       class="request-tab <?php echo $type === 'ps' ? 'active' : ''; ?>">
+        <i class="fas fa-ticket-alt"></i>
+        <span>Pass Slips</span>
+    </a>
+</div>
+
+<div class="page-header" style="margin-top: 0;">
+    <div style="display: flex; align-items: center; gap: 16px;">
         <h2 style="margin: 0; font-size: 1.1rem; color: var(--text-secondary);">
             Showing <?php echo count($requests); ?> of <?php echo $totalRequests; ?> requests
         </h2>
     </div>
-    <div style="display: flex; gap: 10px;">
-        <a href="<?php echo navUrl('/locator-slips.php?action=new'); ?>" class="btn btn-primary">
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <?php if ($type === 'all' || $type === 'ls'): ?>
+        <a href="<?php echo navUrl('/locator-slips.php?action=new'); ?>" class="btn btn-primary btn-sm">
             <i class="fas fa-plus"></i> New Locator Slip
         </a>
-        <a href="<?php echo navUrl('/authority-to-travel.php?action=new'); ?>" class="btn btn-secondary">
+        <?php endif; ?>
+        <?php if ($type === 'all' || $type === 'at'): ?>
+        <a href="<?php echo navUrl('/authority-to-travel.php?action=new'); ?>" class="btn btn-primary btn-sm">
             <i class="fas fa-plus"></i> New Travel Request
         </a>
-        <a href="<?php echo navUrl('/pass-slips.php?action=new'); ?>" class="btn btn-secondary">
+        <?php endif; ?>
+        <?php if ($type === 'all' || $type === 'ps'): ?>
+        <a href="<?php echo navUrl('/pass-slips.php?action=new'); ?>" class="btn btn-primary btn-sm">
             <i class="fas fa-plus"></i> New Pass Slip
         </a>
+        <?php endif; ?>
     </div>
 </div>
 
@@ -107,16 +137,7 @@ $totalPages = ceil($totalRequests / $perPage);
 <div class="filter-bar">
     <form class="filter-form" method="GET" action="">
         <input type="hidden" name="token" value="<?php echo $currentToken; ?>">
-
-        <div class="filter-group">
-            <label>Request Type</label>
-            <select name="type" class="filter-select">
-                <option value="all" <?php echo $type === 'all' ? 'selected' : ''; ?>>All Types</option>
-                <option value="ls" <?php echo $type === 'ls' ? 'selected' : ''; ?>>Locator Slips</option>
-                <option value="at" <?php echo $type === 'at' ? 'selected' : ''; ?>>Authority to Travel</option>
-                <option value="ps" <?php echo $type === 'ps' ? 'selected' : ''; ?>>Pass Slips</option>
-            </select>
-        </div>
+        <input type="hidden" name="type" value="<?php echo htmlspecialchars($type); ?>">
 
         <div class="filter-group">
             <label>Status</label>
@@ -133,7 +154,7 @@ $totalPages = ceil($totalRequests / $perPage);
             <button type="submit" class="btn btn-primary btn-sm">
                 <i class="fas fa-filter"></i> Filter
             </button>
-            <a href="<?php echo navUrl('/my-requests.php'); ?>" class="btn btn-secondary btn-sm">
+            <a href="<?php echo navUrl('/my-requests.php?type=' . $type); ?>" class="btn btn-secondary btn-sm">
                 <i class="fas fa-times"></i> Clear
             </a>
         </div>
@@ -213,11 +234,11 @@ $totalPages = ceil($totalRequests / $perPage);
                                 <div class="action-buttons">
                                     <?php
                                     if ($request['request_type'] === 'ls') {
-                                        $viewUrl = navUrl('/locator-slips.php?view=' . $request['id']);
+                                        $viewUrl = navUrl('/locator-slips.php?view=' . $request['id'] . '&from=my-requests');
                                     } elseif ($request['request_type'] === 'ps') {
-                                        $viewUrl = navUrl('/pass-slips.php?view=' . $request['id']);
+                                        $viewUrl = navUrl('/pass-slips.php?view=' . $request['id'] . '&from=my-requests');
                                     } else {
-                                        $viewUrl = navUrl('/authority-to-travel.php?view=' . $request['id']);
+                                        $viewUrl = navUrl('/authority-to-travel.php?view=' . $request['id'] . '&from=my-requests');
                                     }
                                     ?>
                                     <a href="<?php echo $viewUrl; ?>" class="btn btn-icon" title="View Details">

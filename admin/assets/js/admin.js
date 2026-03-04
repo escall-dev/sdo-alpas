@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initFilterEnterSubmit();
     initModalNotificationHandlers();
     initAvatarUpload();
+    initSPANavigation();
 });
 
 /**
@@ -931,7 +932,414 @@ function updateSidebarAvatar(avatarUrl) {
             25% { transform: translateX(-5px); }
             75% { transform: translateX(5px); }
         }
+
+        /* SPA Navigation Loading Bar */
+        .spa-loading-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
+            z-index: 99999;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.7);
+        }
+
+        .spa-loading-bar.active {
+            animation: spaLoadProgress 1.5s ease forwards;
+        }
+
+        .spa-loading-bar.done {
+            width: 100% !important;
+            animation: none;
+            transition: width 0.2s ease, opacity 0.3s ease 0.2s;
+            opacity: 0;
+        }
+
+        @keyframes spaLoadProgress {
+            0% { width: 0; }
+            20% { width: 30%; }
+            50% { width: 55%; }
+            80% { width: 80%; }
+            100% { width: 90%; }
+        }
+
+        /* SPA Content Transition */
+        .content-wrapper.spa-fade-out {
+            opacity: 0.4;
+            transition: opacity 0.15s ease;
+        }
+
+        .content-wrapper.spa-fade-in {
+            animation: spaFadeIn 0.25s ease forwards;
+        }
+
+        @keyframes spaFadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     `;
     document.head.appendChild(style);
 })();
+
+/**
+ * =========================================
+ * SPA-like Navigation (No Full Page Reload)
+ * =========================================
+ * Intercepts sidebar nav link clicks to load
+ * content via AJAX without refreshing the
+ * entire page (sidebar, header stay intact).
+ */
+
+let spaLoadingBar = null;
+let spaNavigating = false;
+
+function initSPANavigation() {
+    // Create loading bar element
+    spaLoadingBar = document.createElement('div');
+    spaLoadingBar.className = 'spa-loading-bar';
+    document.body.appendChild(spaLoadingBar);
+
+    // Store initial state for browser back/forward
+    history.replaceState({ spaUrl: window.location.href }, document.title, window.location.href);
+
+    // Intercept sidebar nav link clicks
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar) {
+        sidebar.addEventListener('click', function(e) {
+            const navItem = e.target.closest('.nav-item');
+            if (!navItem) return;
+
+            const href = navItem.getAttribute('href');
+            if (!href || href === '#') return;
+
+            // Don't intercept logout links
+            if (href.includes('logout') || href.includes('login.php?logout')) return;
+
+            // Don't intercept if modifier keys are held (open in new tab, etc.)
+            if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+
+            e.preventDefault();
+            spaNavigateTo(href);
+
+            // Close mobile sidebar after click
+            if (window.innerWidth < 992) {
+                sidebar.classList.remove('open');
+            }
+        });
+    }
+
+    // Handle browser back/forward buttons
+    window.addEventListener('popstate', function(e) {
+        if (e.state && e.state.spaUrl) {
+            spaNavigateTo(e.state.spaUrl, false);
+        }
+    });
+}
+
+/**
+ * Navigate to a page via SPA (AJAX content swap)
+ * @param {string} url - The URL to navigate to
+ * @param {boolean} pushState - Whether to push to browser history
+ */
+async function spaNavigateTo(url, pushState = true) {
+    if (spaNavigating) return;
+    spaNavigating = true;
+
+    const contentWrapper = document.querySelector('.content-wrapper');
+    if (!contentWrapper) {
+        // Fallback: full page load
+        window.location.href = url;
+        return;
+    }
+
+    // Show loading bar
+    spaShowLoading();
+
+    // Fade out current content
+    contentWrapper.classList.add('spa-fade-out');
+
+    try {
+        const response = await fetch(url, {
+            headers: {
+                'X-SPA-Request': '1'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('HTTP ' + response.status);
+        }
+
+        // Check if we got redirected (e.g., to login page)
+        const finalUrl = response.url;
+        if (finalUrl.includes('login.php') || finalUrl.includes('403.php')) {
+            window.location.href = finalUrl;
+            return;
+        }
+
+        const html = await response.text();
+
+        // Parse the response HTML
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+
+        // Extract the new content wrapper
+        const newContentWrapper = doc.querySelector('.content-wrapper');
+        if (!newContentWrapper) {
+            throw new Error('Content not found in response');
+        }
+
+        // Extract page title
+        const newTitle = doc.querySelector('title')?.textContent || document.title;
+        const newPageTitle = doc.querySelector('.page-title')?.textContent || '';
+
+        // Update notification badges from the new page's sidebar
+        spaUpdateBadges(doc);
+
+        // Swap the content
+        contentWrapper.innerHTML = newContentWrapper.innerHTML;
+
+        // Update page title
+        document.title = newTitle;
+        const pageTitleEl = document.querySelector('.page-title');
+        if (pageTitleEl) pageTitleEl.textContent = newPageTitle;
+
+        // Update active nav state
+        spaUpdateActiveNav(url);
+
+        // Execute inline scripts from the new content
+        spaExecuteScripts(contentWrapper);
+
+        // Re-initialize page-level JS handlers
+        spaReinitHandlers();
+
+        // Push browser history state
+        if (pushState) {
+            history.pushState({ spaUrl: url }, newTitle, url);
+        }
+
+        // Scroll to top of content area
+        contentWrapper.scrollTop = 0;
+        const mainContent = document.querySelector('.main-content');
+        if (mainContent) mainContent.scrollTo(0, 0);
+
+        // Fade in new content
+        contentWrapper.classList.remove('spa-fade-out');
+        contentWrapper.classList.add('spa-fade-in');
+        setTimeout(function() {
+            contentWrapper.classList.remove('spa-fade-in');
+        }, 300);
+
+    } catch (error) {
+        console.error('SPA navigation failed:', error);
+        // Fallback to full page load
+        window.location.href = url;
+        return;
+    } finally {
+        spaHideLoading();
+        spaNavigating = false;
+    }
+}
+
+/**
+ * Execute inline scripts from SPA-loaded content.
+ * DOMParser doesn't execute <script> tags, so we
+ * manually re-create them as live script elements.
+ *
+ * Also patches DOMContentLoaded listeners to fire
+ * immediately since the DOM is already loaded.
+ */
+function spaExecuteScripts(container) {
+    // Monkey-patch addEventListener to handle DOMContentLoaded
+    // since it already fired during the initial page load
+    const origAddEventListener = document.addEventListener.bind(document);
+    document.addEventListener = function(type, listener, options) {
+        if (type === 'DOMContentLoaded') {
+            // DOM is already ready, call immediately
+            if (typeof listener === 'function') {
+                setTimeout(listener, 0);
+            }
+            return;
+        }
+        return origAddEventListener(type, listener, options);
+    };
+
+    const scripts = container.querySelectorAll('script');
+    scripts.forEach(function(oldScript) {
+        const newScript = document.createElement('script');
+
+        // Copy all attributes
+        Array.from(oldScript.attributes).forEach(function(attr) {
+            newScript.setAttribute(attr.name, attr.value);
+        });
+
+        if (oldScript.src) {
+            // External script - skip admin.js to avoid re-init
+            if (oldScript.src.includes('admin.js')) return;
+            newScript.src = oldScript.src;
+        } else {
+            // Preprocess: replace top-level const/let with var to avoid
+            // re-declaration SyntaxError on repeated SPA navigations.
+            // Only affects un-indented (top-level) declarations.
+            var code = oldScript.textContent;
+            code = code.replace(/^(const|let)\s+/gm, 'var ');
+            newScript.textContent = code;
+        }
+
+        oldScript.parentNode.replaceChild(newScript, oldScript);
+    });
+
+    // Restore original addEventListener after a tick
+    // (setTimeout callbacks from above will still use the patched version)
+    setTimeout(function() {
+        document.addEventListener = origAddEventListener;
+    }, 50);
+}
+
+/**
+ * Re-initialize page-level JS handlers after SPA content swap
+ */
+function spaReinitHandlers() {
+    // Re-init form validation for new forms
+    initFormValidation();
+    // Re-init flash messages for new alerts
+    initFlashMessages();
+    // Re-init filter enter-to-submit for new filter forms
+    initFilterEnterSubmit();
+    // Re-init avatar upload if profile page loaded
+    window.__avatarUploadInitialized = false;
+    initAvatarUpload();
+}
+
+/**
+ * Update sidebar active nav state based on new URL
+ */
+function spaUpdateActiveNav(url) {
+    const sidebar = document.getElementById('sidebar');
+    if (!sidebar) return;
+
+    // Remove all active classes
+    sidebar.querySelectorAll('.nav-item.active').forEach(function(item) {
+        item.classList.remove('active');
+    });
+
+    // Parse the URL to find the matching nav item
+    const navItems = sidebar.querySelectorAll('.nav-item');
+
+    // Try exact match first, then path match
+    let bestMatch = null;
+    let bestMatchScore = -1;
+
+    navItems.forEach(function(item) {
+        const itemHref = item.getAttribute('href');
+        if (!itemHref) return;
+
+        // Compare pathnames and query strings
+        try {
+            const urlObj = new URL(url, window.location.origin);
+            const itemObj = new URL(itemHref, window.location.origin);
+
+            // Remove token param for comparison
+            urlObj.searchParams.delete('token');
+            itemObj.searchParams.delete('token');
+
+            const urlPath = urlObj.pathname;
+            const itemPath = itemObj.pathname;
+
+            if (urlPath === itemPath) {
+                // Path matches - check query params for closer match
+                let score = 1;
+                const urlParams = urlObj.searchParams.toString();
+                const itemParams = itemObj.searchParams.toString();
+
+                if (urlParams === itemParams) {
+                    score = 3; // Exact match including query params
+                } else if (itemParams === '') {
+                    score = 2; // Path match, item has no extra params
+                }
+
+                if (score > bestMatchScore) {
+                    bestMatchScore = score;
+                    bestMatch = item;
+                }
+            }
+        } catch (e) {
+            // URL parsing failed, try simple string comparison
+            if (url.includes(itemHref) || itemHref.includes(url)) {
+                if (bestMatchScore < 0) {
+                    bestMatch = item;
+                    bestMatchScore = 0;
+                }
+            }
+        }
+    });
+
+    if (bestMatch) {
+        bestMatch.classList.add('active');
+    }
+}
+
+/**
+ * Update notification badges in sidebar from new page data
+ */
+function spaUpdateBadges(newDoc) {
+    const sidebar = document.getElementById('sidebar');
+    if (!sidebar) return;
+
+    // Get all badge elements from the new doc's sidebar
+    const newSidebar = newDoc.querySelector('#sidebar');
+    if (!newSidebar) return;
+
+    // Update each nav-badge
+    const currentBadges = sidebar.querySelectorAll('.nav-badge');
+    const newBadges = newSidebar.querySelectorAll('.nav-badge');
+
+    // Replace nav icons that contain badges
+    const currentNavIcons = sidebar.querySelectorAll('.nav-icon');
+    const newNavIcons = newSidebar.querySelectorAll('.nav-icon');
+
+    currentNavIcons.forEach(function(currentIcon, index) {
+        if (newNavIcons[index]) {
+            const currentBadge = currentIcon.querySelector('.nav-badge');
+            const newBadge = newNavIcons[index].querySelector('.nav-badge');
+
+            if (newBadge && !currentBadge) {
+                // Badge appeared - add it
+                currentIcon.appendChild(newBadge.cloneNode(true));
+            } else if (!newBadge && currentBadge) {
+                // Badge disappeared - remove it
+                currentBadge.remove();
+            } else if (newBadge && currentBadge) {
+                // Badge updated - update text
+                currentBadge.textContent = newBadge.textContent;
+            }
+        }
+    });
+}
+
+/**
+ * Show the SPA loading bar
+ */
+function spaShowLoading() {
+    if (!spaLoadingBar) return;
+    spaLoadingBar.classList.remove('done');
+    spaLoadingBar.style.width = '0';
+    // Force reflow
+    spaLoadingBar.offsetHeight;
+    spaLoadingBar.classList.add('active');
+}
+
+/**
+ * Hide the SPA loading bar
+ */
+function spaHideLoading() {
+    if (!spaLoadingBar) return;
+    spaLoadingBar.classList.remove('active');
+    spaLoadingBar.classList.add('done');
+    setTimeout(function() {
+        spaLoadingBar.classList.remove('done');
+        spaLoadingBar.style.width = '0';
+    }, 500);
+}
 
