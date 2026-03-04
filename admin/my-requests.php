@@ -17,13 +17,34 @@ $psModelReq = new PassSlip();
 // Get filter parameters
 $type = $_GET['type'] ?? 'all'; // all, ls, at, ps
 $status = $_GET['status'] ?? '';
+$search = $_GET['search'] ?? '';
+$dateFrom = $_GET['date_from'] ?? '';
+$dateTo = $_GET['date_to'] ?? '';
+$approvalDateFrom = $_GET['approval_date_from'] ?? '';
+$approvalDateTo = $_GET['approval_date_to'] ?? '';
+
 $page = max(1, intval($_GET['page'] ?? 1));
 $perPage = ITEMS_PER_PAGE;
 
-// Build filters
+// Build filters for LS and AT
 $filters = ['user_id' => $userId];
 if ($status) {
     $filters['status'] = $status;
+}
+if ($search) {
+	$filters['search'] = $search;
+}
+if ($dateFrom) {
+	$filters['date_from'] = $dateFrom;
+}
+if ($dateTo) {
+	$filters['date_to'] = $dateTo;
+}
+if ($approvalDateFrom) {
+	$filters['approval_date_from'] = $approvalDateFrom;
+}
+if ($approvalDateTo) {
+	$filters['approval_date_to'] = $approvalDateTo;
 }
 
 // Get data based on type
@@ -54,6 +75,20 @@ if ($type === 'ps' || $type === 'all') {
     $psFilters = ['user_id' => $userId];
     if ($status)
         $psFilters['status'] = $status;
+    if ($search)
+        $psFilters['search'] = $search;
+    if ($dateFrom)
+        $psFilters['date_from'] = $dateFrom;
+    if ($dateTo)
+        $psFilters['date_to'] = $dateTo;
+    if ($approvalDateFrom)
+        $psFilters['approval_date_from'] = $approvalDateFrom;
+    if ($approvalDateTo)
+        $psFilters['approval_date_to'] = $approvalDateTo;
+    if (!empty($_GET['unit']) && ($auth->isApprover() || $auth->isUnitHead())) {
+        $psFilters['unit'] = $_GET['unit'];
+    }
+
     $psRequests = $psModelReq->getAll($psFilters, $type === 'ps' ? $perPage : 100, 0, null, null);
     foreach ($psRequests as $ps) {
         $ps['request_type'] = 'ps';
@@ -73,10 +108,7 @@ if ($type === 'all') {
     $totalRequests = count($requests);
     $requests = array_slice($requests, ($page - 1) * $perPage, $perPage);
 } elseif ($type === 'ps') {
-    $psFiltersCount = ['user_id' => $userId];
-    if ($status)
-        $psFiltersCount['status'] = $status;
-    $totalRequests = $psModelReq->getCount($psFiltersCount);
+    $totalRequests = $psModelReq->getCount($psFilters);
 } else {
     $totalRequests = $type === 'ls' ? $lsModel->getCount($filters) : $atModel->getCount($filters);
 }
@@ -133,11 +165,72 @@ $totalPages = ceil($totalRequests / $perPage);
     </div>
 </div>
 
+<?php
+if ($type === 'ps' && ($auth->isEmployee() || $auth->isUnitHead() || $auth->isASDS() || true)) {
+    $myAccum = $psModelReq->getAccumulatedHours($auth->getUserId());
+    $myProgress = min(100, max(0, ((float) $myAccum['total_hours'] / 8) * 100));
+    if ($myAccum['slip_count'] > 0): ?>
+        <div class="accumulated-hours-card" style="margin-bottom: 20px;">
+            <div class="detail-card">
+                <div class="detail-card-body" style="padding: 16px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                        <div>
+                            <strong><i class="fas fa-clock"></i> Your Accumulated Pass Slip Hours:</strong>
+                            <span style="font-size: 1.1rem; font-weight: 700; margin-left: 8px;">
+                                <?php echo number_format((float) $myAccum['total_hours'], 2); ?> hrs / 8 hrs
+                            </span>
+                            <span style="margin-left: 8px; color: var(--text-muted); font-size: 0.85rem;">(<?php echo number_format($myProgress, 1); ?>%)</span>
+                            <div style="margin-top: 6px; color: var(--text-muted); font-size: 0.85rem;">
+                                Lifetime accumulated: <?php echo number_format((float) ($myAccum['lifetime_hours'] ?? 0), 2); ?> hrs • VL credits deducted: <?php echo (int) ($myAccum['vl_credits_deducted'] ?? 0); ?>
+                            </div>
+                        </div>
+                        <div style="flex: 1; min-width: 200px; max-width: 300px;">
+                            <div class="accumulated-progress-bar">
+                                <div class="accumulated-progress-fill <?php echo $myAccum['total_hours'] >= 8 ? 'danger' : ($myAccum['total_hours'] >= 6 ? 'warning' : ''); ?>" 
+                                     style="width: <?php echo $myProgress; ?>%" title="<?php echo number_format($myProgress, 1); ?>% of 8-hour threshold"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <?php if (!empty($myAccum['vl_credits_deducted'])): ?>
+                        <div class="vl-deduction-warning" style="margin-top: 10px;">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            8hrs = 1 VL credit. Total deducted from your VL credits: <?php echo (int) $myAccum['vl_credits_deducted']; ?>.
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    <?php endif;
+}
+?>
+
 <!-- Filter Bar -->
 <div class="filter-bar">
     <form class="filter-form" method="GET" action="">
         <input type="hidden" name="token" value="<?php echo $currentToken; ?>">
         <input type="hidden" name="type" value="<?php echo htmlspecialchars($type); ?>">
+
+        <?php if ($type === 'ps'): ?>
+        <div class="filter-group">
+            <label>Search</label>
+            <input type="text" name="search" class="filter-input" placeholder="Control no, name, destination..."
+                value="<?php echo htmlspecialchars($_GET['search'] ?? ''); ?>">
+        </div>
+
+        <?php if ($auth->isApprover() || $auth->isUnitHead()): ?>
+        <div class="filter-group">
+            <label>Unit</label>
+            <select name="unit" class="filter-select">
+                <option value="">All Units</option>
+                <?php foreach (SDO_OFFICES as $code => $name): ?>
+                    <option value="<?php echo $code; ?>" <?php echo ($_GET['unit'] ?? '') === $code ? 'selected' : ''; ?>>
+                        <?php echo htmlspecialchars($name); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <?php endif; ?>
+        <?php endif; ?>
 
         <div class="filter-group">
             <label>Status</label>
@@ -149,6 +242,32 @@ $totalPages = ceil($totalRequests / $perPage);
                 <option value="cancelled" <?php echo $status === 'cancelled' ? 'selected' : ''; ?>>Cancelled</option>
             </select>
         </div>
+
+        <?php if ($type === 'ps'): ?>
+        <div class="filter-group">
+            <label>Date Filed From</label>
+            <input type="date" name="date_from" class="filter-input"
+                value="<?php echo htmlspecialchars($_GET['date_from'] ?? ''); ?>">
+        </div>
+
+        <div class="filter-group">
+            <label>Date Filed To</label>
+            <input type="date" name="date_to" class="filter-input"
+                value="<?php echo htmlspecialchars($_GET['date_to'] ?? ''); ?>">
+        </div>
+
+        <div class="filter-group">
+            <label>Approval Date From</label>
+            <input type="date" name="approval_date_from" class="filter-input"
+                value="<?php echo htmlspecialchars($_GET['approval_date_from'] ?? ''); ?>">
+        </div>
+
+        <div class="filter-group">
+            <label>Approval Date To</label>
+            <input type="date" name="approval_date_to" class="filter-input"
+                value="<?php echo htmlspecialchars($_GET['approval_date_to'] ?? ''); ?>">
+        </div>
+        <?php endif; ?>
 
         <div class="filter-actions">
             <button type="submit" class="btn btn-primary btn-sm">
