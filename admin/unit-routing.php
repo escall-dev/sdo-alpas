@@ -936,6 +936,32 @@ foreach ($routingConfigs as $config) {
     background: #f8fafc;
 }
 
+.routing-ref-table .table-responsive {
+    overflow: hidden !important;
+}
+
+#tab-reference {
+    overflow: hidden;
+}
+
+.routing-ref-table {
+    min-height: 540px;
+}
+
+.routing-ref-table .data-card {
+    height: 100%;
+}
+
+.routing-ref-table .data-table {
+    table-layout: fixed;
+}
+
+.routing-ref-table .data-table th,
+.routing-ref-table .data-table td {
+    white-space: normal;
+    word-break: break-word;
+}
+
 @media (max-width: 800px) {
     .routing-ref-tabs {
         flex-wrap: wrap;
@@ -1058,6 +1084,7 @@ function filterRoutingRef(btn) {
         });
     }
 })();
+
 </script>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
