@@ -19,17 +19,18 @@ laminas-escaper, including [laminas-view](https://github.com/laminas/laminas-vie
 which provides a set of helpers that consume it.
 
 <!-- markdownlint-disable-next-line heading-increment -->
+
 > ### Security
 >
 > laminas-escaper is a security related component. As such, if you believe you have
-> found an issue, we ask that you follow our [Security  Policy](https://getlaminas.org/security/)
+> found an issue, we ask that you follow our [Security Policy](https://getlaminas.org/security/)
 > and report security issues accordingly. The Laminas team and the
 > contributors thank you in advance.
 
 ## Overview
 
 laminas-escaper provides one class, `Laminas\Escaper\Escaper`, which in turn provides
-five methods for escaping output. Which method to use  depends on the context in
+five methods for escaping output. Which method to use depends on the context in
 which the output is used. It is up to the developer to use the right methods in
 the right context.
 
@@ -45,8 +46,8 @@ Usage of each method will be discussed in detail in later chapters.
 
 ## What laminas-Escaper is not
 
-laminas-escaper is meant to be used only for *escaping data for output*, and as
-such should not be misused for *filtering input data*. For such tasks, use
+laminas-escaper is meant to be used only for _escaping data for output_, and as
+such should not be misused for _filtering input data_. For such tasks, use
 [laminas-filter](https://docs.laminas.dev/laminas-filter/),
 [HTMLPurifier](http://htmlpurifier.org/) or PHP's
 [Filter](http://php.net/filter) functionality should be used.

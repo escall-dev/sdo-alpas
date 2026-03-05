@@ -93,12 +93,12 @@ should be updated to:
 
 ## Updated Routing Table (Personal OR International)
 
-| Requester | Recommender | Final Approver | forwarded_to_ro | routing_stage |
-|-----------|-------------|----------------|-----------------|---------------|
-| SDS | NULL | RD | 1 | completed |
-| ASDS | NULL | SDS | 0 | final |
-| Division Chief (UNIT_HEAD_ROLES) | NULL | SDS | 0 | final |
-| **Below Division Chief** | **Division Chief** | **SDS** | **0** | **recommending** |
+| Requester                        | Recommender        | Final Approver | forwarded_to_ro | routing_stage    |
+| -------------------------------- | ------------------ | -------------- | --------------- | ---------------- |
+| SDS                              | NULL               | RD             | 1               | completed        |
+| ASDS                             | NULL               | SDS            | 0               | final            |
+| Division Chief (UNIT_HEAD_ROLES) | NULL               | SDS            | 0               | final            |
+| **Below Division Chief**         | **Division Chief** | **SDS**        | **0**           | **recommending** |
 
 ---
 

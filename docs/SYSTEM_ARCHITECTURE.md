@@ -5,6 +5,7 @@
 ---
 
 ## Table of Contents
+
 1. [System Overview](#1-system-overview)
 2. [System Architecture Diagram](#2-system-architecture-diagram)
 3. [Component Architecture](#3-component-architecture)
@@ -26,14 +27,14 @@ SDO ALPAS is a comprehensive web-based document approval system designed for the
 
 ### Technology Stack
 
-| Layer | Technology |
-|-------|------------|
-| **Frontend** | HTML5, CSS3, JavaScript, Bootstrap |
-| **Backend** | PHP 7.4+ / 8.0+ |
-| **Database** | MySQL 5.7+ / MariaDB 10.3+ |
-| **Web Server** | Apache 2.4+ (XAMPP) |
-| **Document Generation** | PHPWord Library |
-| **Authentication** | Token-Based Session Management |
+| Layer                   | Technology                         |
+| ----------------------- | ---------------------------------- |
+| **Frontend**            | HTML5, CSS3, JavaScript, Bootstrap |
+| **Backend**             | PHP 7.4+ / 8.0+                    |
+| **Database**            | MySQL 5.7+ / MariaDB 10.3+         |
+| **Web Server**          | Apache 2.4+ (XAMPP)                |
+| **Document Generation** | PHPWord Library                    |
+| **Authentication**      | Token-Based Session Management     |
 
 ---
 
@@ -1045,39 +1046,39 @@ SDO ALPAS is a comprehensive web-based document approval system designed for the
 
     ENDPOINT                              METHOD    DESCRIPTION
     ────────────────────────────────────────────────────────────────────────────
-    
+
     AUTHENTICATION
     /admin/login.php                      GET/POST  Login page & authentication
     /admin/logout.php                     GET       Logout & token revocation
     /admin/register.php                   GET/POST  User registration (admin)
-    
+
     DASHBOARD
     /admin/index.php                      GET       Role-specific dashboard
     /admin/profile.php                    GET/POST  User profile management
-    
+
     AUTHORITY TO TRAVEL
     /admin/authority-to-travel.php        GET       List AT requests
     /admin/authority-to-travel.php?action=new        GET/POST  Create AT
     /admin/authority-to-travel.php?action=view&id=X  GET       View AT details
     /admin/authority-to-travel.php?action=approve    POST      Approve/Recommend
     /admin/authority-to-travel.php?action=reject     POST      Reject AT
-    
+
     LOCATOR SLIPS
     /admin/locator-slips.php              GET       List LS requests
     /admin/locator-slips.php?action=new   GET/POST  Create LS
     /admin/locator-slips.php?action=view&id=X   GET  View LS details
     /admin/locator-slips.php?action=approve     POST Approve LS
     /admin/locator-slips.php?action=reject      POST Reject LS
-    
+
     MY REQUESTS
     /admin/my-requests.php                GET       User's own requests
     /admin/my-requests.php?type=ls        GET       User's LS requests
     /admin/my-requests.php?type=at        GET       User's AT requests
-    
+
     DOCUMENT GENERATION (AJAX)
     /admin/api/generate-docx.php          POST      Generate DOCX document
     /admin/api/notification-count.php     GET       Get pending notifications
-    
+
     ADMINISTRATION
     /admin/users.php                      GET       User management
     /admin/oic-management.php             GET/POST  OIC delegation

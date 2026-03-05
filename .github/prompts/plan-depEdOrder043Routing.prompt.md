@@ -8,14 +8,14 @@ The current routing engine is a flat 2-tier model (unit chief recommends → SDS
 
 ## Decisions (User-Confirmed)
 
-| Decision | Choice |
-|----------|--------|
-| Travel scopes | 3 values: `local` (Within Region), `national` (Outside Region), `international` (International) |
-| RD handling | No RD role in system. SDS/ASDS→RD cases marked `status='approved'` + `forwarded_to_ro=1`. RD has no account. |
-| DIRECT_SDS_POSITIONS | **Removed**. Attorney III, Accountant III, AO V follow standard chief → SDS chain. |
-| ASDS recommending | Yes — ASDS gains `recommend` action for Division Chief local official travel. |
-| PSDS | Regular users (`role_id=6`) identified by `employee_position`. Fall under CID/Division Chief routing. |
-| Forwarded status | Use `status='approved'` with a `forwarded_to_ro` flag column (not a new status ENUM value). |
+| Decision                         | Choice                                                                                                            |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Travel scopes                    | 3 values: `local` (Within Region), `national` (Outside Region), `international` (International)                   |
+| RD handling                      | No RD role in system. SDS/ASDS→RD cases marked `status='approved'` + `forwarded_to_ro=1`. RD has no account.      |
+| DIRECT_SDS_POSITIONS             | **Removed**. Attorney III, Accountant III, AO V follow standard chief → SDS chain.                                |
+| ASDS recommending                | Yes — ASDS gains `recommend` action for Division Chief local official travel.                                     |
+| PSDS                             | Regular users (`role_id=6`) identified by `employee_position`. Fall under CID/Division Chief routing.             |
+| Forwarded status                 | Use `status='approved'` with a `forwarded_to_ro` flag column (not a new status ENUM value).                       |
 | Div Chief personal/international | Final approver = SDS, no recommending step. Below Division Chief: Division Chief recommends → SDS final approves. |
 
 ---
@@ -52,32 +52,32 @@ determineRouting($requesterRoleId, $requesterOfficeId, $requesterOffice, $travel
 
 Single-level approval only. No recommending approver.
 
-| Requester | Recommender | Final Approver | forwarded_to_ro | routing_stage |
-|-----------|-------------|----------------|-----------------|---------------|
-| SDS | NULL | RD | 1 | completed |
-| ASDS | NULL | SDS | 0 | final |
-| Division Chief (UNIT_HEAD_ROLES) | NULL | SDS | 0 | final |
-| Below Division Chief | Division Chief | SDS | 0 | recommending |
+| Requester                        | Recommender    | Final Approver | forwarded_to_ro | routing_stage |
+| -------------------------------- | -------------- | -------------- | --------------- | ------------- |
+| SDS                              | NULL           | RD             | 1               | completed     |
+| ASDS                             | NULL           | SDS            | 0               | final         |
+| Division Chief (UNIT_HEAD_ROLES) | NULL           | SDS            | 0               | final         |
+| Below Division Chief             | Division Chief | SDS            | 0               | recommending  |
 
 #### If `travel_scope` = local (Within Region) — Official:
 
-| Requester | Recommender | Final Approver | forwarded_to_ro | routing_stage |
-|-----------|-------------|----------------|-----------------|---------------|
-| SDS | NULL | RD | 1 | completed |
-| ASDS | SDS | SDS | 0 | final* |
-| Division Chief | ASDS | SDS | 0 | recommending |
-| Below Division Chief | Division Chief | SDS | 0 | recommending |
+| Requester            | Recommender    | Final Approver | forwarded_to_ro | routing_stage |
+| -------------------- | -------------- | -------------- | --------------- | ------------- |
+| SDS                  | NULL           | RD             | 1               | completed     |
+| ASDS                 | SDS            | SDS            | 0               | final\*       |
+| Division Chief       | ASDS           | SDS            | 0               | recommending  |
+| Below Division Chief | Division Chief | SDS            | 0               | recommending  |
 
-*ASDS within region: recommender = SDS, final = SDS. Since the same person both recommends and approves, route directly to SDS at `final` stage (single step).
+\*ASDS within region: recommender = SDS, final = SDS. Since the same person both recommends and approves, route directly to SDS at `final` stage (single step).
 
 #### If `travel_scope` = national (Outside Region, Domestic) — Official:
 
-| Requester | Recommender | Final Approver | forwarded_to_ro | routing_stage |
-|-----------|-------------|----------------|-----------------|---------------|
-| SDS | NULL | RD | 1 | completed |
-| ASDS | SDS | RD | 0 | recommending → then forwarded_to_ro=1 |
-| Division Chief | ASDS | SDS | 0 | recommending |
-| Below Division Chief | Division Chief | SDS | 0 | recommending |
+| Requester            | Recommender    | Final Approver | forwarded_to_ro | routing_stage                         |
+| -------------------- | -------------- | -------------- | --------------- | ------------------------------------- |
+| SDS                  | NULL           | RD             | 1               | completed                             |
+| ASDS                 | SDS            | RD             | 0               | recommending → then forwarded_to_ro=1 |
+| Division Chief       | ASDS           | SDS            | 0               | recommending                          |
+| Below Division Chief | Division Chief | SDS            | 0               | recommending                          |
 
 ### 4. Update `recommend()` — `models/AuthorityToTravel.php` (lines 670–683)
 
@@ -202,13 +202,13 @@ START
 
 ## Files Changed (Summary)
 
-| File | Action |
-|------|--------|
-| `sql/migration_do043_routing.sql` | **New** — migration script |
-| `config/admin_config.php` | Edit — scopes, remove DIRECT_SDS_POSITIONS, update maps |
-| `models/AuthorityToTravel.php` | Major rewrite — determineRouting, recommend, create, canUserActOn, getAvailableAction, getTypeLabel |
-| `admin/authority-to-travel.php` | Edit — form UI (3 scopes), POST handlers (ASDS recommend, SDS forwarding), visibility |
-| `services/DocxGenerator.php` | Edit — template mapping for new scopes |
+| File                              | Action                                                                                              |
+| --------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `sql/migration_do043_routing.sql` | **New** — migration script                                                                          |
+| `config/admin_config.php`         | Edit — scopes, remove DIRECT_SDS_POSITIONS, update maps                                             |
+| `models/AuthorityToTravel.php`    | Major rewrite — determineRouting, recommend, create, canUserActOn, getAvailableAction, getTypeLabel |
+| `admin/authority-to-travel.php`   | Edit — form UI (3 scopes), POST handlers (ASDS recommend, SDS forwarding), visibility               |
+| `services/DocxGenerator.php`      | Edit — template mapping for new scopes                                                              |
 
 ---
 

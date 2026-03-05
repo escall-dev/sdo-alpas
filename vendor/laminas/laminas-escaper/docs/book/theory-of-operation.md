@@ -5,7 +5,7 @@ in which the data will be used. Each method is based on peer-reviewed rules and
 is in compliance with the current OWASP recommendations.
 
 The escaping follows a well-known and fixed set of encoding rules defined by
-OWASP for each key HTML context.  These rules cannot be impacted or negated by
+OWASP for each key HTML context. These rules cannot be impacted or negated by
 browser quirks or edge-case HTML parsing unless the browser suffers a
 catastrophic bug in its HTML parser or Javascript interpreter &mdash; both of
 these are unlikely.

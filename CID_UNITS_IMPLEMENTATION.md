@@ -1,6 +1,7 @@
 # CID Units Implementation Summary
 
 ## Overview
+
 Added 4 units under the Curriculum Implementation Division (CID) led by CID Chief Erma S. Valenzuela. All these units now route their travel requests directly to the CID_CHIEF for recommendation before going to ASDS for final approval.
 
 ## CID Units Added
@@ -13,9 +14,11 @@ Added 4 units under the Curriculum Implementation Division (CID) led by CID Chie
 ## Changes Made
 
 ### 1. SQL Migration File Created
+
 **File:** `sql/migration_cid_units.sql`
 
 This migration:
+
 - Adds 4 CID units to the `sdo_offices` table
 - Sets parent_office_id = 3 (CID division)
 - Sets approver_role_id = 4 (CID_CHIEF)
@@ -24,12 +27,15 @@ This migration:
 - Updates existing user office assignments if applicable
 
 ### 2. Configuration File Updated
+
 **File:** `config/admin_config.php`
 
 Updated three key configuration constants:
 
 #### a. SDO_OFFICES Array
+
 Added 4 CID units with their full names for office selection in forms:
+
 ```php
 'IM' => 'Instructional Management',
 'LRM' => 'Learning Resource Management',
@@ -38,7 +44,9 @@ Added 4 CID units with their full names for office selection in forms:
 ```
 
 #### b. ROLE_OFFICE_MAP
+
 Maps each CID unit code to CID_CHIEF role (role_id=4):
+
 ```php
 'IM' => ROLE_CID_CHIEF,
 'LRM' => ROLE_CID_CHIEF,
@@ -47,7 +55,9 @@ Maps each CID unit code to CID_CHIEF role (role_id=4):
 ```
 
 #### c. UNIT_HEAD_OFFICES
+
 Updated CID_CHIEF's supervised units:
+
 ```php
 ROLE_CID_CHIEF => ['CID', 'IM', 'LRM', 'ALS', 'DIS'],
 ```
@@ -55,12 +65,14 @@ ROLE_CID_CHIEF => ['CID', 'IM', 'LRM', 'ALS', 'DIS'],
 ## Routing Flow
 
 ### For CID Unit Employees
+
 1. Employee from IM, LRM, ALS, or DIS files a travel request
 2. Request is automatically routed to **CID_CHIEF** (Erma S. Valenzuela)
 3. CID_CHIEF reviews and recommends the request
 4. Request then goes to **ASDS** for final approval
 
 ### For CID Division Employees
+
 1. Employee from CID division files a travel request
 2. Request is automatically routed to **CID_CHIEF** (Erma S. Valenzuela)
 3. CID_CHIEF reviews and recommends the request
@@ -69,14 +81,18 @@ ROLE_CID_CHIEF => ['CID', 'IM', 'LRM', 'ALS', 'DIS'],
 ## Database Structure
 
 ### sdo_offices Table
+
 The four units are added with:
+
 - `parent_office_id = 3` (CID division)
 - `approver_role_id = 4` (CID_CHIEF)
 - `office_type = 'unit'`
 - `sort_order` values: 50, 51, 52, 53
 
 ### unit_routing_config Table
+
 Each unit has a routing configuration entry that:
+
 - Maps the unit to CID_CHIEF (role_id=4)
 - Applies to all travel scopes ('all')
 - Links to the corresponding `sdo_offices.id`

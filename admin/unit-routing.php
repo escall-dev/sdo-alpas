@@ -236,6 +236,19 @@ foreach ($routingConfigs as $config) {
     </div>
 </div>
 
+<!-- Tab Navigation -->
+<div class="routing-page-tabs">
+    <button class="routing-page-tab active" data-routing-tab="config" onclick="switchRoutingTab('config')">
+        <i class="fas fa-cogs"></i> Unit Routing Config
+    </button>
+    <button class="routing-page-tab" data-routing-tab="reference" onclick="switchRoutingTab('reference')">
+        <i class="fas fa-sitemap"></i> Routing Reference
+    </button>
+</div>
+
+<!-- Tab: Unit Routing Config -->
+<div id="tab-config" class="routing-tab-panel">
+
 <?php if ($message): ?>
 <div class="alert alert-success">
     <i class="fas fa-check-circle"></i> <?php echo htmlspecialchars($message); ?>
@@ -478,6 +491,187 @@ foreach ($routingConfigs as $config) {
     </div>
 </div>
 
+</div><!-- /tab-config -->
+
+<!-- Tab: Routing Reference -->
+<div id="tab-reference" class="routing-tab-panel" style="display:none;">
+
+<div class="routing-ref-tabs">
+                            <button class="routing-ref-tab active" data-ref-filter="at-local-within" onclick="filterRoutingRef(this)">AT — Local (Within Region)</button>
+                            <button class="routing-ref-tab" data-ref-filter="at-local-outside" onclick="filterRoutingRef(this)">AT — Local (Outside Region)</button>
+                                <button class="routing-ref-tab" data-ref-filter="at-international" onclick="filterRoutingRef(this)">AT — International (Official)</button>
+                                <button class="routing-ref-tab" data-ref-filter="at-personal" onclick="filterRoutingRef(this)">AT — International & Local (Personal)</button>
+                            <button class="routing-ref-tab" data-ref-filter="ls" onclick="filterRoutingRef(this)">Locator Slip</button>
+                            <button class="routing-ref-tab" data-ref-filter="ps" onclick="filterRoutingRef(this)">Pass Slip</button>
+</div>
+
+<!-- AT — Official Local (Within Region) -->
+<div class="routing-ref-table" data-ref-section="at-local-within">
+    <div class="data-card">
+        <div class="ref-section-title">Authority to Travel — Official Local (Within Region)</div>
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Requestor</th>
+                        <th>Recommending</th>
+                        <th>FINAL APPROVER</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>SDS</td><td class="ref-skip">—</td><td>Self-approved</td></tr>
+                    <tr><td>ASDS</td><td class="ref-skip">—</td><td>SDS</td></tr>
+                    <tr><td>SGOD CHIEF</td><td>ASDS</td><td>SDS</td></tr>
+                    <tr><td>CID CHIEF</td><td>ASDS</td><td>SDS</td></tr>
+                    <tr><td>AO V - ADMINISTRATIVE</td><td>ASDS</td><td>SDS</td></tr>
+                    <tr><td>Regular Employee (SGOD units)</td><td>SGOD CHIEF</td><td>SDS</td></tr>
+                    <tr><td>Regular Employee (CID units)</td><td>CID CHIEF</td><td>SDS</td></tr>
+                    <tr><td>Regular Employee (OSDS units)</td><td>AO V - ADMINISTRATIVE</td><td>SDS</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- AT — Official Local (Outside Region) -->
+<div class="routing-ref-table" data-ref-section="at-local-outside" style="display:none;">
+    <div class="data-card">
+        <div class="ref-section-title">Authority to Travel — Official Local (Outside Region)</div>
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Requestor</th>
+                        <th>Recommending</th>
+                        <th>Final Approver</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>SDS</td><td class="ref-skip">—</td><td>RD (forwarded to RO)</td></tr>
+                    <tr><td>ASDS</td><td>SDS</td><td>RD (forwarded to RO)</td></tr>
+                    <tr><td>SGOD CHIEF</td><td>ASDS</td><td>SDS</td></tr>
+                    <tr><td>CID CHIEF</td><td>ASDS</td><td>SDS</td></tr>
+                    <tr><td>AO V - ADMINISTRATIVE</td><td>ASDS</td><td>SDS</td></tr>
+                    <tr><td>Regular Employee (SGOD units)</td><td>SGOD CHIEF</td><td>SDS</td></tr>
+                    <tr><td>Regular Employee (CID units)</td><td>CID CHIEF</td><td>SDS</td></tr>
+                    <tr><td>Regular Employee (OSDS units)</td><td>AO V - ADMINISTRATIVE</td><td>SDS</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- AT — Official International -->
+<div class="routing-ref-table" data-ref-section="at-international" style="display:none;">
+    <div class="data-card">
+        <div class="ref-section-title">Authority to Travel — Official International</div>
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Requestor</th>
+                        <th>Recommending</th>
+                        <th>Final Approver</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>SDS</td><td>RD</td><td>DEPED SEC</td></tr>
+                    <tr><td>ASDS</td><td>RD</td><td>DEPED SEC</td></tr>
+                    <tr><td>SGOD CHIEF</td><td>SDS</td><td>DEPED SEC</td></tr>
+                    <tr><td>CID CHIEF</td><td>SDS</td><td>DEPED SEC</td></tr>
+                    <tr><td>AO V - ADMINISTRATIVE</td><td>SDS</td><td>DEPED SEC</td></tr>
+                    <tr><td>Regular Employee</td><td>SDS</td><td>DEPED SEC</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- AT — Personal (All Scopes) -->
+<div class="routing-ref-table" data-ref-section="at-personal" style="display:none;">
+    <div class="data-card">
+        <div class="ref-section-title">Authority to Travel — Personal (All Scopes)</div>
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Requestor</th>
+                        <th>Final Approver</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>SDS</td><td>RD (forwarded to RO)</td></tr>
+                    <tr><td>ASDS</td><td>SDS</td></tr>
+                    <tr><td>SGOD CHIEF</td><td>SDS</td></tr>
+                    <tr><td>CID CHIEF</td><td>SDS</td></tr>
+                    <tr><td>AO V - ADMINISTRATIVE</td><td>SDS</td></tr>
+                    <tr><td>Regular Employee (SGOD units)</td><td>SGOD CHIEF</td></tr>
+                    <tr><td>Regular Employee (CID units)</td><td>CID CHIEF</td></tr>
+                    <tr><td>Regular Employee (OSDS units)</td><td>AO V - ADMINISTRATIVE</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Locator Slip -->
+<div class="routing-ref-table" data-ref-section="ls" style="display:none;">
+    <div class="data-card">
+        <div class="ref-section-title">Locator Slip — Routing Chain</div>
+        <p class="ref-section-note">Single-step approval, no recommending stage.</p>
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Requestor</th>
+                        <th>Approver</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>SDS</td><td>SDS</td></tr>
+                    <tr><td>ASDS</td><td>SDS</td></tr>
+                    <tr><td>SGOD CHIEF</td><td>ASDS</td></tr>
+                    <tr><td>CID CHIEF</td><td>ASDS</td></tr>
+                    <tr><td>AO V - ADMINISTRATIVE</td><td>ASDS</td></tr>
+                    <tr><td>Regular Employee (SGOD units)</td><td>SGOD CHIEF</td></tr>
+                    <tr><td>Regular Employee (CID units)</td><td>CID CHIEF</td></tr>
+                    <tr><td>Regular Employee (OSDS units)</td><td>AO V - ADMINISTRATIVE</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Pass Slip -->
+<div class="routing-ref-table" data-ref-section="ps" style="display:none;">
+    <div class="data-card">
+        <div class="ref-section-title">Pass Slip — Routing Chain</div>
+        <p class="ref-section-note">Single-step approval. After approval, GENERAL SERVICES records departure/arrival times.</p>
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Requestor</th>
+                        <th>Approver</th>
+                        <th>Guard Monitoring</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>ASDS</td><td>ASDS</td><td>GENERAL SERVICES</td></tr>
+                    <tr><td>SGOD CHIEF</td><td>ASDS</td><td>GENERAL SERVICES</td></tr>
+                    <tr><td>CID CHIEF</td><td>ASDS</td><td>GENERAL SERVICES</td></tr>
+                    <tr><td>AO V - ADMINISTRATIVE</td><td>ASDS</td><td>GENERAL SERVICES</td></tr>
+                    <tr><td>Regular Employee (SGOD units)</td><td>SGOD CHIEF</td><td>GENERAL SERVICES</td></tr>
+                    <tr><td>Regular Employee (CID units)</td><td>CID CHIEF</td><td>GENERAL SERVICES</td></tr>
+                    <tr><td>Regular Employee (OSDS units)</td><td>AO V - ADMINISTRATIVE</td><td>GENERAL SERVICES</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+</div><!-- /tab-reference -->
+
 <!-- Delete Confirmation Modal -->
 <div class="modal-overlay" id="deleteModal">
     <div class="modal">
@@ -592,6 +786,169 @@ foreach ($routingConfigs as $config) {
         grid-template-columns: 1fr;
     }
 }
+
+/* ===== Routing Page Tabs ===== */
+.routing-page-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 24px;
+    background: var(--card-bg);
+    border: 2px solid rgba(0, 0, 0, 0.12);
+    border-radius: var(--radius-lg, 12px);
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.routing-page-tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 18px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.routing-page-tab:hover {
+    color: var(--primary);
+    background: rgba(99, 102, 241, 0.06);
+}
+
+.routing-page-tab.active {
+    color: var(--primary);
+    background: rgba(99, 102, 241, 0.08);
+    border-bottom-color: var(--primary);
+}
+
+.routing-page-tab i {
+    font-size: 1rem;
+}
+
+.routing-page-tab + .routing-page-tab {
+    border-left: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+@media (max-width: 768px) {
+    .routing-page-tabs {
+        flex-wrap: wrap;
+    }
+    .routing-page-tab {
+        flex: 1 1 45%;
+        padding: 10px 12px;
+        font-size: 0.82rem;
+    }
+}
+
+/* ===== Routing Reference Tab Styles ===== */
+.routing-ref-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 20px;
+    background: #f8fafc;
+    border: 1px solid #dbe3ee;
+    border-radius: var(--radius-lg, 12px);
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.08);
+}
+
+.routing-ref-tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 16px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #334155;
+    background: transparent;
+    border: none;
+    border-right: 1px solid #e2e8f0;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.routing-ref-tab:last-child {
+    border-right: none;
+}
+
+.routing-ref-tab:hover {
+    background: #eef2f7;
+    color: #0f172a;
+}
+
+.routing-ref-tab.active {
+    background: #1e293b;
+    color: #fff;
+}
+
+.ref-section-title {
+    padding: 16px 20px 0;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.ref-section-note {
+    padding: 0 20px;
+    margin: 6px 0 0;
+    font-size: 0.85rem;
+    color: var(--text-secondary, #64748b);
+}
+
+.ref-skip {
+    opacity: 0.35;
+}
+
+/* Make headers bold and more prominent */
+.routing-ref-table .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #c3ccd8;
+}
+
+.routing-ref-table .data-table thead th {
+    font-weight: 800 !important;
+    font-size: 0.85rem !important;
+    text-transform: uppercase;
+    color: #0f172a;
+    background-color: #d2d8e0;
+    letter-spacing: 0.03em;
+    border: 1px solid #c3ccd8;
+    text-align: left;
+    line-height: 1.15;
+}
+
+.routing-ref-table .data-table tbody td {
+    font-weight: 500;
+    color: #1e293b;
+    border: 1px solid #c3ccd8;
+}
+
+.routing-ref-table .data-table tbody tr:nth-child(even) td {
+    background: #f8fafc;
+}
+
+@media (max-width: 800px) {
+    .routing-ref-tabs {
+        flex-wrap: wrap;
+    }
+    .routing-ref-tab {
+        flex: 1 1 33%;
+        padding: 10px 12px;
+        font-size: 0.76rem;
+    }
+    .routing-ref-tab + .routing-ref-tab {
+        border-right: 1px solid rgba(0, 0, 0, 0.08);
+    }
+}
 </style>
 
 <script>
@@ -665,6 +1022,29 @@ document.addEventListener('keydown', function(e) {
         closeDeleteModal();
     }
 });
+
+// ===== Routing Tab Switching =====
+function switchRoutingTab(tab) {
+    // Toggle tab buttons
+    document.querySelectorAll('.routing-page-tab[data-routing-tab]').forEach(function(btn) {
+        btn.classList.toggle('active', btn.getAttribute('data-routing-tab') === tab);
+    });
+    // Toggle panels
+    document.getElementById('tab-config').style.display = (tab === 'config') ? '' : 'none';
+    document.getElementById('tab-reference').style.display = (tab === 'reference') ? '' : 'none';
+}
+
+// ===== Routing Reference Filter =====
+function filterRoutingRef(btn) {
+    var filter = btn.getAttribute('data-ref-filter');
+    // Toggle active filter button
+    document.querySelectorAll('.routing-ref-tab').forEach(function(b) {
+        b.classList.toggle('active', b === btn);
+    });
+    document.querySelectorAll('.routing-ref-table').forEach(function(sec) {
+        sec.style.display = (sec.getAttribute('data-ref-section') === filter) ? '' : 'none';
+    });
+}
 
 // Submit filter form on Enter (search/filter without clicking Filter)
 (function() {

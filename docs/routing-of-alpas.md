@@ -34,14 +34,12 @@
 
 ### Official — International
 
-| Requestor             | Recommending | Final Approver                         |
-| --------------------- | ------------ | -------------------------------------- |
-| Regular Employee      | SDS          | DepEd Secretary (forwarded to RO)      |
-| AO V - ADMINISTRATIVE | SDS          | DepEd Secretary (forwarded to RO)      |
-| CID CHIEF             | SDS          | DepEd Secretary (forwarded to RO)      |
-| SGOD CHIEF            | SDS          | DepEd Secretary (forwarded to RO)      |
-| ASDS                  | —            | DepEd Secretary (auto-forwarded to RO) |
-| SDS                   | —            | RD (forwarded to RO)                   |
+| Requestor’s/Position                                     | Recommending Approver | Final Approver |
+| -------------------------------------------------------- | --------------------- | -------------- |
+| Schools Division Superintendent                          | RD                    | DEPED SEC      |
+| Assistant Schools Division Superintendent (ASDS)         | RD                    | DEPED SEC      |
+| Division Chief (SGOD, OSDS,CID) chiefs                   | SDS                   | DEPED SEC      |
+| Below Division Chief including PSDS and units under them | SDS                   | DEPED SEC      |
 
 ### Personal (All Scopes)
 

@@ -6,7 +6,7 @@ to escape data incorrectly, namely by setting the wrong flags and character
 encoding.
 
 For escaping data to use within an HTML body context, use
-`Laminas\Escaper\Escaper`'s `escapeHtml()` method.  Internally it uses PHP's
+`Laminas\Escaper\Escaper`'s `escapeHtml()` method. Internally it uses PHP's
 `htmlspecialchars()`, correctly setting the flags and encoding for you.
 
 ```php

@@ -2,13 +2,13 @@
 
 Escaping data in **HTML Attribute** contexts is most often done incorrectly, if
 not overlooked completely by developers. Regular [HTML
-escaping](escaping-html.md) can be used for escaping HTML attributes *only* if
+escaping](escaping-html.md) can be used for escaping HTML attributes _only_ if
 the attribute value can be **guaranteed as being properly quoted**! To avoid
 confusion, we recommend always using the HTML Attribute escaper method when
 dealing with HTML attributes specifically.
 
 To escape data for an HTML Attribute, use `Laminas\Escaper\Escaper`'s
-`escapeHtmlAttr()` method.  Internally it will convert the data to UTF-8, check
+`escapeHtmlAttr()` method. Internally it will convert the data to UTF-8, check
 for its validity, and use an extended set of characters to escape that are not
 covered by `htmlspecialchars()` to cover the cases where an attribute might be
 unquoted or quoted illegally.

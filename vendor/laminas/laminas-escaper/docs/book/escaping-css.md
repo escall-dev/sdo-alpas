@@ -1,6 +1,6 @@
 # Escaping Cascading Style Sheets
 
-CSS is similar to [escaping Javascript](escaping-javascript.md).  CSS escaping
+CSS is similar to [escaping Javascript](escaping-javascript.md). CSS escaping
 excludes only basic alphanumeric characters and escapes all other characters
 into valid CSS hexadecimal escapes.
 

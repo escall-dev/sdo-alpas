@@ -30,8 +30,6 @@ flowchart LR
     Word -->|SaveAs2| PDF[PDF File]
 ```
 
-
-
 **Key files:**
 
 - `[scripts/convert-to-pdf.ps1](scripts/convert-to-pdf.ps1)` -- Word COM automation (139 lines)

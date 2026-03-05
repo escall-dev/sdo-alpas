@@ -1,6 +1,7 @@
 # SGOD Units Implementation Summary
 
 ## Overview
+
 Added 7 units under the School Governance and Operations Division (SGOD) led by SGOD Chief Frederick G. Byrd Jr. All these units now route their travel requests directly to the SGOD_CHIEF for recommendation before going to ASDS for final approval.
 
 ## SGOD Units Added
@@ -16,9 +17,11 @@ Added 7 units under the School Governance and Operations Division (SGOD) led by 
 ## Changes Made
 
 ### 1. SQL Migration File Created
+
 **File:** `sql/migration_sgod_units.sql`
 
 This migration:
+
 - Adds 7 SGOD units to the `sdo_offices` table
 - Sets parent_office_id = 4 (SGOD division)
 - Sets approver_role_id = 5 (SGOD_CHIEF)
@@ -27,12 +30,15 @@ This migration:
 - Updates existing user office assignments if applicable
 
 ### 2. Configuration File Updated
+
 **File:** `config/admin_config.php`
 
 Updated three key configuration constants:
 
 #### a. SDO_OFFICES Array
+
 Added 7 SGOD units with their full names for office selection in forms:
+
 ```php
 'SMME' => 'School Management Monitoring and Evaluation',
 'HRD' => 'Human Resource Development',
@@ -44,7 +50,9 @@ Added 7 SGOD units with their full names for office selection in forms:
 ```
 
 #### b. ROLE_OFFICE_MAP
+
 Maps each SGOD unit code to SGOD_CHIEF role (role_id=5):
+
 ```php
 'SMME' => ROLE_SGOD_CHIEF,
 'HRD' => ROLE_SGOD_CHIEF,
@@ -56,7 +64,9 @@ Maps each SGOD unit code to SGOD_CHIEF role (role_id=5):
 ```
 
 #### c. UNIT_HEAD_OFFICES
+
 Updated SGOD_CHIEF's supervised units:
+
 ```php
 ROLE_SGOD_CHIEF => ['SGOD', 'SMME', 'HRD', 'SMN', 'PR', 'DRRM', 'EF', 'SHN'],
 ```
@@ -64,6 +74,7 @@ ROLE_SGOD_CHIEF => ['SGOD', 'SMME', 'HRD', 'SMN', 'PR', 'DRRM', 'EF', 'SHN'],
 ## Routing Flow
 
 ### For SGOD Unit Employees
+
 When employees from any of the 7 SGOD units submit an Authority to Travel or Locator Slip request:
 
 1. **Request Filed** → Status: Pending
@@ -73,13 +84,16 @@ When employees from any of the 7 SGOD units submit an Authority to Travel or Loc
 5. **ASDS Approves** → Status: Approved → Document Generated
 
 ### Bypass for Executives
+
 - **SDS** (Superadmin) can approve directly without routing
 - **ASDS** acts as final approver for all requests
 
 ## Installation Steps
 
 ### 1. Run the SQL Migration
+
 Execute the migration file in your database:
+
 ```bash
 # Option 1: Using MySQL command line
 mysql -u root -p sdo_atlas < sql/migration_sgod_units.sql
@@ -93,17 +107,18 @@ mysql -u root -p sdo_atlas < sql/migration_sgod_units.sql
 ```
 
 ### 2. Verify Installation
+
 Run these verification queries to confirm setup:
 
 ```sql
 -- Check SGOD units in sdo_offices
 SELECT id, office_code, office_name, office_type, parent_office_id, approver_role_id, sort_order
-FROM sdo_offices 
+FROM sdo_offices
 WHERE parent_office_id = 4 OR office_code = 'SGOD'
 ORDER BY sort_order;
 
 -- Check routing configuration
-SELECT urc.id, urc.unit_name, urc.unit_display_name, 
+SELECT urc.id, urc.unit_name, urc.unit_display_name,
        urc.approver_role_id, ar.role_name, urc.office_id
 FROM unit_routing_config urc
 JOIN admin_roles ar ON urc.approver_role_id = ar.id
@@ -112,10 +127,12 @@ ORDER BY urc.sort_order;
 ```
 
 Expected results:
+
 - 7 new office records with SGOD as parent
 - 7 routing configs pointing to SGOD_CHIEF (role_id=5)
 
 ### 3. Test the Routing
+
 1. Create or assign a test user to one of the SGOD units (e.g., "SMME")
 2. Have that user file an Authority to Travel request
 3. Verify request appears in SGOD_CHIEF's pending queue
@@ -125,7 +142,9 @@ Expected results:
 ## User Assignment
 
 ### For New Users
+
 When registering new users or creating accounts:
+
 1. In the employee_office dropdown, select one of the SGOD units:
    - School Management Monitoring and Evaluation
    - Human Resource Development
@@ -140,10 +159,12 @@ When registering new users or creating accounts:
    - Route their requests to SGOD_CHIEF
 
 ### For Existing Users
+
 To move existing users to SGOD units:
+
 ```sql
 -- Update user's office
-UPDATE admin_users 
+UPDATE admin_users
 SET office_id = (SELECT id FROM sdo_offices WHERE office_code = 'SMME'),
     employee_office = 'School Management Monitoring and Evaluation'
 WHERE id = [user_id];

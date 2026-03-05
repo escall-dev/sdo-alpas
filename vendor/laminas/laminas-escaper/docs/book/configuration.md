@@ -13,7 +13,7 @@ The default encoding is **utf-8**. Other supported encodings are:
 - cp1252, windows-1252
 - koi8-r, koi8-ru
 - big5, big5-hkscs, 950, gb2312, 936
-- shift\_jis, sjis, sjis-win, cp932
+- shift_jis, sjis, sjis-win, cp932
 - eucjp, eucjp-win
 - macroman
 
