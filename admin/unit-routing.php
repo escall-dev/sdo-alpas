@@ -231,7 +231,7 @@ foreach ($routingConfigs as $config) {
 
 <div class="page-header">
     <div class="header-content">
-        <h2><i class="fas fa-route"></i> Unit Routing Configuration</h2>
+       
         <p class="header-subtitle">Manage unit-to-approver mappings for Authority to Travel approval</p>
     </div>
 </div>
