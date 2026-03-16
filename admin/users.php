@@ -522,12 +522,12 @@ $pendingCount = $userModel->getPendingRegistrationsCount();
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label class="form-label">Employee No. (optional)</label>
-                        <input type="text" name="employee_no" class="form-control">
+                        <label class="form-label">Employee No. <span class="required">*</span></label>
+                        <input type="text" name="employee_no" class="form-control" required>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Position (optional)</label>
-                        <input type="text" name="employee_position" class="form-control">
+                        <label class="form-label">Position <span class="required">*</span></label>
+                        <input type="text" name="employee_position" class="form-control" required>
                     </div>
                 </div>
 

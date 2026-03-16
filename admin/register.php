@@ -320,13 +320,13 @@ if (isset($_GET['otp_error'])) {
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label class="form-label" for="employee_no">Employee No. (optional)</label>
+                        <label class="form-label" for="employee_no">Employee No. <span class="required">*</span></label>
                         <input type="text" class="form-control" id="employee_no" name="employee_no" 
                                value="<?php echo htmlspecialchars($formData['employee_no']); ?>"
                                placeholder="E-12345">
                     </div>
                     <div class="form-group">
-                        <label class="form-label" for="employee_position">Position (optional)</label>
+                        <label class="form-label" for="employee_position">Position <span class="required">*</span></label>
                         <input type="text" class="form-control" id="employee_position" name="employee_position" 
                                value="<?php echo htmlspecialchars($formData['employee_position']); ?>"
                                placeholder="Teacher I">
