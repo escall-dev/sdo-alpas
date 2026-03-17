@@ -1078,17 +1078,22 @@ $formData = [
     }
     ?>
 
-    <div class="page-header">
-        <div class="result-count">
-            <?php echo $totalRequests; ?> Pass Slip<?php echo $totalRequests !== 1 ? 's' : ''; ?>
-            <?php if ($isGuardView): ?>
-                <span style="color: var(--text-muted); font-size: 0.85rem; margin-left: 8px;">
-                    (<?php echo isset($guardFilters['date']) ? date('M j, Y', strtotime($guardFilters['date'])) : 'All dates'; ?>)
-                </span>
-            <?php endif; ?>
+    <div class="page-header" style="background: #164f77; color: white; padding: 12px 16px; border-radius: var(--radius-lg); margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 15px rgba(22, 79, 119, 0.2); border: none;">
+        <div class="header-content">
+            <h2 style="margin: 0; font-size: 1.15rem; display: flex; align-items: center; gap: 6px; font-weight: 800; letter-spacing: -0.5px; color: white;">
+                <i class="fas fa-ticket-alt" style="color: rgba(255,255,255,0.8); font-size: 1rem;"></i> Pass Slips Management
+            </h2>
+            <p style="margin: 2px 0 0 0; color: rgba(255,255,255,0.8); font-size: 0.75rem;">
+                <?php echo $totalRequests; ?> Pass Slip<?php echo $totalRequests !== 1 ? 's' : ''; ?>
+                <?php if ($isGuardView): ?>
+                    <span style="color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-left: 8px;">
+                        (<?php echo isset($guardFilters['date']) ? date('M j, Y', strtotime($guardFilters['date'])) : 'All dates'; ?>)
+                    </span>
+                <?php endif; ?>
+            </p>
         </div>
         <?php if (!$isGuardView): ?>
-            <button type="button" class="btn btn-primary" onclick="openNewModal()">
+            <button type="button" class="btn" style="background: white; color: var(--primary-dark); font-weight: 700; border: none; padding: 6px 12px; font-size: 0.8rem; border-radius: var(--radius-md); display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);" onclick="openNewModal()">
                 <i class="fas fa-plus"></i> New Pass Slip
             </button>
         <?php endif; ?>
@@ -1098,7 +1103,7 @@ $formData = [
     <!-- ========== GUARD ACCUMULATED HOURS SUMMARY (if viewing specific employee) ========== -->
     
     <!-- Guard Filter Bar -->
-    <div class="filter-bar">
+    <div class="filter-bar" style="background: white; padding: 24px; border-radius: var(--radius-lg); box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 24px; border: 1px solid rgba(0,0,0,0.05);">
         <form class="filter-form" method="GET" action="">
             <input type="hidden" name="token" value="<?php echo $currentToken; ?>">
 
@@ -1144,8 +1149,8 @@ $formData = [
     </div>
 
     <!-- Guard Data Table -->
-    <div class="data-card">
-        <div class="table-responsive">
+    <div class="data-card" style="border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 8px 25px rgba(0,0,0,0.08); border-radius: var(--radius-xl); overflow: hidden;">
+        <div class="table-responsive" style="background: white; overflow-x: hidden;">
             <table class="data-table">
                 <thead>
                     <tr>
@@ -1173,9 +1178,9 @@ $formData = [
                         </tr>
                     <?php else: ?>
                         <?php foreach ($requests as $ps): ?>
-                            <tr>
-                                <td>
-                                    <a href="<?php echo navUrl('/pass-slips.php?view=' . $ps['id']); ?>" class="ref-link">
+                            <tr style="transition: all 0.2s ease; border-bottom: 1px solid var(--border-light);" onmouseover="this.style.backgroundColor='var(--bg-secondary)'; this.style.transform='scale(1.002)';" onmouseout="this.style.backgroundColor=''; this.style.transform='scale(1)';">
+                                <td style="padding: 18px 16px;">
+                                    <a href="<?php echo navUrl('/pass-slips.php?view=' . $ps['id']); ?>" class="ref-link" style="background: var(--bg-secondary); padding: 6px 12px; border-radius: 6px; font-weight: 700;">
                                         <?php echo htmlspecialchars($ps['ps_control_no']); ?>
                                     </a>
                                 </td>
@@ -1236,7 +1241,7 @@ $formData = [
                                         <?php elseif ($ps['status'] === 'approved' && !empty($ps['actual_arrival_time'])): ?>
                                             <span style="color: var(--success);"><i class="fas fa-check-double"></i></span>
                                         <?php else: ?>
-                                            <a href="<?php echo navUrl('/pass-slips.php?view=' . $ps['id']); ?>" class="btn btn-icon" title="View">
+                                            <a href="<?php echo navUrl('/pass-slips.php?view=' . $ps['id']); ?>" class="btn btn-icon" title="View" style="background: var(--bg-secondary); color: var(--primary-dark); border-radius: 8px; width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s ease;">
                                                 <i class="fas fa-eye"></i>
                                             </a>
                                         <?php endif; ?>
@@ -1316,7 +1321,7 @@ $formData = [
     }
     ?>
 
-    <div class="filter-bar">
+    <div class="filter-bar" style="background: white; padding: 24px; border-radius: var(--radius-lg); box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 24px; border: 1px solid rgba(0,0,0,0.05);">
         <form class="filter-form" method="GET" action="">
             <input type="hidden" name="token" value="<?php echo $currentToken; ?>">
 
@@ -1400,8 +1405,8 @@ $formData = [
     </div>
 
     <!-- Data Table -->
-    <div class="data-card">
-        <div class="table-responsive">
+    <div class="data-card" style="border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 8px 25px rgba(0,0,0,0.08); border-radius: var(--radius-xl); overflow: hidden;">
+        <div class="table-responsive" style="background: white; overflow-x: hidden;">
             <table class="data-table">
                 <thead>
                     <tr>
@@ -1426,9 +1431,9 @@ $formData = [
                         </tr>
                     <?php else: ?>
                         <?php foreach ($requests as $ps): ?>
-                            <tr>
-                                <td>
-                                    <a href="<?php echo navUrl('/pass-slips.php?view=' . $ps['id']); ?>" class="ref-link">
+                            <tr style="transition: all 0.2s ease; border-bottom: 1px solid var(--border-light);" onmouseover="this.style.backgroundColor='var(--bg-secondary)'; this.style.transform='scale(1.002)';" onmouseout="this.style.backgroundColor=''; this.style.transform='scale(1)';">
+                                <td style="padding: 18px 16px;">
+                                    <a href="<?php echo navUrl('/pass-slips.php?view=' . $ps['id']); ?>" class="ref-link" style="background: var(--bg-secondary); padding: 6px 12px; border-radius: 6px; font-weight: 700;">
                                         <?php echo htmlspecialchars($ps['ps_control_no']); ?>
                                     </a>
                                 </td>
@@ -1462,20 +1467,20 @@ $formData = [
                                     <?php echo getStatusBadge($ps['status']); ?>
                                 </td>
                                 <td>
-                                    <div class="action-buttons">
+                                    <div class="action-buttons" style="display: flex; gap: 8px;">
                                         <a href="<?php echo navUrl('/pass-slips.php?view=' . $ps['id']); ?>" class="btn btn-icon"
-                                            title="View">
+                                            title="View" style="background: var(--bg-secondary); color: var(--primary-dark); border-radius: 8px; width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s ease;">
                                             <i class="fas fa-eye"></i>
                                         </a>
                                         <?php if ($psModel->canUserEdit($ps, $auth->getUserId())): ?>
                                             <a href="<?php echo navUrl('/pass-slips.php?edit=' . $ps['id']); ?>" class="btn btn-icon"
-                                                title="Edit" style="color: var(--primary);">
+                                                title="Edit" style="background: var(--warning-bg); color: var(--warning); border-radius: 8px; width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s ease;" onmouseover="this.style.background='var(--warning)'; this.style.color='white';" onmouseout="this.style.background='var(--warning-bg)'; this.style.color='var(--warning)';">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                         <?php endif; ?>
                                         <?php if ($ps['status'] === 'approved'): ?>
                                             <a href="<?php echo navUrl('/api/generate-docx.php?type=ps&id=' . $ps['id']); ?>"
-                                                class="btn btn-icon" title="Download PDF" style="color: var(--success);">
+                                                class="btn btn-icon" title="Download PDF" style="background: var(--success-bg); color: var(--success); border-radius: 8px; width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s ease;" onmouseover="this.style.background='var(--success)'; this.style.color='white';" onmouseout="this.style.background='var(--success-bg)'; this.style.color='var(--success)';">
                                                 <i class="fas fa-download"></i>
                                             </a>
                                         <?php endif; ?>
@@ -1677,5 +1682,128 @@ $formData = [
     </script>
     <?php endif; ?><!-- end !isGuardView for new modal -->
 <?php endif; ?>
+
+<style>
+/* Premium Form Enhancements */
+.modal {
+    border-radius: var(--radius-xl);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    background: #ffffff;
+    border: none;
+    overflow: hidden;
+    transform: scale(0.95);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.modal-overlay.active .modal {
+    transform: scale(1);
+    opacity: 1;
+}
+.modal-header {
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+    color: white;
+    padding: 24px 30px;
+    border-bottom: none;
+}
+.modal-header h3 {
+    color: white;
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+.modal-close {
+    color: rgba(255,255,255,0.8);
+    background: rgba(255,255,255,0.1);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+.modal-close:hover {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    transform: rotate(90deg);
+}
+.modal-body {
+    padding: 30px;
+}
+.modal-footer {
+    padding: 20px 30px;
+    background: var(--bg-secondary);
+    border-top: 1px solid rgba(0,0,0,0.05);
+}
+.form-label {
+    font-weight: 700;
+    color: var(--primary-dark);
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+.input-with-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.input-with-icon i {
+    position: absolute;
+    left: 14px;
+    color: var(--text-muted);
+    font-size: 1rem;
+    transition: color 0.3s ease;
+    pointer-events: none;
+}
+.input-with-icon .form-control {
+    padding-left: 42px;
+}
+.form-control {
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 12px 16px;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    background: var(--bg-primary);
+    box-shadow: none;
+}
+.form-control:focus {
+    border-color: var(--primary);
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(15, 76, 117, 0.1);
+}
+.input-with-icon .form-control:focus + i,
+.form-control:focus ~ i {
+    color: var(--primary);
+}
+.form-control:hover {
+    border-color: var(--primary-light);
+}
+
+/* Beautiful Action Buttons */
+.btn {
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    box-shadow: 0 4px 12px rgba(15, 76, 117, 0.2);
+    border: none;
+}
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(15, 76, 117, 0.3);
+}
+.btn-secondary {
+    background: white;
+    border: 2px solid var(--border-color);
+    color: var(--text-primary);
+}
+.btn-secondary:hover {
+    background: var(--bg-secondary);
+    border-color: var(--text-muted);
+    transform: translateY(-2px);
+}
+</style>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>

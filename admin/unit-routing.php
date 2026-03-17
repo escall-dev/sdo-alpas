@@ -262,7 +262,7 @@ foreach ($routingConfigs as $config) {
 <?php endif; ?>
 
 <!-- Filters: same design as Users / Authority to Travel / Locator Slips -->
-<div class="filter-bar">
+<div class="filter-bar" style="background: white; padding: 24px; border-radius: var(--radius-lg); box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 24px; border: 1px solid rgba(0,0,0,0.05);">
     <form method="get" class="filter-form">
         <div class="filter-group">
             <label for="filter_office">Office</label>
@@ -320,8 +320,8 @@ foreach ($routingConfigs as $config) {
 </div>
 
 <!-- Routing Configuration Table (same design as Users / Authority to Travel / Locator Slips) -->
-<div class="data-card">
-    <div class="table-responsive">
+<div class="data-card" style="border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 8px 25px rgba(0,0,0,0.08); border-radius: var(--radius-xl); overflow: hidden;">
+    <div class="table-responsive" style="background: white; overflow-x: hidden;">
         <table class="data-table">
             <thead>
                 <tr>
@@ -507,9 +507,9 @@ foreach ($routingConfigs as $config) {
 
 <!-- AT — Official Local (Within Region) -->
 <div class="routing-ref-table" data-ref-section="at-local-within">
-    <div class="data-card">
+    <div class="data-card" style="border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 8px 25px rgba(0,0,0,0.08); border-radius: var(--radius-xl); overflow: hidden;">
         <div class="ref-section-title">Authority to Travel — Official Local (Within Region)</div>
-        <div class="table-responsive">
+        <div class="table-responsive" style="background: white; overflow-x: hidden;">
             <table class="data-table">
                 <thead>
                     <tr>
@@ -535,9 +535,9 @@ foreach ($routingConfigs as $config) {
 
 <!-- AT — Official Local (Outside Region) -->
 <div class="routing-ref-table" data-ref-section="at-local-outside" style="display:none;">
-    <div class="data-card">
+    <div class="data-card" style="border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 8px 25px rgba(0,0,0,0.08); border-radius: var(--radius-xl); overflow: hidden;">
         <div class="ref-section-title">Authority to Travel — Official Local (Outside Region)</div>
-        <div class="table-responsive">
+        <div class="table-responsive" style="background: white; overflow-x: hidden;">
             <table class="data-table">
                 <thead>
                     <tr>
@@ -563,9 +563,9 @@ foreach ($routingConfigs as $config) {
 
 <!-- AT — Official International -->
 <div class="routing-ref-table" data-ref-section="at-international" style="display:none;">
-    <div class="data-card">
+    <div class="data-card" style="border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 8px 25px rgba(0,0,0,0.08); border-radius: var(--radius-xl); overflow: hidden;">
         <div class="ref-section-title">Authority to Travel — Official International</div>
-        <div class="table-responsive">
+        <div class="table-responsive" style="background: white; overflow-x: hidden;">
             <table class="data-table">
                 <thead>
                     <tr>
@@ -589,9 +589,9 @@ foreach ($routingConfigs as $config) {
 
 <!-- AT — Personal (All Scopes) -->
 <div class="routing-ref-table" data-ref-section="at-personal" style="display:none;">
-    <div class="data-card">
+    <div class="data-card" style="border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 8px 25px rgba(0,0,0,0.08); border-radius: var(--radius-xl); overflow: hidden;">
         <div class="ref-section-title">Authority to Travel — Personal (All Scopes)</div>
-        <div class="table-responsive">
+        <div class="table-responsive" style="background: white; overflow-x: hidden;">
             <table class="data-table">
                 <thead>
                     <tr>
@@ -616,10 +616,10 @@ foreach ($routingConfigs as $config) {
 
 <!-- Locator Slip -->
 <div class="routing-ref-table" data-ref-section="ls" style="display:none;">
-    <div class="data-card">
+    <div class="data-card" style="border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 8px 25px rgba(0,0,0,0.08); border-radius: var(--radius-xl); overflow: hidden;">
         <div class="ref-section-title">Locator Slip — Routing Chain</div>
-        <p class="ref-section-note">Single-step approval, no recommending stage.</p>
-        <div class="table-responsive">
+        <p class="ref-section-note" style="margin: 0 20px 10px 20px; font-size: 0.85rem; color: var(--text-muted);">Single-step approval, no recommending stage.</p>
+        <div class="table-responsive" style="background: white; overflow-x: hidden;">
             <table class="data-table">
                 <thead>
                     <tr>
@@ -644,10 +644,10 @@ foreach ($routingConfigs as $config) {
 
 <!-- Pass Slip -->
 <div class="routing-ref-table" data-ref-section="ps" style="display:none;">
-    <div class="data-card">
+    <div class="data-card" style="border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 8px 25px rgba(0,0,0,0.08); border-radius: var(--radius-xl); overflow: hidden;">
         <div class="ref-section-title">Pass Slip — Routing Chain</div>
-        <p class="ref-section-note">Single-step approval. After approval, GENERAL SERVICES records departure/arrival times.</p>
-        <div class="table-responsive">
+        <p class="ref-section-note" style="margin: 0 20px 10px 20px; font-size: 0.85rem; color: var(--text-muted);">Single-step approval. After approval, GENERAL SERVICES records departure/arrival times.</p>
+        <div class="table-responsive" style="background: white; overflow-x: hidden;">
             <table class="data-table">
                 <thead>
                     <tr>

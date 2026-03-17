@@ -208,27 +208,24 @@ if ($auth->isGuard()) {
             <div class="card-body">
                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;">
                     <!-- Locator Slip -->
-                    <a href="<?php echo navUrl('/locator-slips.php?action=new'); ?>" class="request-type-card"
-                        style="display: flex; flex-direction: column; align-items: center; padding: 24px; background: #1e3a8a; border-radius: 12px; text-decoration: none; color: white; transition: transform 0.2s, box-shadow 0.2s;">
-                        <i class="fas fa-map-marker-alt" style="font-size: 2.5rem; margin-bottom: 12px;"></i>
-                        <span style="font-weight: 600; font-size: 1rem;">Locator Slip</span>
-                        <span style="font-size: 0.8rem; opacity: 0.8; margin-top: 4px;">For local movement</span>
+                    <a href="<?php echo navUrl('/locator-slips.php?action=new'); ?>" class="request-type-card">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span class="request-title">Locator Slip</span>
+                        <span class="request-desc">For local movement</span>
                     </a>
 
                     <!-- Authority to Travel (single card: Local/International and Official/Personal chosen on form) -->
-                    <a href="<?php echo navUrl('/authority-to-travel.php?action=new'); ?>" class="request-type-card"
-                        style="display: flex; flex-direction: column; align-items: center; padding: 24px; background: #1e3a8a; border-radius: 12px; text-decoration: none; color: white; transition: transform 0.2s, box-shadow 0.2s;">
-                        <i class="fas fa-plane" style="font-size: 2.5rem; margin-bottom: 12px;"></i>
-                        <span style="font-weight: 600; font-size: 1rem;">Authority to Travel</span>
-                        <span style="font-size: 0.8rem; opacity: 0.8; margin-top: 4px;">Within/Outside Region or International</span>
+                    <a href="<?php echo navUrl('/authority-to-travel.php?action=new'); ?>" class="request-type-card">
+                        <i class="fas fa-plane"></i>
+                        <span class="request-title">Authority to Travel</span>
+                        <span class="request-desc">Within/Outside Region or International</span>
                     </a>
 
                     <!-- Pass Slip -->
-                    <a href="<?php echo navUrl('/pass-slips.php?action=new'); ?>" class="request-type-card"
-                        style="display: flex; flex-direction: column; align-items: center; padding: 24px; background: #1e3a8a; border-radius: 12px; text-decoration: none; color: white; transition: transform 0.2s, box-shadow 0.2s;">
-                        <i class="fas fa-ticket-alt" style="font-size: 2.5rem; margin-bottom: 12px;"></i>
-                        <span style="font-weight: 600; font-size: 1rem;">Pass Slip</span>
-                        <span style="font-size: 0.8rem; opacity: 0.8; margin-top: 4px;">For short-term travel</span>
+                    <a href="<?php echo navUrl('/pass-slips.php?action=new'); ?>" class="request-type-card">
+                        <i class="fas fa-ticket-alt"></i>
+                        <span class="request-title">Pass Slip</span>
+                        <span class="request-desc">For short-term travel</span>
                     </a>
                 </div>
             </div>
@@ -552,9 +549,76 @@ if ($auth->isGuard()) {
 <?php endif; ?>
 
 <style>
+    .request-type-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 32px 24px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+        border-radius: var(--radius-lg);
+        text-decoration: none;
+        color: white;
+        transition: all var(--transition-base);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .request-type-card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+        transition: var(--transition-slow);
+    }
+
+    .request-type-card:hover::after {
+        left: 100%;
+    }
+
+    .request-type-card i {
+        font-size: 2.2rem;
+        margin-bottom: 16px;
+        background: rgba(255, 255, 255, 0.15);
+        height: 72px;
+        width: 72px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        backdrop-filter: blur(4px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transition: transform var(--transition-base);
+    }
+
+    .request-type-card .request-title {
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-bottom: 8px;
+        letter-spacing: 0.02em;
+    }
+
+    .request-type-card .request-desc {
+        font-size: 0.85rem;
+        opacity: 0.85;
+        line-height: 1.4;
+    }
+
     .request-type-card:hover {
         transform: translateY(-4px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        box-shadow: var(--shadow-md);
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .request-type-card:hover i {
+        transform: scale(1.1) rotate(5deg);
+        background: rgba(255, 255, 255, 0.2);
     }
 </style>
 

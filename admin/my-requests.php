@@ -205,7 +205,7 @@ if ($type === 'ps' && ($auth->isEmployee() || $auth->isUnitHead() || $auth->isAS
 ?>
 
 <!-- Filter Bar -->
-<div class="filter-bar">
+<div class="filter-bar" style="background: white; padding: 24px; border-radius: var(--radius-lg); box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 24px; border: 1px solid rgba(0,0,0,0.05);">
     <form class="filter-form" method="GET" action="">
         <input type="hidden" name="token" value="<?php echo $currentToken; ?>">
         <input type="hidden" name="type" value="<?php echo htmlspecialchars($type); ?>">
@@ -281,8 +281,8 @@ if ($type === 'ps' && ($auth->isEmployee() || $auth->isUnitHead() || $auth->isAS
 </div>
 
 <!-- Requests Table -->
-<div class="data-card">
-    <div class="table-responsive">
+<div class="data-card" style="border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 8px 25px rgba(0,0,0,0.08); border-radius: var(--radius-xl); overflow: hidden;">
+    <div class="table-responsive" style="background: white; overflow-x: hidden;">
         <table class="data-table">
             <thead>
                 <tr>

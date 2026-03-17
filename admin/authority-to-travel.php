@@ -32,10 +32,11 @@ $isActingAsOIC = $auth->isActingAsOIC();
  * Convert technical database errors into plain-language messages
  * so non-technical users can understand what went wrong.
  */
-function friendlyDbErrorAT($exceptionMessage) {
+function friendlyDbErrorAT($exceptionMessage)
+{
     if (stripos($exceptionMessage, "employee_no") !== false && stripos($exceptionMessage, "cannot be null") !== false) {
         return "This action could not be completed because the employee's Employee Number is not yet saved in the system. "
-             . "Please ask HR or your system administrator to update the employee's profile with their Employee Number, then try again.";
+            . "Please ask HR or your system administrator to update the employee's profile with their Employee Number, then try again.";
     }
     if (stripos($exceptionMessage, "Duplicate entry") !== false) {
         return "This record was already processed. Please refresh the page and try again.";
@@ -415,14 +416,14 @@ if ($type === 'outside_region') {
         <i class="fas fa-exclamation-triangle"></i> <?php echo htmlspecialchars($error); ?>
     </div>
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        if (typeof showAlertModal === 'function') {
-            showAlertModal(<?php echo json_encode($error); ?>, {
-                title: 'Unable to Complete Action',
-                tone: 'error'
-            });
-        }
-    });
+        document.addEventListener('DOMContentLoaded', function () {
+            if (typeof showAlertModal === 'function') {
+                showAlertModal(<?php echo json_encode($error); ?>, {
+                    title: 'Unable to Complete Action',
+                    tone: 'error'
+                });
+            }
+        });
     </script>
 <?php endif; ?>
 
@@ -1063,29 +1064,41 @@ if ($type === 'outside_region') {
 
 <?php else: ?>
     <!-- List View -->
-    <div class="page-header">
-        <div class="result-count">
-            <?php echo $totalRequests; ?> Travel Request<?php echo $totalRequests !== 1 ? 's' : ''; ?>
-            <?php if ($auth->canActOnAT() && empty($_GET['show_all'])): ?>
-                <span class="text-muted">(In Your Queue)</span>
-            <?php endif; ?>
+    <div class="page-header"
+        style="background: #164f77; color: white; padding: 12px 16px; border-radius: var(--radius-lg); margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 15px rgba(22, 79, 119, 0.2); border: none;">
+        <div class="header-content">
+            <h2
+                style="margin: 0; font-size: 1.15rem; display: flex; align-items: center; gap: 6px; font-weight: 800; letter-spacing: -0.5px; color: white;">
+                <i class="fas fa-plane" style="color: rgba(255,255,255,0.8); font-size: 1rem;"></i> Authority to Travel
+                Management
+            </h2>
+            <p style="margin: 2px 0 0 0; color: rgba(255,255,255,0.8); font-size: 0.75rem;">
+                <?php echo $totalRequests; ?> Travel Request<?php echo $totalRequests !== 1 ? 's' : ''; ?>
+                <?php if ($auth->canActOnAT() && empty($_GET['show_all'])): ?>
+                    <span style="color: rgba(255,255,255,0.6);">(In Your Queue)</span>
+                <?php endif; ?>
+            </p>
         </div>
-        <div class="header-actions">
+        <div class="header-actions" style="display: flex; gap: 8px;">
             <?php if ($auth->canActOnAT()): ?>
                 <a href="<?php echo navUrl('/authority-to-travel.php' . (empty($_GET['show_all']) ? '?show_all=1' : '')); ?>"
-                    class="btn btn-secondary btn-sm">
+                    class="btn"
+                    style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.3); font-weight: 600; padding: 6px 12px; font-size: 0.8rem; border-radius: var(--radius-md); display: flex; align-items: center; gap: 6px;">
                     <i class="fas fa-<?php echo empty($_GET['show_all']) ? 'list' : 'inbox'; ?>"></i>
                     <?php echo empty($_GET['show_all']) ? 'View All' : 'My Queue'; ?>
                 </a>
             <?php endif; ?>
-            <button type="button" class="btn btn-primary" onclick="openNewModal()">
+            <button type="button" class="btn"
+                style="background: white; color: var(--primary-dark); font-weight: 700; border: none; padding: 6px 12px; font-size: 0.8rem; border-radius: var(--radius-md); display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"
+                onclick="openNewModal()">
                 <i class="fas fa-plus"></i> New Travel Request
             </button>
         </div>
     </div>
 
     <!-- Filter Bar -->
-    <div class="filter-bar">
+    <div class="filter-bar"
+        style="background: white; padding: 24px; border-radius: var(--radius-lg); box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 24px; border: 1px solid rgba(0,0,0,0.05);">
         <form class="filter-form" method="GET" action="">
             <input type="hidden" name="token" value="<?php echo $currentToken; ?>">
 
@@ -1199,8 +1212,9 @@ if ($type === 'outside_region') {
     </div>
 
     <!-- Data Table -->
-    <div class="data-card">
-        <div class="table-responsive">
+    <div class="data-card"
+        style="border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 8px 25px rgba(0,0,0,0.08); border-radius: var(--radius-xl); overflow: hidden;">
+        <div class="table-responsive" style="background: white; overflow-x: hidden;">
             <table class="data-table">
                 <thead>
                     <tr>
@@ -1226,9 +1240,12 @@ if ($type === 'outside_region') {
                         </tr>
                     <?php else: ?>
                         <?php foreach ($requests as $at): ?>
-                            <tr>
-                                <td>
-                                    <a href="<?php echo navUrl('/authority-to-travel.php?view=' . $at['id']); ?>" class="ref-link">
+                            <tr style="transition: all 0.2s ease; border-bottom: 1px solid var(--border-light);"
+                                onmouseover="this.style.backgroundColor='var(--bg-secondary)'; this.style.transform='scale(1.002)';"
+                                onmouseout="this.style.backgroundColor=''; this.style.transform='scale(1)';">
+                                <td style="padding: 18px 16px;">
+                                    <a href="<?php echo navUrl('/authority-to-travel.php?view=' . $at['id']); ?>" class="ref-link"
+                                        style="background: var(--bg-secondary); padding: 6px 12px; border-radius: 6px; font-weight: 700;">
                                         <?php echo htmlspecialchars($at['at_tracking_no']); ?>
                                     </a>
                                 </td>
@@ -1246,7 +1263,8 @@ if ($type === 'outside_region') {
                                 </td>
                                 <td>
                                     <div class="cell-primary"><?php echo date('M j', strtotime($at['date_from'])); ?> -
-                                        <?php echo date('M j, Y', strtotime($at['date_to'])); ?></div>
+                                        <?php echo date('M j, Y', strtotime($at['date_to'])); ?>
+                                    </div>
                                 </td>
                                 <td>
                                     <?php
@@ -1279,20 +1297,27 @@ if ($type === 'outside_region') {
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <div class="action-buttons">
+                                    <div class="action-buttons" style="display: flex; gap: 8px;">
                                         <a href="<?php echo navUrl('/authority-to-travel.php?view=' . $at['id']); ?>"
-                                            class="btn btn-icon" title="View">
+                                            class="btn btn-icon" title="View"
+                                            style="background: var(--bg-secondary); color: var(--primary-dark); border-radius: 8px; width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s ease;">
                                             <i class="fas fa-eye"></i>
                                         </a>
                                         <?php if ($atModel->canUserEdit($at, $auth->getUserId())): ?>
                                             <a href="<?php echo navUrl('/authority-to-travel.php?edit=' . $at['id']); ?>"
-                                                class="btn btn-icon" title="Edit" style="color: var(--primary);">
+                                                class="btn btn-icon" title="Edit"
+                                                style="background: var(--warning-bg); color: var(--warning); border-radius: 8px; width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s ease;"
+                                                onmouseover="this.style.background='var(--warning)'; this.style.color='white';"
+                                                onmouseout="this.style.background='var(--warning-bg)'; this.style.color='var(--warning)';">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                         <?php endif; ?>
                                         <?php if ($at['status'] === 'approved'): ?>
                                             <a href="<?php echo navUrl('/api/generate-docx.php?type=at&id=' . $at['id']); ?>"
-                                                class="btn btn-icon" title="Download PDF" style="color: var(--success);">
+                                                class="btn btn-icon" title="Download PDF"
+                                                style="background: var(--success-bg); color: var(--success); border-radius: 8px; width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s ease;"
+                                                onmouseover="this.style.background='var(--success)'; this.style.color='white';"
+                                                onmouseout="this.style.background='var(--success-bg)'; this.style.color='var(--success)';">
                                                 <i class="fas fa-download"></i>
                                             </a>
                                         <?php endif; ?>
@@ -1528,5 +1553,147 @@ if ($type === 'outside_region') {
         <?php endif; ?>
     </script>
 <?php endif; ?>
+
+<style>
+    /* Premium Form Enhancements */
+    .modal {
+        border-radius: var(--radius-xl);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        background: #ffffff;
+        border: none;
+        overflow: hidden;
+        transform: scale(0.95);
+        opacity: 0;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .modal-overlay.active .modal {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+        color: white;
+        padding: 24px 30px;
+        border-bottom: none;
+    }
+
+    .modal-header h3 {
+        color: white;
+        font-size: 1.3rem;
+        font-weight: 700;
+    }
+
+    .modal-close {
+        color: rgba(255, 255, 255, 0.8);
+        background: rgba(255, 255, 255, 0.1);
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+
+    .modal-close:hover {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        transform: rotate(90deg);
+    }
+
+    .modal-body {
+        padding: 30px;
+    }
+
+    .modal-footer {
+        padding: 20px 30px;
+        background: var(--bg-secondary);
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .form-label {
+        font-weight: 700;
+        color: var(--primary-dark);
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+    }
+
+    .input-with-icon {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .input-with-icon i {
+        position: absolute;
+        left: 14px;
+        color: var(--text-muted);
+        font-size: 1rem;
+        transition: color 0.3s ease;
+        pointer-events: none;
+    }
+
+    .input-with-icon .form-control {
+        padding-left: 42px;
+    }
+
+    .form-control {
+        border: 2px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: 12px 16px;
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+        background: var(--bg-primary);
+        box-shadow: none;
+    }
+
+    .form-control:focus {
+        border-color: var(--primary);
+        background: #ffffff;
+        box-shadow: 0 0 0 4px rgba(15, 76, 117, 0.1);
+    }
+
+    .input-with-icon .form-control:focus+i,
+    .form-control:focus~i {
+        color: var(--primary);
+    }
+
+    .form-control:hover {
+        border-color: var(--primary-light);
+    }
+
+    /* Beautiful Action Buttons */
+    .btn {
+        border-radius: var(--radius-md);
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+        box-shadow: 0 4px 12px rgba(15, 76, 117, 0.2);
+        border: none;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(15, 76, 117, 0.3);
+    }
+
+    .btn-secondary {
+        background: white;
+        border: 2px solid var(--border-color);
+        color: var(--text-primary);
+    }
+
+    .btn-secondary:hover {
+        background: var(--bg-secondary);
+        border-color: var(--text-muted);
+        transform: translateY(-2px);
+    }
+</style>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>

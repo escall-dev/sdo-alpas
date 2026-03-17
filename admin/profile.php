@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $data['employee_office'] = $_POST['employee_office'] ?? '';
         }
     }
-    
+
     // Validate
     if (empty($data['full_name'])) {
         $error = 'Full name is required.';
@@ -61,12 +61,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $data['password'] = $_POST['new_password'];
             }
         }
-        
+
         if (!$error) {
             $userModel->update($auth->getUserId(), $data);
             $auth->logActivity('update_profile', 'user', $auth->getUserId(), 'Updated profile');
             $message = 'Profile updated successfully!';
-            
+
             // Refresh user data and re-resolve office/unit
             $currentUser = $userModel->getById($auth->getUserId());
             $profileOfficeId = isset($currentUser['office_id']) ? (int) $currentUser['office_id'] : null;
@@ -83,11 +83,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 
 <?php if ($message): ?>
-<div class="alert alert-success"><i class="fas fa-check-circle"></i> <?php echo htmlspecialchars($message); ?></div>
+    <div class="alert alert-success"><i class="fas fa-check-circle"></i> <?php echo htmlspecialchars($message); ?></div>
 <?php endif; ?>
 
 <?php if ($error): ?>
-<div class="alert alert-error"><i class="fas fa-exclamation-triangle"></i> <?php echo htmlspecialchars($error); ?></div>
+    <div class="alert alert-error"><i class="fas fa-exclamation-triangle"></i> <?php echo htmlspecialchars($error); ?></div>
 <?php endif; ?>
 
 <div class="complaint-detail-grid profile-page-grid" style="grid-template-columns: 1fr 350px; align-items: stretch;">
@@ -133,38 +133,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="form-group">
                         <label class="form-label">Office/Division</label>
                         <?php if ($isSuperAdmin): ?>
-                        <select name="office" id="profile_office" class="form-control" aria-label="Select office to enable Unit/Section">
-                            <option value="">-- Select Office --</option>
-                            <?php foreach ($topOffices as $o): ?>
-                            <option value="<?php echo htmlspecialchars($o['code']); ?>" <?php echo $profileOfficeCode === ($o['code'] ?? '') ? 'selected' : ''; ?>><?php echo htmlspecialchars($o['name']); ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                        <span class="form-hint">OSDS, SGOD, or CID</span>
+                            <select name="office" id="profile_office" class="form-control" aria-label="Select office to enable Unit/Section">
+                                <option value="">-- Select Office --</option>
+                                <?php foreach ($topOffices as $o): ?>
+                                    <option value="<?php echo htmlspecialchars($o['code']); ?>" <?php echo $profileOfficeCode === ($o['code'] ?? '') ? 'selected' : ''; ?>><?php echo htmlspecialchars($o['name']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <span class="form-hint">OSDS, SGOD, or CID</span>
                         <?php else: ?>
-                        <input type="text" class="form-control" readonly disabled
-                               value="<?php echo htmlspecialchars($profileDivisionName ?: $profileUnitName ?: ($currentUser['employee_office'] ?? '—')); ?>">
-                        <span class="form-hint">Office/Division can only be changed by Superadmin</span>
+                            <input type="text" class="form-control" readonly disabled
+                                   value="<?php echo htmlspecialchars($profileDivisionName ?: $profileUnitName ?: ($currentUser['employee_office'] ?? '—')); ?>">
+                            <span class="form-hint">Office/Division can only be changed by Superadmin</span>
                         <?php endif; ?>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Unit/Section</label>
                         <?php if ($isSuperAdmin): ?>
-                        <select name="office_id" id="profile_unit_id" class="form-control" <?php echo empty($profileOfficeCode) ? 'disabled' : ''; ?>>
-                            <option value="">-- Select Unit/Section --</option>
-                            <?php
-                            if ($profileOfficeCode && !empty($unitsByOffice[$profileOfficeCode])) {
-                                foreach ($unitsByOffice[$profileOfficeCode] as $u) {
-                                    $sel = ($profileOfficeId && (int)$u['id'] === $profileOfficeId) ? ' selected' : '';
-                                    echo '<option value="' . (int)$u['id'] . '"' . $sel . '>' . htmlspecialchars($u['office_name'] ?? $u['office_code'] ?? $u['id']) . '</option>';
+                            <select name="office_id" id="profile_unit_id" class="form-control" <?php echo empty($profileOfficeCode) ? 'disabled' : ''; ?>>
+                                <option value="">-- Select Unit/Section --</option>
+                                <?php
+                                if ($profileOfficeCode && !empty($unitsByOffice[$profileOfficeCode])) {
+                                    foreach ($unitsByOffice[$profileOfficeCode] as $u) {
+                                        $sel = ($profileOfficeId && (int) $u['id'] === $profileOfficeId) ? ' selected' : '';
+                                        echo '<option value="' . (int) $u['id'] . '"' . $sel . '>' . htmlspecialchars($u['office_name'] ?? $u['office_code'] ?? $u['id']) . '</option>';
+                                    }
                                 }
-                            }
-                            ?>
-                        </select>
-                        <span class="form-hint">Select an Office first</span>
+                                ?>
+                            </select>
+                            <span class="form-hint">Select an Office first</span>
                         <?php else: ?>
-                        <input type="text" class="form-control" readonly disabled
-                               value="<?php echo htmlspecialchars($profileUnitName ?: '—'); ?>">
-                        <span class="form-hint">Unit you belong to</span>
+                            <input type="text" class="form-control" readonly disabled
+                                   value="<?php echo htmlspecialchars($profileUnitName ?: '—'); ?>">
+                            <span class="form-hint">Unit you belong to</span>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -202,16 +202,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="detail-card-body" style="text-align: center; padding: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 0;">
                 <div class="profile-avatar-wrapper" id="avatarWrapper" style="position: relative; width: 120px; height: 120px; border-radius: 50%; cursor: pointer; margin: 35px auto 14px; flex-shrink: 0;">
                     <?php if (!empty($currentUser['avatar_url'])): ?>
-                    <img src="<?php echo BASE_URL . '/uploads/avatars/' . htmlspecialchars($currentUser['avatar_url']); ?>" 
-                         alt="Avatar" 
-                         class="profile-avatar-img" 
-                         id="profileAvatarImg"
-                         style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; display: block; border: 3px solid rgba(255,255,255,0.25);">
+                        <img src="<?php echo BASE_URL . '/uploads/avatars/' . htmlspecialchars($currentUser['avatar_url']); ?>" 
+                             alt="Avatar" 
+                             class="profile-avatar-img" 
+                             id="profileAvatarImg"
+                             style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; display: block; border: 3px solid rgba(255,255,255,0.25);">
                     <?php else: ?>
-                    <div class="user-avatar-placeholder profile-avatar-icon" id="profileAvatarPlaceholder" 
-                         style="width: 120px; height: 120px; font-size: 2.4rem; background:rgb(241, 142, 37); color: white;">
-                        <?php echo strtoupper(substr($currentUser['full_name'], 0, 1)); ?>
-                    </div>
+                        <div class="user-avatar-placeholder profile-avatar-icon" id="profileAvatarPlaceholder" 
+                             style="width: 120px; height: 120px; font-size: 2.4rem; background:rgb(241, 142, 37); color: white;">
+                            <?php echo strtoupper(substr($currentUser['full_name'], 0, 1)); ?>
+                        </div>
                     <?php endif; ?>
                     <!-- Camera badge at bottom-right -->
                     <div id="avatarCameraBadge" title="Change avatar"
@@ -297,36 +297,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
 <?php if ($isSuperAdmin && !empty($unitsByOffice)): ?>
-<script>
-(function() {
-    var unitsByOffice = <?php echo json_encode($unitsByOffice); ?>;
-    function fillUnitSelect(selectEl, officeCode) {
-        if (!selectEl) return;
-        selectEl.innerHTML = '<option value="">-- Select Unit/Section --</option>';
-        selectEl.disabled = true;
-        if (!officeCode || !unitsByOffice[officeCode]) return;
-        var units = unitsByOffice[officeCode];
-        for (var i = 0; i < units.length; i++) {
-            var opt = document.createElement('option');
-            opt.value = units[i].id;
-            opt.textContent = units[i].office_name || units[i].office_code || units[i].id;
-            selectEl.appendChild(opt);
+    <script>
+    (function() {
+        var unitsByOffice = <?php echo json_encode($unitsByOffice); ?>;
+        function fillUnitSelect(selectEl, officeCode) {
+            if (!selectEl) return;
+            selectEl.innerHTML = '<option value="">-- Select Unit/Section --</option>';
+            selectEl.disabled = true;
+            if (!officeCode || !unitsByOffice[officeCode]) return;
+            var units = unitsByOffice[officeCode];
+            for (var i = 0; i < units.length; i++) {
+                var opt = document.createElement('option');
+                opt.value = units[i].id;
+                opt.textContent = units[i].office_name || units[i].office_code || units[i].id;
+                selectEl.appendChild(opt);
+            }
+            selectEl.disabled = false;
         }
-        selectEl.disabled = false;
-    }
-    document.addEventListener('DOMContentLoaded', function() {
-        var profileOffice = document.getElementById('profile_office');
-        var profileUnit = document.getElementById('profile_unit_id');
-        if (profileOffice && profileUnit) {
-            profileOffice.addEventListener('change', function() {
-                var code = profileOffice.value;
-                fillUnitSelect(profileUnit, code);
-                profileUnit.value = '';
-            });
-        }
-    });
-})();
-</script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var profileOffice = document.getElementById('profile_office');
+            var profileUnit = document.getElementById('profile_unit_id');
+            if (profileOffice && profileUnit) {
+                profileOffice.addEventListener('change', function() {
+                    var code = profileOffice.value;
+                    fillUnitSelect(profileUnit, code);
+                    profileUnit.value = '';
+                });
+            }
+        });
+    })();
+    </script>
 <?php endif; ?>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>

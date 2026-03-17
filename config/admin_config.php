@@ -215,8 +215,10 @@ define('PDF_CONVERT_TIMEOUT', 120);
 define('CONVERSION_LOG_DIR', __DIR__ . '/../logs/');
 
 // Backward-compatible aliases for older references
-if (!defined('WORD_CONVERT_SCRIPT'))  define('WORD_CONVERT_SCRIPT', PDF_CONVERT_SCRIPT);
-if (!defined('WORD_CONVERT_TIMEOUT')) define('WORD_CONVERT_TIMEOUT', PDF_CONVERT_TIMEOUT);
+if (!defined('WORD_CONVERT_SCRIPT'))
+    define('WORD_CONVERT_SCRIPT', PDF_CONVERT_SCRIPT);
+if (!defined('WORD_CONVERT_TIMEOUT'))
+    define('WORD_CONVERT_TIMEOUT', PDF_CONVERT_TIMEOUT);
 
 // Permission definitions
 define('PERMISSIONS', [

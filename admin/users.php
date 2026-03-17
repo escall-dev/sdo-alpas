@@ -211,16 +211,19 @@ $pendingCount = $userModel->getPendingRegistrationsCount();
 <?php endif; ?>
 
 <div class="page-header">
-    <div class="result-count"><?php echo $totalUsers; ?> User<?php echo $totalUsers !== 1 ? 's' : ''; ?></div>
+    <div class="header-content">
+        <h2><i class="fas fa-users"></i> User Management</h2>
+        <p class="header-subtitle"><?php echo $totalUsers; ?> Total Users</p>
+    </div>
     <?php if ($auth->isSuperAdmin()): ?>
-    <button type="button" class="btn btn-primary btn-sm" onclick="openAddUserModal()">
+    <button type="button" class="btn btn-primary" onclick="openAddUserModal()">
         <i class="fas fa-user-plus"></i> Add User
     </button>
     <?php endif; ?>
 </div>
 
 <!-- Filter Bar -->
-<div class="filter-bar">
+<div class="filter-bar" style="background: white; padding: 24px; border-radius: var(--radius-lg); box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 24px; border: 1px solid rgba(0,0,0,0.05);">
     <form class="filter-form" method="GET" action="">
         <input type="hidden" name="token" value="<?php echo $currentToken; ?>">
         
@@ -303,8 +306,8 @@ $pendingCount = $userModel->getPendingRegistrationsCount();
 </div>
 
 <!-- Users Table -->
-<div class="data-card">
-    <div class="table-responsive">
+<div class="data-card" style="border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 8px 25px rgba(0,0,0,0.08); border-radius: var(--radius-xl); overflow: hidden;">
+    <div class="table-responsive" style="background: white; overflow-x: hidden;">
         <table class="data-table">
             <thead>
                 <tr>

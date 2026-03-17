@@ -106,12 +106,12 @@ $stats = $resetModel->getAttemptStats();
 </div>
 
 <!-- Filter Bar -->
-<div class="filter-bar">
+<div class="filter-bar" style="background: white; padding: 24px; border-radius: var(--radius-lg); box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 24px; border: 1px solid rgba(0,0,0,0.05);">
     <form class="filter-form" method="GET" action="">
         <?php if (!empty($currentToken)): ?>
             <input type="hidden" name="token" value="<?php echo htmlspecialchars($currentToken); ?>">
         <?php endif; ?>
-        <div class="filter-group" style="flex: 1; min-width: 200px;">
+        <div class="filter-group">
             <label>Search</label>
             <input type="text" name="search" class="filter-input" placeholder="Search by name or email..."
                 value="<?php echo htmlspecialchars($filters['search'] ?? ''); ?>">
@@ -133,10 +133,10 @@ $stats = $resetModel->getAttemptStats();
 </div>
 
 <!-- Table -->
-<div class="data-card">
+<div class="data-card" style="border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 8px 25px rgba(0,0,0,0.08); border-radius: var(--radius-xl); overflow: hidden;">
     <div class="data-card-header"
-        style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px;">
-        <h3 style="margin: 0; font-size: 1rem; color: var(--text-primary);">
+        style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid rgba(0,0,0,0.05); background: white;">
+        <h3 style="margin: 0; font-size: 1rem; color: var(--text-primary); font-weight: 700;">
             <i class="fas fa-key" style="color: var(--primary); margin-right: 8px;"></i>
             Password Reset Rate Limits
         </h3>
@@ -152,7 +152,7 @@ $stats = $resetModel->getAttemptStats();
             <p>No users have requested a password reset yet.</p>
         </div>
     <?php else: ?>
-        <div class="table-responsive">
+        <div class="table-responsive" style="background: white; overflow-x: hidden;">
             <table class="data-table">
                 <thead>
                     <tr>
