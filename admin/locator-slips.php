@@ -355,7 +355,6 @@ $formData = [
                         <div class="form-group">
                             <label class="form-label">Employee Name <span class="required">*</span></label>
                             <div class="input-with-icon">
-                                <i class="fas fa-user"></i>
                                 <input type="text" name="employee_name" class="form-control" required
                                     value="<?php echo htmlspecialchars($editData['employee_name']); ?>">
                             </div>
@@ -363,7 +362,6 @@ $formData = [
                         <div class="form-group">
                             <label class="form-label">Position</label>
                             <div class="input-with-icon">
-                                <i class="fas fa-id-badge"></i>
                                 <input type="text" name="employee_position" class="form-control"
                                     value="<?php echo htmlspecialchars($editData['employee_position'] ?? ''); ?>">
                             </div>
@@ -373,7 +371,6 @@ $formData = [
                     <div class="form-group">
                         <label class="form-label">Unit/Section</label>
                         <div class="input-with-icon">
-                            <i class="fas fa-building"></i>
                             <select name="employee_office" class="form-control">
                                 <option value="">-- Select Unit/Section --</option>
                                 <?php foreach (SDO_OFFICES as $code => $name): ?>
@@ -389,7 +386,6 @@ $formData = [
                         <div class="form-group">
                             <label class="form-label">Travel Type <span class="required">*</span></label>
                             <div class="input-with-icon">
-                                <i class="fas fa-route"></i>
                                 <select name="travel_type" class="form-control" required>
                                     <?php foreach (TRAVEL_TYPES as $code => $label): ?>
                                         <option value="<?php echo $code; ?>" <?php echo ($editData['travel_type'] ?? '') === $code ? 'selected' : ''; ?>>
@@ -402,7 +398,6 @@ $formData = [
                         <div class="form-group">
                             <label class="form-label">Date & Time <span class="required">*</span></label>
                             <div class="input-with-icon">
-                                <i class="fas fa-clock"></i>
                                 <input type="datetime-local" name="date_time" class="form-control" required
                                     min="<?php echo date('Y-m-d\TH:i'); ?>"
                                     value="<?php echo date('Y-m-d\TH:i', strtotime($editData['date_time'])); ?>">
@@ -413,7 +408,6 @@ $formData = [
                     <div class="form-group">
                         <label class="form-label">Destination <span class="required">*</span></label>
                         <div class="input-with-icon">
-                            <i class="fas fa-map-marker-alt"></i>
                             <input type="text" name="destination" class="form-control" required
                                 value="<?php echo htmlspecialchars($editData['destination']); ?>">
                         </div>
@@ -421,8 +415,7 @@ $formData = [
 
                     <div class="form-group">
                         <label class="form-label">Purpose of Travel <span class="required">*</span></label>
-                        <div class="input-with-icon" style="align-items: flex-start;">
-                            <i class="fas fa-align-left" style="top: 14px;"></i>
+                        <div class="input-with-icon">
                             <textarea name="purpose_of_travel" class="form-control" rows="3"
                                 required><?php echo htmlspecialchars($editData['purpose_of_travel']); ?></textarea>
                         </div>
@@ -430,10 +423,10 @@ $formData = [
 
                     <div class="form-actions">
                         <a href="<?php echo navUrl('/locator-slips.php?view=' . $editData['id']); ?>" class="btn btn-secondary">
-                            <i class="fas fa-times"></i> Cancel
+                            Cancel
                         </a>
                         <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i> Save Changes
+                            Save Changes
                         </button>
                     </div>
                 </form>
@@ -1028,7 +1021,7 @@ $formData = [
     <div class="modal-overlay" id="newModal" <?php echo $action === 'new' ? 'class="active"' : ''; ?>>
         <div class="modal modal-lg">
             <div class="modal-header">
-                <h3><i class="fas fa-map-marker-alt"></i> New Locator Slip</h3>
+                <h3>New Locator Slip</h3>
                 <button class="modal-close" onclick="closeNewModal()">&times;</button>
             </div>
             <form method="POST" action="">
@@ -1040,7 +1033,6 @@ $formData = [
                         <div class="form-group">
                             <label class="form-label">Employee Name <span class="required">*</span></label>
                             <div class="input-with-icon">
-                                <i class="fas fa-user"></i>
                                 <input type="text" name="employee_name" class="form-control" required
                                     value="<?php echo htmlspecialchars($formData['employee_name']); ?>">
                             </div>
@@ -1048,7 +1040,6 @@ $formData = [
                         <div class="form-group">
                             <label class="form-label">Position</label>
                             <div class="input-with-icon">
-                                <i class="fas fa-id-badge"></i>
                                 <input type="text" name="employee_position" class="form-control"
                                     value="<?php echo htmlspecialchars($formData['employee_position']); ?>">
                             </div>
@@ -1058,7 +1049,6 @@ $formData = [
                     <div class="form-group">
                         <label class="form-label">Unit/Section</label>
                         <div class="input-with-icon">
-                            <i class="fas fa-building"></i>
                             <input type="text" class="form-control" readonly
                                 value="<?php echo htmlspecialchars($formData['employee_unit_section'] ?: '-'); ?>"
                                 style="background: var(--bg-secondary); cursor: not-allowed;">
@@ -1071,7 +1061,6 @@ $formData = [
                         <div class="form-group">
                             <label class="form-label">Travel Type <span class="required">*</span></label>
                             <div class="input-with-icon">
-                                <i class="fas fa-route"></i>
                                 <select name="travel_type" class="form-control" required>
                                     <?php foreach (TRAVEL_TYPES as $code => $label): ?>
                                         <option value="<?php echo $code; ?>"><?php echo htmlspecialchars($label); ?></option>
@@ -1082,7 +1071,6 @@ $formData = [
                         <div class="form-group">
                             <label class="form-label">Date & Time <span class="required">*</span></label>
                             <div class="input-with-icon">
-                                <i class="fas fa-clock"></i>
                                 <input type="datetime-local" name="date_time" class="form-control" required
                                     min="<?php echo date('Y-m-d\TH:i'); ?>" value="<?php echo date('Y-m-d\TH:i'); ?>">
                             </div>
@@ -1092,7 +1080,6 @@ $formData = [
                     <div class="form-group">
                         <label class="form-label">Destination <span class="required">*</span></label>
                         <div class="input-with-icon">
-                            <i class="fas fa-map-marker-alt"></i>
                             <input type="text" name="destination" class="form-control" required
                                 placeholder="Where are you going?">
                         </div>
@@ -1100,8 +1087,7 @@ $formData = [
 
                     <div class="form-group">
                         <label class="form-label">Purpose of Travel <span class="required">*</span></label>
-                        <div class="input-with-icon" style="align-items: flex-start;">
-                            <i class="fas fa-align-left" style="top: 14px;"></i>
+                        <div class="input-with-icon">
                             <textarea name="purpose_of_travel" class="form-control" rows="3" required
                                 placeholder="Describe the purpose of your travel..."></textarea>
                         </div>
@@ -1109,7 +1095,7 @@ $formData = [
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeNewModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Submit Request</button>
+                    <button type="submit" class="btn btn-primary">Submit Request</button>
                 </div>
             </form>
         </div>
@@ -1282,17 +1268,8 @@ $formData = [
             align-items: center;
         }
 
-        .input-with-icon i {
-            position: absolute;
-            left: 14px;
-            color: var(--text-muted);
-            font-size: 1rem;
-            transition: color 0.3s ease;
-            pointer-events: none;
-        }
-
         .input-with-icon .form-control {
-            padding-left: 42px;
+            padding-left: 16px;
         }
 
         .form-control {
@@ -1309,11 +1286,6 @@ $formData = [
             border-color: var(--primary);
             background: #ffffff;
             box-shadow: 0 0 0 4px rgba(15, 76, 117, 0.1);
-        }
-
-        .input-with-icon .form-control:focus+i,
-        .form-control:focus~i {
-            color: var(--primary);
         }
 
         .form-control:hover {

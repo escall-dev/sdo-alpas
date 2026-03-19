@@ -360,7 +360,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <img src="assets/logos/sdo-logo.jpg" alt="SDO Logo">
                 </div>
                 <h1>SDO ALPAS</h1>
-                <p>Authority to Travel, Locator and Pass slip Approval System<br>Schools Division Office of San Pedro City</p>
+                <p>Authority to Travel, Locator & Pass slip Approval System</p>
             </div>
 
             <?php if ($error): ?>
@@ -409,13 +409,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </a>
 
             <div class="login-footer">
-                <p>Need help? Contact the IT Office</p>
+                 <p>Need help? Click   &nbsp;&nbsp;<a href="http://192.168.11.1/icthelpdesk/login.php" target="_blank">ICT Helpdesk</a></p>
             </div>
         </div>
 
         <div class="brand-footer">
             <p>&copy; <?php echo date('Y'); ?> SDO ALPAS - Department of Education<br>
-            Schools Division Office of San Pedro City</p>
+            Schools Division Office of San Pedro City<br>
+        Developed by: Alexander Joerenz Escallente & Redgine Pinedes</p>
         </div>
     </div>
 </body>

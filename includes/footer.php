@@ -1,9 +1,9 @@
             </div><!-- .content-wrapper -->
             
             <footer class="admin-footer">
-                <p>&copy; <?php echo date('Y'); ?> SDO ALPAS - Schools Division Office of San Pedro City<br>
-                Authority to Travel, Locator and Pass slip Approval System</p>
-                <p>Department of Education</p>
+                <p>&copy; <?php echo date('Y'); ?>  SDO ALPAS - Department of Education</p>
+                <p>Schools Division Office of San Pedro City<br>
+                Developed by: Alexander Joerenz Escallente & Redgine Pinedes</p>
             </footer>
         </main>
     </div>
