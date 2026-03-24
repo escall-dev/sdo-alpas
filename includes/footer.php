@@ -1,9 +1,8 @@
             </div><!-- .content-wrapper -->
             
             <footer class="admin-footer">
-                <p>&copy; <?php echo date('Y'); ?>  SDO ALPAS - Department of Education</p>
-                <p>Schools Division Office of San Pedro City<br>
-                Developed by: Alexander Joerenz Escallente & Redgine Pinedes</p>
+                <p>DepEd — Schools Division Office of San Pedro City</p>
+                <span>&copy; <?php echo date('Y'); ?> ICT Unit</span>
             </footer>
         </main>
     </div>
