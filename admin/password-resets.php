@@ -227,11 +227,11 @@ $stats = $resetModel->getAttemptStats();
                             <td style="text-align: center;">
                                 <?php if ($a['is_blocked']): ?>
                                     <span class="status-badge status-rejected">
-                                        <i class="fas fa-lock" style="font-size: 0.6rem;"></i> Blocked
+                                        Blocked
                                     </span>
                                 <?php else: ?>
                                     <span class="status-badge status-approved">
-                                        <i class="fas fa-unlock" style="font-size: 0.6rem;"></i> Active
+                                        Active
                                     </span>
                                 <?php endif; ?>
                             </td>

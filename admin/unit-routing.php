@@ -366,9 +366,9 @@ foreach ($routingConfigs as $config) {
                     <td><?php echo $appliesToLabels[$config['applies_to']] ?? 'Authority to Travel'; ?></td>
                     <td>
                         <?php if ($config['is_active']): ?>
-                        <span class="status-badge status-approved"><i class="fas fa-check-circle"></i> Active</span>
+                        <span class="status-badge status-approved">Active</span>
                         <?php else: ?>
-                        <span class="status-badge status-rejected"><i class="fas fa-times-circle"></i> Inactive</span>
+                        <span class="status-badge status-rejected">Inactive</span>
                         <?php endif; ?>
                     </td>
                     <td>

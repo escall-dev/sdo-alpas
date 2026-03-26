@@ -156,7 +156,7 @@ $activeOIC = $oicModel->getActiveOICForUnit($currentRoleId);
             <i class="fas fa-user-check"></i> Currently Active OIC
         </h3>
         <span class="status-badge status-approved">
-            <i class="fas fa-check-circle"></i> Active
+            Active
         </span>
     </div>
     <div class="detail-card-body">
@@ -245,11 +245,11 @@ $activeOIC = $oicModel->getActiveOICForUnit($currentRoleId);
                         $isActive = $oic['is_active'] == 1;
                         $isCurrent = strtotime($oic['start_date']) <= time() && strtotime($oic['end_date']) >= time();
                         if ($isActive && $isCurrent) {
-                            echo '<span class="status-badge status-approved"><i class="fas fa-check-circle"></i> Active</span>';
+                            echo '<span class="status-badge status-approved">Active</span>';
                         } elseif ($isActive && !$isCurrent) {
-                            echo '<span class="status-badge status-pending"><i class="fas fa-clock"></i> Scheduled</span>';
+                            echo '<span class="status-badge status-pending">Scheduled</span>';
                         } else {
-                            echo '<span class="status-badge status-rejected"><i class="fas fa-times-circle"></i> Inactive</span>';
+                            echo '<span class="status-badge status-rejected">Inactive</span>';
                         }
                         ?>
                     </td>

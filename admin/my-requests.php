@@ -25,6 +25,7 @@ $approvalDateTo = $_GET['approval_date_to'] ?? '';
 
 $page = max(1, intval($_GET['page'] ?? 1));
 $perPage = ITEMS_PER_PAGE;
+$canCreateTravelRequests = !$auth->isSuperAdmin();
 
 // Build filters for LS and AT
 $filters = ['user_id' => $userId];
@@ -147,17 +148,17 @@ $totalPages = ceil($totalRequests / $perPage);
         </h2>
     </div>
     <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-        <?php if ($type === 'all' || $type === 'ls'): ?>
+        <?php if ($canCreateTravelRequests && ($type === 'all' || $type === 'ls')): ?>
         <a href="<?php echo navUrl('/locator-slips.php?action=new'); ?>" class="btn btn-primary btn-sm">
             <i class="fas fa-plus"></i> New Locator Slip
         </a>
         <?php endif; ?>
-        <?php if ($type === 'all' || $type === 'at'): ?>
+        <?php if ($canCreateTravelRequests && ($type === 'all' || $type === 'at')): ?>
         <a href="<?php echo navUrl('/authority-to-travel.php?action=new'); ?>" class="btn btn-primary btn-sm">
             <i class="fas fa-plus"></i> New Travel Request
         </a>
         <?php endif; ?>
-        <?php if ($type === 'all' || $type === 'ps'): ?>
+        <?php if ($canCreateTravelRequests && ($type === 'all' || $type === 'ps')): ?>
         <a href="<?php echo navUrl('/pass-slips.php?action=new'); ?>" class="btn btn-primary btn-sm">
             <i class="fas fa-plus"></i> New Pass Slip
         </a>

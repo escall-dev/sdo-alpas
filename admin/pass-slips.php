@@ -20,6 +20,12 @@ $viewId = $_GET['view'] ?? '';
 $editId = $_GET['edit'] ?? '';
 $message = trim((string) ($_GET['msg'] ?? ''));
 $error = trim((string) ($_GET['err'] ?? ''));
+$canCreateTravelRequests = !$auth->isSuperAdmin();
+
+if (!$canCreateTravelRequests && $action === 'new') {
+    $action = '';
+    $error = 'Superadmin accounts cannot file travel requests.';
+}
 
 function buildPassSlipRedirectUrl($overrides = [], $removeKeys = ['msg', 'err'])
 {
@@ -99,6 +105,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $redirectUrl = buildPassSlipRedirectUrl(['action' => null]);
 
     if ($postAction === 'create') {
+        if (!$canCreateTravelRequests) {
+            $error = 'Superadmin accounts cannot file travel requests.';
+        } else {
         try {
             $data = [
                 'employee_name' => $_POST['employee_name'],
@@ -136,6 +145,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         } catch (Exception $e) {
             $error = 'Failed to create Pass Slip: ' . $e->getMessage();
+        }
         }
     }
 
@@ -1092,7 +1102,7 @@ $formData = [
                 <?php endif; ?>
             </p>
         </div>
-        <?php if (!$isGuardView): ?>
+        <?php if (!$isGuardView && $canCreateTravelRequests): ?>
             <button type="button" class="btn" style="background: white; color: var(--primary-dark); font-weight: 700; border: none; padding: 6px 12px; font-size: 0.8rem; border-radius: var(--radius-md); display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);" onclick="openNewModal()">
                 <i class="fas fa-plus"></i> New Pass Slip
             </button>
@@ -1526,7 +1536,7 @@ $formData = [
     </div>
     <?php endif; ?><!-- end guard/non-guard list view toggle -->
 
-    <?php if (!$isGuardView): ?>
+    <?php if (!$isGuardView && $canCreateTravelRequests): ?>
     <!-- New Pass Slip Modal -->
     <div class="modal-overlay" id="newModal" <?php echo $action === 'new' ? 'class="active"' : ''; ?>>
         <div class="modal modal-lg">

@@ -544,7 +544,7 @@ function getApprovingAuthorityName($roleId)
 function getStatusBadge($status)
 {
     $config = STATUS_CONFIG[$status] ?? STATUS_CONFIG['pending'];
-    return '<span class="status-badge status-' . $status . '">' . $config['icon'] . ' ' . $config['label'] . '</span>';
+    return '<span class="status-badge status-' . $status . '">' . $config['label'] . '</span>';
 }
 
 /**

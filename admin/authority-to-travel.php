@@ -19,6 +19,12 @@ $editId = $_GET['edit'] ?? '';
 $type = $_GET['type'] ?? 'local'; // local, outside_region, international, personal
 $message = $_GET['msg'] ?? '';
 $error = '';
+$canCreateTravelRequests = !$auth->isSuperAdmin();
+
+if (!$canCreateTravelRequests && $action === 'new') {
+    $action = '';
+    $error = 'Superadmin accounts cannot file travel requests.';
+}
 
 // Get current user info for routing
 // Use effective role ID/Name which accounts for OIC delegation
@@ -49,6 +55,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $postAction = $_POST['action'] ?? '';
 
     if ($postAction === 'create') {
+        if (!$canCreateTravelRequests) {
+            $error = 'Superadmin accounts cannot file travel requests.';
+        } else {
         try {
             $scope = $_POST['travel_scope'] ?? 'local';
             $localType = $_POST['travel_type'] ?? 'within_region';
@@ -114,6 +123,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         } catch (Exception $e) {
             $error = 'Failed to create Authority to Travel: ' . $e->getMessage();
+        }
         }
     }
 
@@ -667,7 +677,7 @@ if ($type === 'outside_region') {
                             <label>RO Forwarding</label>
                             <span class="status-badge"
                                 style="background: #e0e7ff; color: #4338ca; white-space: normal; word-break: break-word; display: inline-block; width: 100%;">
-                                <i class="fas fa-share"></i> Forwarded to Regional Office
+                                Forwarded to Regional Office
                                 <?php if (($viewData['final_approver_role'] ?? '') === 'DEPED_SEC'): ?>
                                     (for DepEd Secretary approval)
                                 <?php endif; ?>
@@ -1088,11 +1098,13 @@ if ($type === 'outside_region') {
                     <?php echo empty($_GET['show_all']) ? 'View All' : 'My Queue'; ?>
                 </a>
             <?php endif; ?>
-            <button type="button" class="btn"
-                style="background: white; color: var(--primary-dark); font-weight: 700; border: none; padding: 6px 12px; font-size: 0.8rem; border-radius: var(--radius-md); display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"
-                onclick="openNewModal()">
-                <i class="fas fa-plus"></i> New Travel Request
-            </button>
+            <?php if ($canCreateTravelRequests): ?>
+                <button type="button" class="btn"
+                    style="background: white; color: var(--primary-dark); font-weight: 700; border: none; padding: 6px 12px; font-size: 0.8rem; border-radius: var(--radius-md); display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"
+                    onclick="openNewModal()">
+                    <i class="fas fa-plus"></i> New Travel Request
+                </button>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -1276,23 +1288,23 @@ if ($type === 'outside_region') {
                                     <span class="status-badge status-<?php echo $statusClass; ?>">
                                         <?php
                                         if ($at['status'] === 'pending') {
-                                            echo '<i class="fas fa-clock"></i> Pending';
+                                            echo 'Pending';
                                             if ($at['current_approver_role']) {
                                                 echo ' (' . htmlspecialchars($at['current_approver_role']) . ')';
                                             }
                                         } elseif ($at['status'] === 'recommended') {
-                                            echo '<i class="fas fa-thumbs-up"></i> Recommended';
+                                            echo 'Recommended';
                                         } elseif ($at['status'] === 'approved') {
-                                            echo '<i class="fas fa-check-circle"></i> Approved';
+                                            echo 'Approved';
                                         } elseif ($at['status'] === 'rejected') {
-                                            echo '<i class="fas fa-times-circle"></i> Rejected';
+                                            echo 'Rejected';
                                         }
                                         ?>
                                     </span>
                                     <?php if (!empty($at['forwarded_to_ro'])): ?>
                                         <span class="status-badge"
                                             style="background: #e0e7ff; color: #4338ca; font-size: 0.75rem; margin-top: 4px; display: inline-block;">
-                                            <i class="fas fa-share"></i> Forwarded to RO
+                                            Forwarded to RO
                                         </span>
                                     <?php endif; ?>
                                 </td>
@@ -1357,6 +1369,7 @@ if ($type === 'outside_region') {
         <?php endif; ?>
     </div>
 
+    <?php if ($canCreateTravelRequests): ?>
     <!-- New AT Modal -->
     <div class="modal-overlay" id="newModal" <?php echo $action === 'new' ? 'class="active"' : ''; ?>>
         <div class="modal modal-lg">
@@ -1548,10 +1561,11 @@ if ($type === 'outside_region') {
             }
         }
 
-        <?php if ($action === 'new'): ?>
+        <?php if ($canCreateTravelRequests && $action === 'new'): ?>
             document.addEventListener('DOMContentLoaded', openNewModal);
         <?php endif; ?>
     </script>
+    <?php endif; ?>
 <?php endif; ?>
 
 <style>

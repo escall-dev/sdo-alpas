@@ -216,13 +216,15 @@ function navUrl($path)
                         <span class="nav-text">Pass Slips</span>
                     </a>
 
-                    <!-- My Requests for Chiefs, ASDS, SDS, and Superadmin -->
-                    <a href="<?php echo navUrl('/my-requests.php'); ?>"
-                        class="nav-item <?php echo $currentPage === 'my-requests' ? 'active' : ''; ?>"
-                        data-tooltip="My Requests">
-                        <span class="nav-icon"><i class="fas fa-folder-open"></i></span>
-                        <span class="nav-text">My Requests</span>
-                    </a>
+                    <?php if (!$auth->isSuperAdmin()): ?>
+                        <!-- My Requests for Chiefs, ASDS, and SDS -->
+                        <a href="<?php echo navUrl('/my-requests.php'); ?>"
+                            class="nav-item <?php echo $currentPage === 'my-requests' ? 'active' : ''; ?>"
+                            data-tooltip="My Requests">
+                            <span class="nav-icon"><i class="fas fa-folder-open"></i></span>
+                            <span class="nav-text">My Requests</span>
+                        </a>
+                    <?php endif; ?>
                 <?php endif; ?>
 
                 <?php if (!$auth->isActingAsOIC() && isUnitHead($currentUser['role_id'])): ?>

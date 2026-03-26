@@ -3116,14 +3116,20 @@ textarea.form-control {
 
 /* Premium Status Badge Overrides */
 .status-badge {
-    padding: 8px 16px !important;
-    border-radius: 50px !important;
-    font-weight: 700 !important;
-    font-size: 0.85rem !important;
+    padding: 3px 9px !important;
+    border-radius: 999px !important;
+    font-weight: 600 !important;
+    font-size: 0.74rem !important;
     display: inline-flex !important;
     align-items: center !important;
-    gap: 8px !important;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1) !important;
+    gap: 5px !important;
+    line-height: 1.2 !important;
+    box-shadow: none !important;
+}
+
+.status-badge.large {
+    padding: 6px 12px !important;
+    font-size: 0.82rem !important;
 }
 
 .status-badge.status-pending {

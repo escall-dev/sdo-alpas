@@ -22,6 +22,12 @@ $viewId = $_GET['view'] ?? '';
 $editId = $_GET['edit'] ?? '';
 $message = '';
 $error = '';
+$canCreateTravelRequests = !$auth->isSuperAdmin();
+
+if (!$canCreateTravelRequests && $action === 'new') {
+    $action = '';
+    $error = 'Superadmin accounts cannot file travel requests.';
+}
 
 /**
  * Convert technical database errors into plain-language messages
@@ -44,6 +50,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $postAction = $_POST['action'] ?? '';
 
     if ($postAction === 'create') {
+        if (!$canCreateTravelRequests) {
+            $error = 'Superadmin accounts cannot file travel requests.';
+        } else {
         // Create new Locator Slip
         try {
             $controlNo = $trackingService->generateLSNumber();
@@ -80,6 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         } catch (Exception $e) {
             $error = 'Failed to create Locator Slip: ' . $e->getMessage();
+        }
         }
     }
 
@@ -803,11 +813,13 @@ $formData = [
                 Record<?php echo $totalRequests !== 1 ? 's' : ''; ?>
             </p>
         </div>
-        <button type="button" class="btn"
-            style="background: white; color: var(--primary-dark); font-weight: 700; border: none; padding: 6px 12px; font-size: 0.8rem; border-radius: var(--radius-md); display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"
-            onclick="openNewModal()">
-            <i class="fas fa-plus"></i> New Locator Slip
-        </button>
+        <?php if ($canCreateTravelRequests): ?>
+            <button type="button" class="btn"
+                style="background: white; color: var(--primary-dark); font-weight: 700; border: none; padding: 6px 12px; font-size: 0.8rem; border-radius: var(--radius-md); display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"
+                onclick="openNewModal()">
+                <i class="fas fa-plus"></i> New Locator Slip
+            </button>
+        <?php endif; ?>
     </div>
 
     <!-- Filter Bar -->
@@ -1017,6 +1029,7 @@ $formData = [
         <?php endif; ?>
     </div>
 
+    <?php if ($canCreateTravelRequests): ?>
     <!-- New Locator Slip Modal -->
     <div class="modal-overlay" id="newModal" <?php echo $action === 'new' ? 'class="active"' : ''; ?>>
         <div class="modal modal-lg">
@@ -1191,10 +1204,11 @@ $formData = [
         });
 
         // Auto-open modal if action=new
-        <?php if ($action === 'new'): ?>
+        <?php if ($canCreateTravelRequests && $action === 'new'): ?>
             document.addEventListener('DOMContentLoaded', openNewModal);
         <?php endif; ?>
     </script>
+    <?php endif; ?>
 
     <style>
         /* Premium Form Enhancements */
