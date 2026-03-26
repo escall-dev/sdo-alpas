@@ -71,7 +71,8 @@ $pageTitles = [
     'logs' => 'Activity Logs',
     'profile' => 'My Profile',
     'oic-management' => 'OIC Management',
-    'password-resets' => 'Password Reset Management'
+    'password-resets' => 'Password Reset Management',
+    'contact' => 'Need Help?'
 ];
 
 $pageTitle = $pageTitles[$currentPage] ?? 'Admin Panel';
@@ -280,6 +281,15 @@ function navUrl($path)
                     data-tooltip="My Profile">
                     <span class="nav-icon"><i class="fas fa-user-cog"></i></span>
                     <span class="nav-text">My Profile</span>
+                </a>
+
+                <div class="nav-divider"></div>
+
+                <a href="<?php echo navUrl('/contact.php'); ?>"
+                    class="nav-item <?php echo $currentPage === 'contact' ? 'active' : ''; ?>"
+                    data-tooltip="Need Help?">
+                    <span class="nav-icon"><i class="fas fa-question-circle"></i></span>
+                    <span class="nav-text">Need Help?</span>
                 </a>
             </nav>
 
