@@ -486,7 +486,7 @@ $formData = [
                 <div class="detail-card-header"
                     style="padding: 20px 24px; background: var(--bg-secondary); border-bottom: 1px solid rgba(0,0,0,0.05);">
                     <h3 style="font-size: 1.1rem; color: var(--primary-dark); font-weight: 700;"><i
-                            class="fas fa-info-circle" style="color: var(--accent);"></i> Request Details</h3>
+                        class="fas fa-info-circle"></i> Request Details</h3>
                 </div>
                 <div class="detail-card-body" style="padding: 24px;">
                     <div class="detail-grid"
@@ -673,8 +673,7 @@ $formData = [
                     style="border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 8px 25px rgba(0,0,0,0.04); border-radius: var(--radius-xl);">
                     <div class="detail-card-header"
                         style="padding: 20px 24px; background: var(--bg-secondary); border-bottom: 1px solid rgba(0,0,0,0.05);">
-                        <h3 style="font-size: 1.1rem; color: var(--primary-dark); font-weight: 700;"><i class="fas fa-download"
-                                style="color: var(--accent);"></i> Download</h3>
+                            <h3 style="font-size: 1.1rem; color: var(--primary-dark); font-weight: 700;"><i class="fas fa-download"></i> Download</h3>
                     </div>
                     <div class="detail-card-body" style="padding: 24px;">
                         <a href="<?php echo navUrl('/api/generate-docx.php?type=ls&id=' . $viewData['id']); ?>"
@@ -694,7 +693,7 @@ $formData = [
                 <div class="detail-card-header"
                     style="padding: 20px 24px; background: var(--bg-secondary); border-bottom: 1px solid rgba(0,0,0,0.05);">
                     <h3 style="font-size: 1.1rem; color: var(--primary-dark); font-weight: 700;"><i
-                            class="fas fa-user-circle" style="color: var(--accent);"></i> Filed By</h3>
+                            class="fas fa-user"></i> Filed By</h3>
                 </div>
                 <div class="detail-card-body" style="padding: 24px;">
                     <div class="detail-item" style="border: none; margin-bottom: 16px;">
