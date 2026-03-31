@@ -97,6 +97,7 @@ body {
     flex-direction: column;
     transition: width var(--transition-slow);
     box-shadow: var(--shadow-xl);
+    overflow-x: hidden;
 }
 
 .sidebar-header {
@@ -314,6 +315,15 @@ body {
     flex: 1;
     padding: 16px 10px;
     overflow-y: auto;
+    overflow-x: hidden;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
 }
 
 .nav-item {
@@ -328,6 +338,7 @@ body {
     transition: all var(--transition-base);
     font-weight: 500;
     min-height: 44px;
+    min-width: 0;
 }
 
 .nav-group {
@@ -605,6 +616,10 @@ body {
 
 .nav-text {
     font-size: 0.9rem;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .nav-divider {
