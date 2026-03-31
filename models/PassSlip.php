@@ -62,6 +62,12 @@ class PassSlip
     public function getById($id)
     {
         $sql = "SELECT ps.*, 
+                CASE 
+                    WHEN ps.status = 'rejected' THEN 'disapproved'
+                    WHEN (ps.status = '' OR ps.status IS NULL) AND ps.rejection_reason IS NOT NULL AND ps.rejection_reason != '' THEN 'disapproved'
+                    WHEN ps.status = '' OR ps.status IS NULL THEN 'pending'
+                    ELSE ps.status 
+                END as status,
                 u.full_name as filed_by_name, 
                 u.email as filed_by_email
                 FROM pass_slips ps
@@ -78,6 +84,12 @@ class PassSlip
     public function getByControlNumber($controlNo)
     {
         $sql = "SELECT ps.*, 
+                CASE 
+                    WHEN ps.status = 'rejected' THEN 'disapproved'
+                    WHEN (ps.status = '' OR ps.status IS NULL) AND ps.rejection_reason IS NOT NULL AND ps.rejection_reason != '' THEN 'disapproved'
+                    WHEN ps.status = '' OR ps.status IS NULL THEN 'pending'
+                    ELSE ps.status 
+                END as status,
                 u.full_name as filed_by_name, 
                 u.email as filed_by_email
                 FROM pass_slips ps
@@ -115,12 +127,12 @@ class PassSlip
     }
 
     /**
-     * Reject a Pass Slip
+     * Disapprove a Pass Slip
      */
-    public function reject($id, $approverId, $reason = null)
+    public function disapprove($id, $approverId, $reason = null)
     {
         $sql = "UPDATE pass_slips SET 
-                status = 'rejected',
+                status = 'disapproved',
                 approved_by = ?,
                 rejection_reason = ?
                 WHERE id = ? AND status = 'pending'";
@@ -352,8 +364,12 @@ class PassSlip
 
         // Guards see approved and pending slips
         if (!empty($filters['status'])) {
-            $where[] = "ps.status = ?";
-            $params[] = $filters['status'];
+            if ($filters['status'] === 'disapproved') {
+                $where[] = "ps.status IN ('disapproved', 'rejected')";
+            } else {
+                $where[] = "ps.status = ?";
+                $params[] = $filters['status'];
+            }
         }
 
         if (!empty($filters['date'])) {
@@ -402,8 +418,12 @@ class PassSlip
         $params = [];
 
         if (!empty($filters['status'])) {
-            $where[] = "ps.status = ?";
-            $params[] = $filters['status'];
+            if ($filters['status'] === 'disapproved') {
+                $where[] = "ps.status IN ('disapproved', 'rejected')";
+            } else {
+                $where[] = "ps.status = ?";
+                $params[] = $filters['status'];
+            }
         }
         if (!empty($filters['date'])) {
             $where[] = "ps.date = ?";
@@ -518,8 +538,12 @@ class PassSlip
 
         // Apply filters
         if (!empty($filters['status'])) {
-            $where[] = "ps.status = ?";
-            $params[] = $filters['status'];
+            if ($filters['status'] === 'disapproved') {
+                $where[] = "ps.status IN ('disapproved', 'rejected')";
+            } else {
+                $where[] = "ps.status = ?";
+                $params[] = $filters['status'];
+            }
         }
         if (!empty($filters['unit'])) {
             $where[] = "ps.employee_office = ?";
@@ -560,6 +584,12 @@ class PassSlip
         $whereClause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
 
         $sql = "SELECT ps.*, 
+                CASE 
+                    WHEN ps.status = 'rejected' THEN 'disapproved'
+                    WHEN (ps.status = '' OR ps.status IS NULL) AND ps.rejection_reason IS NOT NULL AND ps.rejection_reason != '' THEN 'disapproved'
+                    WHEN ps.status = '' OR ps.status IS NULL THEN 'pending'
+                    ELSE ps.status 
+                END as status,
                 u.full_name as filed_by_name, 
                 u.email as filed_by_email
                 FROM pass_slips ps
@@ -605,8 +635,12 @@ class PassSlip
         }
 
         if (!empty($filters['status'])) {
-            $where[] = "ps.status = ?";
-            $params[] = $filters['status'];
+            if ($filters['status'] === 'disapproved') {
+                $where[] = "ps.status IN ('disapproved', 'rejected')";
+            } else {
+                $where[] = "ps.status = ?";
+                $params[] = $filters['status'];
+            }
         }
         if (!empty($filters['unit'])) {
             $where[] = "ps.employee_office = ?";
@@ -669,7 +703,7 @@ class PassSlip
                 COUNT(*) as total,
                 SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
                 SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) as approved,
-                SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) as rejected,
+                SUM(CASE WHEN status = 'disapproved' THEN 1 ELSE 0 END) as disapproved,
                 SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END) as cancelled
                 FROM pass_slips $where";
 
@@ -707,7 +741,7 @@ class PassSlip
                 COUNT(*) as total,
                 SUM(CASE WHEN ps.status = 'pending' THEN 1 ELSE 0 END) as pending,
                 SUM(CASE WHEN ps.status = 'approved' THEN 1 ELSE 0 END) as approved,
-                SUM(CASE WHEN ps.status = 'rejected' THEN 1 ELSE 0 END) as rejected,
+                SUM(CASE WHEN ps.status = 'disapproved' THEN 1 ELSE 0 END) as disapproved,
                 SUM(CASE WHEN ps.status = 'cancelled' THEN 1 ELSE 0 END) as cancelled
                 FROM pass_slips ps $whereClause";
 

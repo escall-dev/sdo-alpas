@@ -76,7 +76,7 @@ ALTER TABLE authority_to_travel
 
 -- Update status ENUM to include 'recommended'
 ALTER TABLE authority_to_travel 
-    MODIFY COLUMN status ENUM('pending','recommended','approved','rejected') DEFAULT 'pending';
+    MODIFY COLUMN status ENUM('pending','recommended','approved','disapproved') DEFAULT 'pending';
 
 -- Set default travel_category
 ALTER TABLE authority_to_travel 
@@ -93,10 +93,10 @@ SET at.requester_office = u.employee_office,
     at.requester_role_id = u.role_id
 WHERE at.requester_office IS NULL OR at.requester_office = '';
 
--- Set routing_stage for existing approved/rejected records
+-- Set routing_stage for existing approved/disapproved records
 UPDATE authority_to_travel 
 SET routing_stage = 'completed', current_approver_role = NULL 
-WHERE status IN ('approved', 'rejected');
+WHERE status IN ('approved', 'disapproved');
 
 -- Set routing_stage for existing pending records (route to ASDS by default)
 UPDATE authority_to_travel 

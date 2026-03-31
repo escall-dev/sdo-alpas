@@ -402,7 +402,7 @@ class AuthorityToTravel {
         $employeePosition = $data['employee_position'] ?? null;
         $routing = $this->determineRouting($requesterRoleId, $requesterOfficeId, $requesterOffice, $travelScope, $employeePosition, $travelCategory, $travelType);
         
-        // Reject submission if routing cannot be resolved
+        // Disapprove submission if routing cannot be resolved
         if ($routing === null) {
             throw new \Exception('Unable to determine routing for this travel request. Please verify your travel scope and category.');
         }
@@ -552,6 +552,12 @@ class AuthorityToTravel {
      */
     public function getById($id) {
         $sql = "SELECT at.*, 
+                       CASE 
+                           WHEN at.status = 'rejected' THEN 'disapproved'
+                           WHEN (at.status = '' OR at.status IS NULL) AND at.rejection_reason IS NOT NULL AND at.rejection_reason != '' THEN 'disapproved'
+                           WHEN at.status = '' OR at.status IS NULL THEN 'pending'
+                           ELSE at.status 
+                       END as status,
                        u.full_name as filed_by_name, u.email as filed_by_email,
                        u.employee_office as filed_by_office, u.role_id as filed_by_role,
                        a.full_name as approved_by_name,
@@ -569,6 +575,12 @@ class AuthorityToTravel {
      */
     public function getByTrackingNo($trackingNo) {
         $sql = "SELECT at.*, 
+                       CASE 
+                           WHEN at.status = 'rejected' THEN 'disapproved'
+                           WHEN (at.status = '' OR at.status IS NULL) AND at.rejection_reason IS NOT NULL AND at.rejection_reason != '' THEN 'disapproved'
+                           WHEN at.status = '' OR at.status IS NULL THEN 'pending'
+                           ELSE at.status 
+                       END as status,
                        u.full_name as filed_by_name,
                        a.full_name as approved_by_name
                 FROM authority_to_travel at
@@ -640,6 +652,12 @@ class AuthorityToTravel {
      */
     public function getAll($filters = [], $limit = 15, $offset = 0, $viewerRoleId = null, $viewerUserId = null) {
         $sql = "SELECT at.*, 
+                       CASE 
+                           WHEN at.status = 'rejected' THEN 'disapproved'
+                           WHEN (at.status = '' OR at.status IS NULL) AND at.rejection_reason IS NOT NULL AND at.rejection_reason != '' THEN 'disapproved'
+                           WHEN at.status = '' OR at.status IS NULL THEN 'pending'
+                           ELSE at.status 
+                       END as status,
                        u.full_name as filed_by_name, u.email as filed_by_email,
                        u.employee_office as filed_by_office,
                        a.full_name as approved_by_name,
@@ -669,8 +687,12 @@ class AuthorityToTravel {
         }
 
         if (!empty($filters['status'])) {
-            $sql .= " AND at.status = ?";
-            $params[] = $filters['status'];
+            if ($filters['status'] === 'disapproved') {
+                $sql .= " AND at.status IN ('disapproved', 'rejected')";
+            } else {
+                $sql .= " AND at.status = ?";
+                $params[] = $filters['status'];
+            }
         }
 
         if (!empty($filters['travel_category'])) {
@@ -775,8 +797,12 @@ class AuthorityToTravel {
         }
 
         if (!empty($filters['status'])) {
-            $sql .= " AND at.status = ?";
-            $params[] = $filters['status'];
+            if ($filters['status'] === 'disapproved') {
+                $sql .= " AND at.status IN ('disapproved', 'rejected')";
+            } else {
+                $sql .= " AND at.status = ?";
+                $params[] = $filters['status'];
+            }
         }
 
         if (!empty($filters['travel_category'])) {
@@ -1021,18 +1047,18 @@ class AuthorityToTravel {
     }
 
     /**
-     * Reject an Authority to Travel request
+     * Disapprove an Authority to Travel request
      */
-    public function reject($id, $rejecterId, $reason = null) {
+    public function disapprove($id, $disapproverId, $reason = null) {
         $sql = "UPDATE authority_to_travel SET 
-                status = 'rejected',
+                status = 'disapproved',
                 approved_by = ?,
                 rejection_reason = ?,
                 current_approver_role = NULL,
                 routing_stage = 'completed'
                 WHERE id = ?";
         
-        return $this->db->query($sql, [$rejecterId, $reason, $id]);
+        return $this->db->query($sql, [$disapproverId, $reason, $id]);
     }
 
     /**
@@ -1041,13 +1067,13 @@ class AuthorityToTravel {
      * ASDS can act on Division Chief ATs at recommending stage (no office filter)
      */
     public function canUserActOn($at, $userRoleId, $userRoleName) {
-        // Superadmin can VIEW all requests but cannot approve/reject/recommend
+        // Superadmin can VIEW all requests but cannot approve/disapprove/recommend
         if ($userRoleId == ROLE_SUPERADMIN) {
             return false;
         }
 
-        // If already completed (approved/rejected), no action
-        if (in_array($at['status'], ['approved', 'rejected'])) {
+        // If already completed (approved/disapproved), no action
+        if (in_array($at['status'], ['approved', 'disapproved'])) {
             return false;
         }
 
@@ -1136,7 +1162,7 @@ class AuthorityToTravel {
                 SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
                 SUM(CASE WHEN status = 'recommended' THEN 1 ELSE 0 END) as recommended,
                 SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) as approved,
-                SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) as rejected,
+                SUM(CASE WHEN status = 'disapproved' THEN 1 ELSE 0 END) as disapproved,
                 SUM(CASE WHEN DATE(created_at) = CURDATE() THEN 1 ELSE 0 END) as today,
                 SUM(CASE WHEN YEARWEEK(created_at) = YEARWEEK(CURDATE()) THEN 1 ELSE 0 END) as this_week
                 FROM authority_to_travel WHERE 1=1" . $baseCondition;
@@ -1161,7 +1187,7 @@ class AuthorityToTravel {
                 SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
                 SUM(CASE WHEN status = 'recommended' THEN 1 ELSE 0 END) as recommended,
                 SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) as approved,
-                SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) as rejected,
+                SUM(CASE WHEN status = 'disapproved' THEN 1 ELSE 0 END) as disapproved,
                 SUM(CASE WHEN DATE(created_at) = CURDATE() THEN 1 ELSE 0 END) as today,
                 SUM(CASE WHEN YEARWEEK(created_at) = YEARWEEK(CURDATE()) THEN 1 ELSE 0 END) as this_week,
                 SUM(CASE WHEN travel_category = 'official' AND travel_scope = 'local' AND (travel_type = 'within_region' OR travel_type IS NULL) THEN 1 ELSE 0 END) as within_region_official,
@@ -1183,7 +1209,7 @@ class AuthorityToTravel {
         if (!isset(UNIT_HEAD_OFFICES[$roleId])) {
             return [
                 'total' => 0, 'pending' => 0, 'recommended' => 0, 
-                'approved' => 0, 'rejected' => 0, 'today' => 0, 'this_week' => 0,
+                'approved' => 0, 'disapproved' => 0, 'today' => 0, 'this_week' => 0,
                 'within_region_official' => 0, 'outside_region_official' => 0, 'international_official' => 0, 'personal' => 0
             ];
         }
@@ -1214,7 +1240,7 @@ class AuthorityToTravel {
                 SUM(CASE WHEN at.status = 'pending' THEN 1 ELSE 0 END) as pending,
                 SUM(CASE WHEN at.status = 'recommended' THEN 1 ELSE 0 END) as recommended,
                 SUM(CASE WHEN at.status = 'approved' THEN 1 ELSE 0 END) as approved,
-                SUM(CASE WHEN at.status = 'rejected' THEN 1 ELSE 0 END) as rejected,
+                SUM(CASE WHEN at.status = 'disapproved' THEN 1 ELSE 0 END) as disapproved,
                 SUM(CASE WHEN DATE(at.created_at) = CURDATE() THEN 1 ELSE 0 END) as today,
                 SUM(CASE WHEN YEARWEEK(at.created_at) = YEARWEEK(CURDATE()) THEN 1 ELSE 0 END) as this_week,
                 SUM(CASE WHEN at.travel_category = 'official' AND at.travel_scope = 'local' AND (at.travel_type = 'within_region' OR at.travel_type IS NULL) THEN 1 ELSE 0 END) as within_region_official,
@@ -1318,7 +1344,7 @@ class AuthorityToTravel {
             'pending' => 'Pending Recommendation',
             'recommended' => 'Pending Final Approval',
             'approved' => 'Approved',
-            'rejected' => 'Rejected'
+            'disapproved' => 'Disapproved'
         ];
         
         $label = $labels[$status] ?? ucfirst($status);

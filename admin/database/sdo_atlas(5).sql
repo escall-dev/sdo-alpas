@@ -240,7 +240,7 @@ INSERT INTO `activity_logs` (`id`, `user_id`, `action_type`, `entity_type`, `ent
 (192, 11, 'CREATE_AT', 'AT', 13, 'Created AT: AT-2026-000010', NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36', '2026-01-23 06:36:15'),
 (193, 6, 'login', 'auth', NULL, 'User logged in', NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36', '2026-01-23 06:37:03'),
 (194, 1, 'update_user', 'user', 11, 'Updated user: cb@gmail.com', NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36', '2026-01-23 06:38:13'),
-(195, 6, 'REJECT_AT', 'AT', 13, 'Rejected AT: AT-2026-000010', NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36', '2026-01-23 06:39:42'),
+(195, 6, 'DISAPPROVE_AT', 'AT', 13, 'Disapproved AT: AT-2026-000010', NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36', '2026-01-23 06:39:42'),
 (196, 11, 'CREATE_AT', 'AT', 14, 'Created AT: AT-2026-000011', NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36', '2026-01-23 06:40:26'),
 (197, 7, 'login', 'auth', NULL, 'User logged in', NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36', '2026-01-23 06:42:16'),
 (198, 5, 'login', 'auth', NULL, 'User logged in', NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36', '2026-01-23 06:45:14'),
@@ -399,7 +399,7 @@ INSERT INTO `activity_logs` (`id`, `user_id`, `action_type`, `entity_type`, `ent
 (350, 36, 'create', 'locator_slip', 15, 'Created Locator Slip: LS-2026-000015', NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36', '2026-01-30 01:38:04'),
 (351, 36, 'create', 'locator_slip', 16, 'Created Locator Slip: LS-2026-000016', NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36', '2026-01-30 02:05:32'),
 (352, 36, 'logout', 'auth', NULL, 'User logged out', NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36', '2026-01-30 02:49:57'),
-(353, 6, 'reject', 'locator_slip', 15, 'Rejected Locator Slip: LS-2026-000015', NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36', '2026-01-30 02:50:11'),
+(353, 6, 'disapprove', 'locator_slip', 15, 'Disapproved Locator Slip: LS-2026-000015', NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36', '2026-01-30 02:50:11'),
 (354, 7, 'login', 'auth', NULL, 'User logged in', NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36', '2026-01-30 02:50:32'),
 (355, 7, 'logout', 'auth', NULL, 'User logged out', NULL, NULL, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36', '2026-01-30 02:50:42');
 
@@ -536,7 +536,7 @@ CREATE TABLE `authority_to_travel` (
   `rejection_reason` text DEFAULT NULL,
   `travel_category` enum('official','personal') NOT NULL DEFAULT 'official',
   `travel_scope` enum('local','national') DEFAULT NULL,
-  `status` enum('pending','recommended','approved','rejected') DEFAULT 'pending',
+  `status` enum('pending','recommended','approved','disapproved') DEFAULT 'pending',
   `user_id` int(11) NOT NULL,
   `approved_by` int(11) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
@@ -568,7 +568,7 @@ INSERT INTO `authority_to_travel` (`id`, `at_tracking_no`, `employee_name`, `emp
 (10, 'AT-2026-000007', 'Alexander Joerenz Escallente', 'ITO - 1', 'SDO San Pedro City', 'MAGBABAWAS', 'SDO SAN PEDRO CITY', '2026-01-22', '2026-01-23', 'BAHAY', 'MOOE', NULL, 'Alexander Joerenz Escallente', '2026-01-22', 'Paul Jeremy I. Aguja, AO V', '2026-01-22', 'Paul Jeremy I. Aguja, AO V', '2026-01-22', NULL, 'official', 'local', 'approved', 9, 6, '2026-01-22 14:43:58', '2026-01-26 07:27:11', 6, NULL, 'completed', 'OSDS', 10, 6, NULL, '2026-01-22'),
 (11, 'AT-2026-000008', 'Algen Loveres', 'PDO - I', 'SDO San Pedro City', 'VACATION', '', '2026-01-22', '2026-01-28', 'VIETNAM', '', NULL, 'Algen Loveres', '2026-01-22', 'Frederick G. Byrd Jr., SGOD Chief', '2026-01-22', 'Frederick G. Byrd Jr., SGOD Chief', '2026-01-22', NULL, 'personal', NULL, 'approved', 10, 8, '2026-01-22 14:46:49', '2026-01-26 07:27:11', 8, NULL, 'completed', 'SGOD', 4, 6, NULL, '2026-01-22'),
 (12, 'AT-2026-000009', 'Redgine Pinedes', 'Teacher II', 'SDO San Pedro City', 'dfdfsfdsfs', 'REGION IV-A', '2026-01-23', '2026-01-31', 'Sta. Cruz, Laguna', 'local', NULL, 'Redgine Pinedes', '2026-01-23', 'Redgine Pinedes, CID Chief', '2026-01-23', 'Redgine Pinedes, CID Chief', '2026-01-23', NULL, 'official', 'local', 'approved', 5, 5, '2026-01-23 01:52:27', '2026-01-26 07:27:11', 5, NULL, 'completed', 'CID', 3, 6, NULL, '2026-01-23'),
-(13, 'AT-2026-000010', 'Cedrick Bacaresas', '', 'SDO San Pedro City', 'hfhghhguyfuyvjyhv', 'REGION IV-A', '2026-01-23', '2026-01-25', 'Alaska', 'MOOE', NULL, 'Cedrick Bacaresas', '2026-01-23', NULL, NULL, NULL, NULL, 'no position included?\r\n', 'official', 'local', 'rejected', 11, 6, '2026-01-23 06:36:15', '2026-01-26 07:27:11', NULL, NULL, 'completed', 'Records', 13, 6, 6, '2026-01-23'),
+(13, 'AT-2026-000010', 'Cedrick Bacaresas', '', 'SDO San Pedro City', 'hfhghhguyfuyvjyhv', 'REGION IV-A', '2026-01-23', '2026-01-25', 'Alaska', 'MOOE', NULL, 'Cedrick Bacaresas', '2026-01-23', NULL, NULL, NULL, NULL, 'no position included?\r\n', 'official', 'local', 'disapproved', 11, 6, '2026-01-23 06:36:15', '2026-01-26 07:27:11', NULL, NULL, 'completed', 'Records', 13, 6, 6, '2026-01-23'),
 (14, 'AT-2026-000011', 'Cedrick Bacaresas', 'Accountant III', 'SDO San Pedro City', 'werrwsfssfx', 'SDO SAN PEDRO CITY', '2026-01-23', '2026-01-24', 'Sta. Cruz, Laguna', 'MOOE', NULL, 'Cedrick Bacaresas', '2026-01-23', 'Paul Jeremy I. Aguja, AO V', '2026-01-26', 'Paul Jeremy I. Aguja, AO V', '2026-01-26', NULL, 'official', 'local', 'approved', 11, 6, '2026-01-23 06:40:26', '2026-01-26 07:27:11', 6, NULL, 'completed', 'Records', 13, 6, 6, '2026-01-23'),
 (15, 'AT-2026-000012', 'John Daniel P. Tec', 'Public Schools District Supervisor', 'SDO San Pedro City', 'forgot something', 'SDO SAN PEDRO CITY', '2026-01-23', '2026-01-24', 'BAHAY', 'MOOE', NULL, 'John Daniel P. Tec', '2026-01-23', 'Erma S. Valenzuela, CID Chief', '2026-01-26', 'Erma S. Valenzuela, CID Chief', '2026-01-26', NULL, 'official', 'local', 'approved', 12, 7, '2026-01-23 06:48:06', '2026-01-26 07:27:11', 7, NULL, 'completed', 'CID', 3, 6, 5, '2026-01-23'),
 (16, 'AT-2026-000013', 'eljohn', 'CLERK', 'SDO San Pedro City', 'meeting', '', '2026-01-26', '2026-01-27', 'Sta. Cruz, Laguna', '', NULL, 'eljohn', '2026-01-26', NULL, NULL, NULL, NULL, NULL, 'personal', NULL, 'pending', 13, NULL, '2026-01-26 02:33:08', '2026-01-26 02:33:08', NULL, 'OSDS_CHIEF', 'recommending', 'ICTO', NULL, 6, 6, '2026-01-26'),
@@ -602,7 +602,7 @@ CREATE TABLE `locator_slips` (
   `approver_position` varchar(100) DEFAULT NULL,
   `approval_date` date DEFAULT NULL,
   `rejection_reason` text DEFAULT NULL,
-  `status` enum('pending','approved','rejected') DEFAULT 'pending',
+  `status` enum('pending','approved','disapproved') DEFAULT 'pending',
   `user_id` int(11) NOT NULL,
   `approved_by` int(11) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
@@ -633,7 +633,7 @@ INSERT INTO `locator_slips` (`id`, `ls_control_no`, `employee_name`, `employee_p
 (12, 'LS-2026-000012', 'Redgine Pinedes', 'Teacher II', 'CID', 'shopping', 'official_business', '2026-01-23 03:44:00', 'moa', 'Redgine Pinedes', '2026-01-23', 'Erma S. Valenzuela', 'CID - CHIEF', '2026-01-23', NULL, 'approved', 5, 7, '2026-01-23 02:44:44', '2026-01-23 02:45:26', 4, 7, 'CID', 6, '2026-01-23'),
 (13, 'LS-2026-000013', 'Emelinda Amil', 'Public Schools District Supervisor', 'DIS', 'PODCAST', 'official_business', '2026-01-30 14:00:00', 'Sta. Cruz, Laguna', 'Emelinda Amil', '2026-01-30', NULL, NULL, NULL, NULL, 'pending', 45, NULL, '2026-01-30 01:09:51', '2026-01-30 01:09:51', 3, 6, 'DIS', 6, '2026-01-30'),
 (14, 'LS-2026-000014', 'Jenina Ambayec', 'Dentist II', 'SHN_DENTAL', 'seminar', 'official_business', '2026-01-30 22:00:00', 'city hall', 'Jenina Ambayec', '2026-01-30', NULL, NULL, NULL, NULL, 'pending', 36, NULL, '2026-01-30 01:13:33', '2026-01-30 01:13:33', 3, 6, 'SHN_DENTAL', 6, '2026-01-30'),
-(15, 'LS-2026-000015', 'Jenina Ambayec', 'Dentist II', 'SHN_DENTAL', 'forgot something\r\n', 'official_business', '2026-01-30 02:37:00', 'BAHAY', 'Jenina Ambayec', '2026-01-30', NULL, NULL, NULL, '', 'rejected', 36, 6, '2026-01-30 01:38:04', '2026-01-30 02:50:11', 3, 6, 'SHN_DENTAL', 6, '2026-01-30'),
+(15, 'LS-2026-000015', 'Jenina Ambayec', 'Dentist II', 'SHN_DENTAL', 'forgot something\r\n', 'official_business', '2026-01-30 02:37:00', 'BAHAY', 'Jenina Ambayec', '2026-01-30', NULL, NULL, NULL, '', 'disapproved', 36, 6, '2026-01-30 01:38:04', '2026-01-30 02:50:11', 3, 6, 'SHN_DENTAL', 6, '2026-01-30'),
 (16, 'LS-2026-000016', 'Jenina Ambayec', 'Dentist II', 'SHN_DENTAL', 'coffee', 'official_business', '2026-01-30 03:05:00', 'Festival', 'Jenina Ambayec', '2026-01-30', NULL, NULL, NULL, NULL, 'pending', 36, NULL, '2026-01-30 02:05:32', '2026-01-30 02:05:32', 5, 8, 'SHN_DENTAL', 6, '2026-01-30');
 
 -- --------------------------------------------------------

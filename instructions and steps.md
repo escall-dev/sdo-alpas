@@ -126,7 +126,7 @@ For each source table:
 
 - If row becomes `approved`:
   - insert/update `dtr_system.todtr`
-- If row is no longer `approved` (rejected/cancelled/etc):
+- If row is no longer `approved` (disapproved/cancelled/etc):
   - delete from `dtr_system.todtr`
 
 Events run every 5 minutes to reconcile missed updates.

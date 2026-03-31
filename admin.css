@@ -1237,7 +1237,7 @@ body {
 .status-pending { background: var(--warning-bg); color: #b45309; }
 .status-recommended { background: var(--info-bg); color: #1d4ed8; }
 .status-approved { background: var(--success-bg); color: #047857; }
-.status-rejected { background: var(--danger-bg); color: #dc2626; }
+.status-disapproved { background: var(--danger-bg); color: #dc2626; }
 .status-accepted { background: var(--info-bg); color: #1d4ed8; }
 .status-in_progress { background: #ede9fe; color: #7c3aed; }
 .status-resolved { background: var(--success-bg); color: #047857; }

@@ -132,7 +132,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // 2. Their role matches the assigned approver role (e.g. OSDS Chief for OSDS-routed requests)
         // 3. They are acting as OIC for the assigned approver's role
         // 4. ASDS only when this slip is assigned to ASDS (Office Chief as requestor)
-        // Note: Superadmin can VIEW all requests but cannot approve/reject
+        // Note: Superadmin can VIEW all requests but cannot approve/disapprove
         // SDS is view-only for Locator Slip — cannot approve
         $canApprove = !$auth->isSDS() && (
             ($ls['assigned_approver_user_id'] == $auth->getUserId()) ||
@@ -180,28 +180,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    if ($postAction === 'reject') {
+    if ($postAction === 'disapprove') {
         $id = $_POST['id'];
         $reason = $_POST['rejection_reason'] ?? null;
         $ls = $lsModel->getById($id);
 
-        $canReject = $ls && $ls['status'] === 'pending' &&
+        $canDisapprove = $ls && $ls['status'] === 'pending' &&
             (($ls['assigned_approver_user_id'] == $auth->getUserId()) ||
                 ($currentRoleId == $ls['assigned_approver_role_id'] && in_array($currentRoleId, UNIT_HEAD_ROLES)) ||
                 ($auth->isASDS() && (int) ($ls['assigned_approver_role_id'] ?? 0) === ROLE_ASDS));
-        if (!$canReject && $ls && $auth->isActingAsOIC()) {
+        if (!$canDisapprove && $ls && $auth->isActingAsOIC()) {
             $oicInfo = $auth->getActiveOICDelegation();
             if ($oicInfo && $oicInfo['unit_head_role_id'] == $ls['assigned_approver_role_id']) {
-                $canReject = true;
+                $canDisapprove = true;
             }
         }
 
-        if ($canReject) {
-            $lsModel->reject($id, $auth->getUserId(), $reason);
-            $auth->logActivity('reject', 'locator_slip', $id, 'Rejected Locator Slip: ' . $ls['ls_control_no']);
-            $message = 'Locator Slip rejected.';
+        if ($canDisapprove) {
+            $lsModel->disapprove($id, $auth->getUserId(), $reason);
+            $auth->logActivity('disapprove', 'locator_slip', $id, 'Disapproved Locator Slip: ' . $ls['ls_control_no']);
+            $message = 'Locator Slip disapproved.';
         } elseif ($ls && $ls['status'] === 'pending') {
-            $error = 'You do not have permission to reject this request.';
+            $error = 'You do not have permission to disapprove this request.';
         }
     }
 }
@@ -551,7 +551,7 @@ $formData = [
                             style="font-size: 1.1rem; color: <?php echo $viewData['status'] === 'approved' ? 'var(--success)' : 'var(--danger)'; ?>; font-weight: 700;">
                             <i
                                 class="fas fa-<?php echo $viewData['status'] === 'approved' ? 'check-circle' : 'times-circle'; ?>"></i>
-                            <?php echo $viewData['status'] === 'approved' ? 'Approval' : 'Rejection'; ?> Details
+                            <?php echo $viewData['status'] === 'approved' ? 'Approval' : 'Disapproval'; ?> Details
                         </h3>
                     </div>
                     <div class="detail-card-body" style="padding: 24px;">
@@ -587,7 +587,7 @@ $formData = [
                             <?php else: ?>
                                 <div class="detail-item"
                                     style="border: none; background: var(--danger-bg); padding: 16px; border-radius: var(--radius-md); grid-column: 1 / -1;">
-                                    <label style="color: var(--danger); font-weight: 700; margin-bottom: 8px;">Rejection
+                                    <label style="color: var(--danger); font-weight: 700; margin-bottom: 8px;">Disapproval
                                         Reason</label>
                                     <span
                                         style="font-weight: 600; font-size: 1.05rem; color: var(--danger);"><?php echo htmlspecialchars($viewData['rejection_reason'] ?: 'No reason provided'); ?></span>
@@ -641,8 +641,8 @@ $formData = [
                             style="padding: 14px; font-size: 1.05rem; background: var(--danger-bg); color: var(--danger); border: none; box-shadow: none; transition: all 0.2s;"
                             onmouseover="this.style.background='var(--danger)'; this.style.color='white';"
                             onmouseout="this.style.background='var(--danger-bg)'; this.style.color='var(--danger)';"
-                            onclick="showRejectModal(<?php echo $viewData['id']; ?>)">
-                            <i class="fas fa-times"></i> Reject Request
+                            onclick="showDisapproveModal(<?php echo $viewData['id']; ?>)">
+                            <i class="fas fa-times"></i> Disapprove Request
                         </button>
                     </div>
                 </div>
@@ -742,28 +742,28 @@ $formData = [
         </div>
     </div>
 
-    <!-- Reject Modal -->
-    <div class="modal-overlay" id="rejectModal">
+    <!-- Disapprove Modal -->
+    <div class="modal-overlay" id="disapproveModal">
         <div class="modal">
             <div class="modal-header">
-                <h3>Reject Locator Slip</h3>
-                <button class="modal-close" onclick="closeRejectModal()">&times;</button>
+                <h3>Disapprove Locator Slip</h3>
+                <button class="modal-close" onclick="closeDisapproveModal()">&times;</button>
             </div>
             <form method="POST" action="">
                 <div class="modal-body">
                     <input type="hidden" name="_token" value="<?php echo $currentToken; ?>">
-                    <input type="hidden" name="action" value="reject">
-                    <input type="hidden" name="id" id="rejectId" value="">
+                    <input type="hidden" name="action" value="disapprove">
+                    <input type="hidden" name="id" id="disapproveId" value="">
 
                     <div class="form-group">
-                        <label class="form-label">Reason for Rejection (Optional)</label>
+                        <label class="form-label">Reason for Disapproval (Optional)</label>
                         <textarea name="rejection_reason" class="form-control" rows="4"
                             placeholder="Enter reason..."></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="closeRejectModal()">Cancel</button>
-                    <button type="submit" class="btn btn-danger">Reject Request</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeDisapproveModal()">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Disapprove Request</button>
                 </div>
             </form>
         </div>
@@ -788,12 +788,12 @@ $formData = [
             document.getElementById('approveModal').classList.remove('active');
         }
 
-        function showRejectModal(id) {
-            document.getElementById('rejectId').value = id;
-            document.getElementById('rejectModal').classList.add('active');
+        function showDisapproveModal(id) {
+            document.getElementById('disapproveId').value = id;
+            document.getElementById('disapproveModal').classList.add('active');
         }
-        function closeRejectModal() {
-            document.getElementById('rejectModal').classList.remove('active');
+        function closeDisapproveModal() {
+            document.getElementById('disapproveModal').classList.remove('active');
         }
     </script>
 
@@ -865,7 +865,7 @@ $formData = [
                     </option>
                     <option value="approved" <?php echo ($_GET['status'] ?? '') === 'approved' ? 'selected' : ''; ?>>Approved
                     </option>
-                    <option value="rejected" <?php echo ($_GET['status'] ?? '') === 'rejected' ? 'selected' : ''; ?>>Rejected
+                    <option value="disapproved" <?php echo ($_GET['status'] ?? '') === 'disapproved' ? 'selected' : ''; ?>>Disapproved
                     </option>
                 </select>
             </div>

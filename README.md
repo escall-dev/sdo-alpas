@@ -143,7 +143,7 @@ Navigate to `http://localhost/SDO-alpas/admin/` in your web browser.
 
 1. **Employee** files LS request
 2. Request visible to **ASDS** and **OSDS Chief**
-3. Either approver can approve/reject
+3. Either approver can approve/disapprove
 4. **Superadmin** can also approve
 
 ## Technology Stack

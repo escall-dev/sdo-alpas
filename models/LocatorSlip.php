@@ -217,6 +217,12 @@ class LocatorSlip {
      */
     public function getById($id) {
         $sql = "SELECT ls.*, 
+                       CASE 
+                           WHEN ls.status = 'rejected' THEN 'disapproved'
+                           WHEN (ls.status = '' OR ls.status IS NULL) AND ls.rejection_reason IS NOT NULL AND ls.rejection_reason != '' THEN 'disapproved'
+                           WHEN ls.status = '' OR ls.status IS NULL THEN 'pending'
+                           ELSE ls.status 
+                       END as status,
                        u.full_name as filed_by_name, u.email as filed_by_email,
                        u.employee_office as filed_by_office, u.role_id as filed_by_role,
                        a.full_name as approved_by_name,
@@ -237,6 +243,12 @@ class LocatorSlip {
      */
     public function getByControlNo($controlNo) {
         $sql = "SELECT ls.*, 
+                       CASE 
+                           WHEN ls.status = 'rejected' THEN 'disapproved'
+                           WHEN (ls.status = '' OR ls.status IS NULL) AND ls.rejection_reason IS NOT NULL AND ls.rejection_reason != '' THEN 'disapproved'
+                           WHEN ls.status = '' OR ls.status IS NULL THEN 'pending'
+                           ELSE ls.status 
+                       END as status,
                        u.full_name as filed_by_name,
                        a.full_name as approved_by_name
                 FROM locator_slips ls
@@ -252,6 +264,12 @@ class LocatorSlip {
      */
     public function getAll($filters = [], $limit = 15, $offset = 0, $viewerRoleId = null, $viewerUserId = null) {
         $sql = "SELECT ls.*, 
+                       CASE 
+                           WHEN ls.status = 'rejected' THEN 'disapproved'
+                           WHEN (ls.status = '' OR ls.status IS NULL) AND ls.rejection_reason IS NOT NULL AND ls.rejection_reason != '' THEN 'disapproved'
+                           WHEN ls.status = '' OR ls.status IS NULL THEN 'pending'
+                           ELSE ls.status 
+                       END as status,
                        u.full_name as filed_by_name, u.email as filed_by_email,
                        u.employee_office as filed_by_office,
                        a.full_name as approved_by_name,
@@ -306,8 +324,12 @@ class LocatorSlip {
         // Additional filters (user_id already handled above in visibility filtering)
 
         if (!empty($filters['status'])) {
-            $sql .= " AND ls.status = ?";
-            $params[] = $filters['status'];
+            if ($filters['status'] === 'disapproved') {
+                $sql .= " AND ls.status IN ('disapproved', 'rejected')";
+            } else {
+                $sql .= " AND ls.status = ?";
+                $params[] = $filters['status'];
+            }
         }
 
         if (!empty($filters['unit'])) {
@@ -398,8 +420,12 @@ class LocatorSlip {
         }
 
         if (!empty($filters['status'])) {
-            $sql .= " AND ls.status = ?";
-            $params[] = $filters['status'];
+            if ($filters['status'] === 'disapproved') {
+                $sql .= " AND ls.status IN ('disapproved', 'rejected')";
+            } else {
+                $sql .= " AND ls.status = ?";
+                $params[] = $filters['status'];
+            }
         }
 
         if (!empty($filters['unit'])) {
@@ -580,11 +606,11 @@ class LocatorSlip {
     }
 
     /**
-     * Reject a Locator Slip
+     * Disapprove a Locator Slip
      */
-    public function reject($id, $approverId, $reason = null) {
+    public function disapprove($id, $approverId, $reason = null) {
         $sql = "UPDATE locator_slips SET 
-                status = 'rejected',
+                status = 'disapproved',
                 approved_by = ?,
                 rejection_reason = ?
                 WHERE id = ?";
@@ -608,7 +634,7 @@ class LocatorSlip {
                 COUNT(*) as total,
                 SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
                 SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) as approved,
-                SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) as rejected,
+                SUM(CASE WHEN status = 'disapproved' THEN 1 ELSE 0 END) as disapproved,
                 SUM(CASE WHEN DATE(created_at) = CURDATE() THEN 1 ELSE 0 END) as today,
                 SUM(CASE WHEN YEARWEEK(created_at) = YEARWEEK(CURDATE()) THEN 1 ELSE 0 END) as this_week
                 FROM locator_slips WHERE 1=1" . $userCondition;

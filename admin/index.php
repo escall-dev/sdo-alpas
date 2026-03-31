@@ -272,8 +272,8 @@ if ($auth->isGuard()) {
                 </div>
                 <div class="stat-content">
                     <span
-                        class="stat-value"><?php echo ($myLsStats['rejected'] ?? 0) + ($myAtStats['rejected'] ?? 0) + ($myPsStats['rejected'] ?? 0); ?></span>
-                    <span class="stat-label">Rejected</span>
+                        class="stat-value"><?php echo ($myLsStats['disapproved'] ?? 0) + ($myAtStats['disapproved'] ?? 0) + ($myPsStats['disapproved'] ?? 0); ?></span>
+                    <span class="stat-label">Disapproved</span>
                 </div>
             </div>
         </div>
@@ -398,8 +398,8 @@ if ($auth->isGuard()) {
                     <i class="fas fa-times-circle" style="color: #dc2626;"></i>
                 </div>
                 <div class="stat-content">
-                    <span class="stat-value"><?php echo ($myAtStats['rejected'] ?? 0); ?></span>
-                    <span class="stat-label"><?php echo $auth->isUnitHead() ? 'Unit Rejected' : 'Rejected'; ?></span>
+                    <span class="stat-value"><?php echo ($myAtStats['disapproved'] ?? 0); ?></span>
+                    <span class="stat-label"><?php echo $auth->isUnitHead() ? 'Unit Disapproved' : 'Disapproved'; ?></span>
                 </div>
             </div>
         </div>

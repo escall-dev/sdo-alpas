@@ -249,7 +249,7 @@ $activeOIC = $oicModel->getActiveOICForUnit($currentRoleId);
                         } elseif ($isActive && !$isCurrent) {
                             echo '<span class="status-badge status-pending">Scheduled</span>';
                         } else {
-                            echo '<span class="status-badge status-rejected">Inactive</span>';
+                            echo '<span class="status-badge status-disapproved">Inactive</span>';
                         }
                         ?>
                     </td>

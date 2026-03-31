@@ -1,7 +1,7 @@
 <?php
 /**
  * Pass Slip Management Page
- * SDO ALPAS - View, create, approve, reject, cancel Pass Slip, and update guard times
+ * SDO ALPAS - View, create, approve, disapprove, cancel Pass Slip, and update guard times
  */
 
 require_once __DIR__ . '/../includes/header.php';
@@ -226,28 +226,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    if ($postAction === 'reject') {
+    if ($postAction === 'disapprove') {
         $id = $_POST['id'];
         $reason = $_POST['rejection_reason'] ?? null;
         $ps = $psModel->getById($id);
 
-        $canReject = $ps && $ps['status'] === 'pending' &&
+        $canDisapprove = $ps && $ps['status'] === 'pending' &&
             (($ps['assigned_approver_user_id'] == $auth->getUserId()) ||
                 ($currentRoleId == $ps['assigned_approver_role_id'] && in_array($currentRoleId, UNIT_HEAD_ROLES)) ||
                 ($auth->isASDS() && (int) ($ps['assigned_approver_role_id'] ?? 0) === ROLE_ASDS));
-        if (!$canReject && $ps && $auth->isActingAsOIC()) {
+        if (!$canDisapprove && $ps && $auth->isActingAsOIC()) {
             $oicInfo = $auth->getActiveOICDelegation();
             if ($oicInfo && $oicInfo['unit_head_role_id'] == $ps['assigned_approver_role_id']) {
-                $canReject = true;
+                $canDisapprove = true;
             }
         }
 
-        if ($canReject) {
-            $psModel->reject($id, $auth->getUserId(), $reason);
-            $auth->logActivity('reject', 'pass_slip', $id, 'Rejected Pass Slip: ' . $ps['ps_control_no']);
-            $message = 'Pass Slip rejected.';
+        if ($canDisapprove) {
+            $psModel->disapprove($id, $auth->getUserId(), $reason);
+            $auth->logActivity('disapprove', 'pass_slip', $id, 'Disapproved Pass Slip: ' . $ps['ps_control_no']);
+            $message = 'Pass Slip disapproved.';
         } elseif ($ps && $ps['status'] === 'pending') {
-            $error = 'You do not have permission to reject this request.';
+            $error = 'You do not have permission to disapprove this request.';
         }
     }
 
@@ -668,12 +668,12 @@ $formData = [
             </div>
 
             <?php if ($viewData['status'] !== 'pending' && ($viewData['approver_name'] || $viewData['rejection_reason'])): ?>
-                <!-- Approval / Rejection Details -->
+                <!-- Approval / Disapproval Details -->
                 <div class="detail-card">
                     <div class="detail-card-header">
                         <h3><i
                                 class="fas fa-<?php echo $viewData['status'] === 'approved' ? 'check-circle' : 'times-circle'; ?>"></i>
-                            <?php echo $viewData['status'] === 'approved' ? 'Approval' : 'Rejection'; ?> Details
+                            <?php echo $viewData['status'] === 'approved' ? 'Approval' : 'Disapproval'; ?> Details
                         </h3>
                     </div>
                     <div class="detail-card-body">
@@ -705,7 +705,7 @@ $formData = [
                                 </div>
                             <?php else: ?>
                                 <div class="detail-item">
-                                    <label>Rejection Reason</label>
+                                    <label>Disapproval Reason</label>
                                     <span>
                                         <?php echo htmlspecialchars($viewData['rejection_reason'] ?: 'No reason provided'); ?>
                                     </span>
@@ -878,8 +878,8 @@ $formData = [
                         </form>
 
                         <button type="button" class="btn btn-danger btn-block"
-                            onclick="showRejectModal(<?php echo $viewData['id']; ?>)">
-                            <i class="fas fa-times"></i> Reject
+                            onclick="showDisapproveModal(<?php echo $viewData['id']; ?>)">
+                            <i class="fas fa-times"></i> Disapprove
                         </button>
                     </div>
                 </div>
@@ -982,28 +982,28 @@ $formData = [
         </div>
     </div>
 
-    <!-- Reject Modal -->
-    <div class="modal-overlay" id="rejectModal">
+    <!-- Disapprove Modal -->
+    <div class="modal-overlay" id="disapproveModal">
         <div class="modal">
             <div class="modal-header">
-                <h3>Reject Pass Slip</h3>
-                <button class="modal-close" onclick="closeRejectModal()">&times;</button>
+                <h3>Disapprove Pass Slip</h3>
+                <button class="modal-close" onclick="closeDisapproveModal()">&times;</button>
             </div>
             <form method="POST" action="">
                 <div class="modal-body">
                     <input type="hidden" name="_token" value="<?php echo $currentToken; ?>">
-                    <input type="hidden" name="action" value="reject">
-                    <input type="hidden" name="id" id="rejectId" value="">
+                    <input type="hidden" name="action" value="disapprove">
+                    <input type="hidden" name="id" id="disapproveId" value="">
 
                     <div class="form-group">
-                        <label class="form-label">Reason for Rejection (Optional)</label>
+                        <label class="form-label">Reason for Disapproval (Optional)</label>
                         <textarea name="rejection_reason" class="form-control" rows="4"
                             placeholder="Enter reason..."></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="closeRejectModal()">Cancel</button>
-                    <button type="submit" class="btn btn-danger">Reject Request</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeDisapproveModal()">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Disapprove Request</button>
                 </div>
             </form>
         </div>
@@ -1047,12 +1047,12 @@ $formData = [
             document.getElementById('approveModal').classList.remove('active');
         }
 
-        function showRejectModal(id) {
-            document.getElementById('rejectId').value = id;
-            document.getElementById('rejectModal').classList.add('active');
+        function showDisapproveModal(id) {
+            document.getElementById('disapproveId').value = id;
+            document.getElementById('disapproveModal').classList.add('active');
         }
-        function closeRejectModal() {
-            document.getElementById('rejectModal').classList.remove('active');
+        function closeDisapproveModal() {
+            document.getElementById('disapproveModal').classList.remove('active');
         }
 
         function showCancelModal(id) {
@@ -1361,7 +1361,7 @@ $formData = [
                     </option>
                     <option value="approved" <?php echo ($_GET['status'] ?? '') === 'approved' ? 'selected' : ''; ?>>Approved
                     </option>
-                    <option value="rejected" <?php echo ($_GET['status'] ?? '') === 'rejected' ? 'selected' : ''; ?>>Rejected
+                    <option value="disapproved" <?php echo ($_GET['status'] ?? '') === 'disapproved' ? 'selected' : ''; ?>>Disapproved
                     </option>
                     <option value="cancelled" <?php echo ($_GET['status'] ?? '') === 'cancelled' ? 'selected' : ''; ?>>
                         Cancelled</option>

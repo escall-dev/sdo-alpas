@@ -368,7 +368,7 @@ foreach ($routingConfigs as $config) {
                         <?php if ($config['is_active']): ?>
                         <span class="status-badge status-approved">Active</span>
                         <?php else: ?>
-                        <span class="status-badge status-rejected">Inactive</span>
+                        <span class="status-badge status-disapproved">Inactive</span>
                         <?php endif; ?>
                     </td>
                     <td>

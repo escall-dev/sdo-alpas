@@ -386,7 +386,7 @@ class AdminUser {
     }
 
     /**
-     * Reject/Deactivate user
+     * Disapprove/Deactivate user
      */
     public function deactivate($id) {
         return $this->update($id, ['status' => 'inactive', 'is_active' => 0]);

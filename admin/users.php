@@ -359,7 +359,7 @@ $pendingCount = $userModel->getPendingRegistrationsCount();
                     </td>
                     <td>
                         <?php
-                        $statusClass = $user['status'] === 'active' ? 'status-approved' : ($user['status'] === 'pending' ? 'status-pending' : 'status-rejected');
+                        $statusClass = $user['status'] === 'active' ? 'status-approved' : ($user['status'] === 'pending' ? 'status-pending' : 'status-disapproved');
                         ?>
                         <span class="status-badge <?php echo $statusClass; ?>">
                             <?php echo ucfirst($user['status']); ?>

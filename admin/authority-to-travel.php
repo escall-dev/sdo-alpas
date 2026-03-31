@@ -237,7 +237,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id = $_POST['id'];
         $at = $atModel->getById($id);
 
-        if ($at && !in_array($at['status'], ['approved', 'rejected'])) {
+        if ($at && !in_array($at['status'], ['approved', 'disapproved'])) {
             try {
                 $atModel->executiveApprove($id, $auth->getUserId(), $currentUser['full_name']);
                 $auth->logActivity('APPROVE_AT', 'AT', $id, 'Executive approved AT: ' . $at['at_tracking_no']);
@@ -249,21 +249,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Handle reject action (by any approver)
-    if ($postAction === 'reject' && $auth->canActOnAT()) {
+    // Handle disapprove action (by any approver)
+    if ($postAction === 'disapprove' && $auth->canActOnAT()) {
         $id = $_POST['id'];
         $reason = $_POST['rejection_reason'] ?? null;
         $at = $atModel->getById($id);
 
-        if ($at && !in_array($at['status'], ['approved', 'rejected'])) {
+        if ($at && !in_array($at['status'], ['approved', 'disapproved'])) {
             // Check if user can act on this AT
             if ($atModel->canUserActOn($at, $currentRoleId, $currentRoleName)) {
-                $atModel->reject($id, $auth->getUserId(), $reason);
-                $auth->logActivity('REJECT_AT', 'AT', $id, 'Rejected AT: ' . $at['at_tracking_no']);
-                header('Location: ' . navUrl('/authority-to-travel.php?view=' . $id) . '&msg=' . urlencode('Authority to Travel rejected.'));
+                $atModel->disapprove($id, $auth->getUserId(), $reason);
+                $auth->logActivity('DISAPPROVE_AT', 'AT', $id, 'Disapproved AT: ' . $at['at_tracking_no']);
+                header('Location: ' . navUrl('/authority-to-travel.php?view=' . $id) . '&msg=' . urlencode('Authority to Travel disapproved.'));
                 exit;
             } else {
-                $error = 'You do not have permission to reject this request.';
+                $error = 'You do not have permission to disapprove this request.';
             }
         }
     }
@@ -523,12 +523,12 @@ if ($type === 'outside_region') {
             </div>
 
             <?php if ($viewData['status'] !== 'pending' && $viewData['status'] !== 'recommended'): ?>
-                <!-- Approval/Rejection Details -->
+                <!-- Approval/Disapproval Details -->
                 <div class="detail-card">
                     <div class="detail-card-header">
                         <h3><i
                                 class="fas fa-<?php echo $viewData['status'] === 'approved' ? 'check-circle' : 'times-circle'; ?>"></i>
-                            <?php echo $viewData['status'] === 'approved' ? 'Approval' : 'Rejection'; ?> Details
+                            <?php echo $viewData['status'] === 'approved' ? 'Approval' : 'Disapproval'; ?> Details
                         </h3>
                     </div>
                     <div class="detail-card-body">
@@ -556,7 +556,7 @@ if ($type === 'outside_region') {
                                 </div>
                             <?php else: ?>
                                 <div class="detail-item">
-                                    <label>Rejection Reason</label>
+                                    <label>Disapproval Reason</label>
                                     <span><?php echo htmlspecialchars($viewData['rejection_reason'] ?: 'No reason provided'); ?></span>
                                 </div>
                             <?php endif; ?>
@@ -628,8 +628,8 @@ if ($type === 'outside_region') {
                         <?php endif; ?>
 
                         <button type="button" class="btn btn-danger btn-block"
-                            onclick="showRejectModal(<?php echo $viewData['id']; ?>)">
-                            <i class="fas fa-times"></i> Reject
+                            onclick="showDisapproveModal(<?php echo $viewData['id']; ?>)">
+                            <i class="fas fa-times"></i> Disapprove
                         </button>
                     </div>
                 </div>
@@ -763,28 +763,28 @@ if ($type === 'outside_region') {
         </div>
     </div>
 
-    <!-- Reject Modal -->
-    <div class="modal-overlay" id="rejectModal">
+    <!-- Disapprove Modal -->
+    <div class="modal-overlay" id="disapproveModal">
         <div class="modal">
             <div class="modal-header">
-                <h3>Reject Authority to Travel</h3>
-                <button class="modal-close" onclick="closeRejectModal()">&times;</button>
+                <h3>Disapprove Authority to Travel</h3>
+                <button class="modal-close" onclick="closeDisapproveModal()">&times;</button>
             </div>
             <form method="POST" action="">
                 <div class="modal-body">
                     <input type="hidden" name="_token" value="<?php echo $currentToken; ?>">
-                    <input type="hidden" name="action" value="reject">
-                    <input type="hidden" name="id" id="rejectId" value="">
+                    <input type="hidden" name="action" value="disapprove">
+                    <input type="hidden" name="id" id="disapproveId" value="">
 
                     <div class="form-group">
-                        <label class="form-label">Reason for Rejection (Optional)</label>
+                        <label class="form-label">Reason for Disapproval (Optional)</label>
                         <textarea name="rejection_reason" class="form-control" rows="4"
                             placeholder="Enter reason..."></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="closeRejectModal()">Cancel</button>
-                    <button type="submit" class="btn btn-danger">Reject Request</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeDisapproveModal()">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Disapprove Request</button>
                 </div>
             </form>
         </div>
@@ -860,12 +860,12 @@ if ($type === 'outside_region') {
             document.getElementById('recommendModal').classList.remove('active');
         }
 
-        function showRejectModal(id) {
-            document.getElementById('rejectId').value = id;
-            document.getElementById('rejectModal').classList.add('active');
+        function showDisapproveModal(id) {
+            document.getElementById('disapproveId').value = id;
+            document.getElementById('disapproveModal').classList.add('active');
         }
-        function closeRejectModal() {
-            document.getElementById('rejectModal').classList.remove('active');
+        function closeDisapproveModal() {
+            document.getElementById('disapproveModal').classList.remove('active');
         }
     </script>
 
@@ -1172,7 +1172,7 @@ if ($type === 'outside_region') {
                         Recommended</option>
                     <option value="approved" <?php echo ($_GET['status'] ?? '') === 'approved' ? 'selected' : ''; ?>>Approved
                     </option>
-                    <option value="rejected" <?php echo ($_GET['status'] ?? '') === 'rejected' ? 'selected' : ''; ?>>Rejected
+                    <option value="disapproved" <?php echo ($_GET['status'] ?? '') === 'disapproved' ? 'selected' : ''; ?>>Disapproved
                     </option>
                 </select>
             </div>
@@ -1281,23 +1281,24 @@ if ($type === 'outside_region') {
                                 <td>
                                     <?php
                                     // Enhanced status display with routing info
-                                    $statusClass = $at['status'];
-                                    if ($at['status'] === 'recommended')
+                                    $displayStatus = normalizeRequestStatus($at['status'] ?? 'pending');
+                                    $statusClass = $displayStatus;
+                                    if ($displayStatus === 'recommended')
                                         $statusClass = 'pending';
                                     ?>
                                     <span class="status-badge status-<?php echo $statusClass; ?>">
                                         <?php
-                                        if ($at['status'] === 'pending') {
+                                        if ($displayStatus === 'pending') {
                                             echo 'Pending';
                                             if ($at['current_approver_role']) {
                                                 echo ' (' . htmlspecialchars($at['current_approver_role']) . ')';
                                             }
-                                        } elseif ($at['status'] === 'recommended') {
+                                        } elseif ($displayStatus === 'recommended') {
                                             echo 'Recommended';
-                                        } elseif ($at['status'] === 'approved') {
+                                        } elseif ($displayStatus === 'approved') {
                                             echo 'Approved';
-                                        } elseif ($at['status'] === 'rejected') {
-                                            echo 'Rejected';
+                                        } elseif ($displayStatus === 'disapproved') {
+                                            echo 'Disapproved';
                                         }
                                         ?>
                                     </span>

@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS pass_slips (
   idt TIME NOT NULL,
   iat TIME NOT NULL,
   purpose TEXT NOT NULL,
-  status ENUM('pending','approved','rejected','cancelled') DEFAULT 'pending',
+  status ENUM('pending','approved','disapproved','cancelled') DEFAULT 'pending',
   user_id INT NOT NULL,
   assigned_approver_role_id INT DEFAULT NULL,
   assigned_approver_user_id INT DEFAULT NULL,

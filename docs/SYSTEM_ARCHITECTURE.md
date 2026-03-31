@@ -102,9 +102,9 @@ SDO ALPAS is a comprehensive web-based document approval system designed for the
 │  │  │                     │  │                     │  │                  │  │  │
 │  │  │ - determineRouting  │  │ - create()          │  │ - authenticate() │  │  │
 │  │  │ - create()          │  │ - approve()         │  │ - getById()      │  │  │
-│  │  │ - approve()         │  │ - reject()          │  │ - getByRole()    │  │  │
+│  │  │ - approve()         │  │ - disapprove()          │  │ - getByRole()    │  │  │
 │  │  │ - recommend()       │  │ - getStatistics()   │  │ - updateProfile()│  │  │
-│  │  │ - reject()          │  │ - getPending()      │  │                  │  │  │
+│  │  │ - disapprove()          │  │ - getPending()      │  │                  │  │  │
 │  │  │ - getPending()      │  │                     │  │                  │  │  │
 │  │  └─────────────────────┘  └─────────────────────┘  └──────────────────┘  │  │
 │  │  ┌─────────────────────┐  ┌─────────────────────┐  ┌──────────────────┐  │  │
@@ -453,17 +453,17 @@ SDO ALPAS is a comprehensive web-based document approval system designed for the
 │  ┌─────────────────────────────────────────────────────────────────────────────┐ │
 │  │                                                                             │ │
 │  │     ┌──────────┐        ┌──────────┐        ┌──────────────────────┐       │ │
-│  │     │ APPROVE  │        │  REJECT  │        │ (Optional) RETURN    │       │ │
+│  │     │ APPROVE  │        │  DISAPPROVE  │        │ (Optional) RETURN    │       │ │
 │  │     │(Recommend)│       │          │        │    FOR REVISION      │       │ │
 │  │     └────┬─────┘        └────┬─────┘        └──────────────────────┘       │ │
 │  │          │                   │                                              │ │
 │  │          ▼                   ▼                                              │ │
 │  │   ┌─────────────────┐ ┌─────────────────┐                                  │ │
-│  │   │ recommend()     │ │ reject()        │                                  │ │
+│  │   │ recommend()     │ │ disapprove()        │                                  │ │
 │  │   │                 │ │                 │                                  │ │
 │  │   │ UPDATE:         │ │ UPDATE:         │                                  │ │
 │  │   │ - routing_stage │ │ - status =      │                                  │ │
-│  │   │   = 'final'     │ │   'rejected'    │                                  │ │
+│  │   │   = 'final'     │ │   'disapproved'    │                                  │ │
 │  │   │ - current_      │ │ - rejection_    │                                  │ │
 │  │   │   approver_role │ │   reason        │                                  │ │
 │  │   │   = 'ASDS'      │ │                 │                                  │ │
@@ -473,7 +473,7 @@ SDO ALPAS is a comprehensive web-based document approval system designed for the
 │  │   │   date          │ │                 │                                  │ │
 │  │   └────────┬────────┘ └────────┬────────┘                                  │ │
 │  │            │                   │                                            │ │
-│  │            │                   └──────▶ END (Request Rejected)              │ │
+│  │            │                   └──────▶ END (Request Disapproved)              │ │
 │  │            │                                                                │ │
 │  │            ▼                                                                │ │
 │  │     Log Activity                                                            │ │
@@ -498,24 +498,24 @@ SDO ALPAS is a comprehensive web-based document approval system designed for the
 │  ┌─────────────────────────────────────────────────────────────────────────────┐ │
 │  │                                                                             │ │
 │  │     ┌──────────┐              ┌──────────┐                                  │ │
-│  │     │ APPROVE  │              │  REJECT  │                                  │ │
+│  │     │ APPROVE  │              │  DISAPPROVE  │                                  │ │
 │  │     │ (Final)  │              │          │                                  │ │
 │  │     └────┬─────┘              └────┬─────┘                                  │ │
 │  │          │                         │                                        │ │
 │  │          ▼                         ▼                                        │ │
 │  │   ┌─────────────────┐       ┌─────────────────┐                            │ │
-│  │   │ approve()       │       │ reject()        │                            │ │
+│  │   │ approve()       │       │ disapprove()        │                            │ │
 │  │   │                 │       │                 │                            │ │
 │  │   │ UPDATE:         │       │ UPDATE:         │                            │ │
 │  │   │ - status =      │       │ - status =      │                            │ │
-│  │   │   'approved'    │       │   'rejected'    │                            │ │
+│  │   │   'approved'    │       │   'disapproved'    │                            │ │
 │  │   │ - approved_by   │       │ - rejection_    │                            │ │
 │  │   │ - approval_date │       │   reason        │                            │ │
 │  │   │ - routing_stage │       │                 │                            │ │
 │  │   │   = 'completed' │       │                 │                            │ │
 │  │   └────────┬────────┘       └────────┬────────┘                            │ │
 │  │            │                         │                                      │ │
-│  │            │                         └──────▶ END (Request Rejected)        │ │
+│  │            │                         └──────▶ END (Request Disapproved)        │ │
 │  │            │                                                                │ │
 │  │            ▼                                                                │ │
 │  │     Log Activity                                                            │ │
@@ -645,24 +645,24 @@ SDO ALPAS is a comprehensive web-based document approval system designed for the
 │                         LS APPROVAL PROCESS (SINGLE STEP)                         │
 │                                                                                   │
 │       ┌──────────────────┐                    ┌──────────────────┐               │
-│       │     APPROVE      │                    │      REJECT      │               │
+│       │     APPROVE      │                    │      DISAPPROVE      │               │
 │       └────────┬─────────┘                    └────────┬─────────┘               │
 │                │                                       │                         │
 │                ▼                                       ▼                         │
 │         ┌─────────────────┐                    ┌─────────────────┐               │
 │         │ UPDATE:         │                    │ UPDATE:         │               │
 │         │ - status =      │                    │ - status =      │               │
-│         │   'approved'    │                    │   'rejected'    │               │
+│         │   'approved'    │                    │   'disapproved'    │               │
 │         │ - approved_by   │                    │ - rejection_    │               │
 │         │ - approval_date │                    │   reason        │               │
 │         └────────┬────────┘                    └────────┬────────┘               │
 │                  │                                      │                        │
 │                  ▼                                      ▼                        │
 │           Log Activity                          Log Activity                     │
-│           'LS_APPROVED'                         'LS_REJECTED'                    │
+│           'LS_APPROVED'                         'LS_DISAPPROVED'                    │
 │                  │                                      │                        │
 │                  ▼                                      ▼                        │
-│         Generate DOCX Available                   END (Rejected)                 │
+│         Generate DOCX Available                   END (Disapproved)                 │
 │                  │                                                               │
 └──────────────────┼───────────────────────────────────────────────────────────────┘
                    │
@@ -956,7 +956,7 @@ SDO ALPAS is a comprehensive web-based document approval system designed for the
 │  │ Audit Trail                                                                │ │
 │  │                                                                            │ │
 │  │  • Complete activity logging (ActivityLog model)                           │ │
-│  │  • Action types: LOGIN, LOGOUT, CREATE, UPDATE, APPROVE, REJECT, etc.      │ │
+│  │  • Action types: LOGIN, LOGOUT, CREATE, UPDATE, APPROVE, DISAPPROVE, etc.      │ │
 │  │  • Entity tracking: user, authority_to_travel, locator_slip                │ │
 │  │  • Old/New value storage for data changes                                  │ │
 │  │  • IP address and browser fingerprinting                                   │ │
@@ -1010,8 +1010,8 @@ SDO ALPAS is a comprehensive web-based document approval system designed for the
     │ │   → STAGE: final  │                                 │
     │ │   → APPROVER: ASDS│                                 │
     │ │                   │                                 │
-    │ └─ REJECT           │                                 │
-    │     → STATUS:rejected│                                │
+    │ └─ DISAPPROVE           │                                 │
+    │     → STATUS:disapproved│                                │
     └──────────┬──────────┘                                 │
                │                                            │
                ▼                                            ▼
@@ -1022,8 +1022,8 @@ SDO ALPAS is a comprehensive web-based document approval system designed for the
     │ │   → STATUS:approved│                     │ ├─ APPROVE          │
     │ │   → STAGE:completed│                     │ │   → STATUS:approved│
     │ │                   │                      │ │                   │
-    │ └─ REJECT           │                      │ └─ REJECT           │
-    │     → STATUS:rejected│                     │     → STATUS:rejected│
+    │ └─ DISAPPROVE           │                      │ └─ DISAPPROVE           │
+    │     → STATUS:disapproved│                     │     → STATUS:disapproved│
     └──────────┬──────────┘                      └──────────┬──────────┘
                │                                            │
                ▼                                            ▼
@@ -1061,14 +1061,14 @@ SDO ALPAS is a comprehensive web-based document approval system designed for the
     /admin/authority-to-travel.php?action=new        GET/POST  Create AT
     /admin/authority-to-travel.php?action=view&id=X  GET       View AT details
     /admin/authority-to-travel.php?action=approve    POST      Approve/Recommend
-    /admin/authority-to-travel.php?action=reject     POST      Reject AT
+    /admin/authority-to-travel.php?action=disapprove     POST      Disapprove AT
 
     LOCATOR SLIPS
     /admin/locator-slips.php              GET       List LS requests
     /admin/locator-slips.php?action=new   GET/POST  Create LS
     /admin/locator-slips.php?action=view&id=X   GET  View LS details
     /admin/locator-slips.php?action=approve     POST Approve LS
-    /admin/locator-slips.php?action=reject      POST Reject LS
+    /admin/locator-slips.php?action=disapprove      POST Disapprove LS
 
     MY REQUESTS
     /admin/my-requests.php                GET       User's own requests

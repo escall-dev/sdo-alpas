@@ -51,8 +51,8 @@ In [models/LocatorSlip.php](models/LocatorSlip.php#L202-L290) `getAll()`:
 
 In [admin/locator-slips.php](admin/locator-slips.php#L100-L142):
 
-- In the approval POST handler, block SDS from approving/rejecting LS.
-- In the detail view sidebar (actions card), hide Approve/Reject buttons when `$currentRoleId === ROLE_SDS`.
+- In the approval POST handler, block SDS from approving/disapproving LS.
+- In the detail view sidebar (actions card), hide Approve/Disapprove buttons when `$currentRoleId === ROLE_SDS`.
 
 In [models/LocatorSlip.php](models/LocatorSlip.php) `getAvailableAction()`:
 
@@ -68,7 +68,7 @@ In [admin/password-resets.php](admin/password-resets.php):
 
 - Replace all inline `style=""` stat cards (lines 89-112) with `.stats-row` + `.stat-card` CSS classes used in other modules.
 - Replace inline filter bar styling (lines 115-142) with `.filter-bar` + `.filter-form` + `.filter-group` classes.
-- Replace inline status badges with `.status-badge` + `.status-approved` / `.status-rejected` classes.
+- Replace inline status badges with `.status-badge` + `.status-approved` / `.status-disapproved` classes.
 - Replace inline button colors with `.btn-primary`, `.btn-danger`, `.btn-success` classes.
 - This aligns password-resets with the design system in [admin.css](admin.css#L841-L935).
 
@@ -89,7 +89,7 @@ In both models' `getAll()` methods, support filtering by `current_approver_role`
 
 Review [admin/authority-to-travel.php](admin/authority-to-travel.php) and [admin/locator-slips.php](admin/locator-slips.php) to ensure both use the same CSS variables and class patterns from [admin.css](admin.css#L4-L56):
 
-- Status badges: `.status-pending`, `.status-recommended`, `.status-approved`, `.status-rejected`
+- Status badges: `.status-pending`, `.status-recommended`, `.status-approved`, `.status-disapproved`
 - Cards: `.detail-card`, `.ref-card`
 - Buttons: `.btn-primary`, `.btn-success`, `.btn-danger`
 - Any inline color overrides should be replaced with CSS variable references.
@@ -128,7 +128,7 @@ In [admin.js](admin.js#L43-L100):
 
 1. **Manual test**: Log in as each role (User, AO V, CID Chief, SGOD Chief, ASDS, SDS, Superadmin) and verify:
    - AT detail card shows Office and Unit fields
-   - SDS sees all LS but cannot approve/reject
+   - SDS sees all LS but cannot approve/disapprove
    - Attorney III / Accountant III / AO V AT requests route directly to SDS
    - LS filed by unit heads routes to SDS (not ASDS)
    - ASDS and SDS appear in approver filter dropdowns

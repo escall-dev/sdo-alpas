@@ -17,6 +17,10 @@ $psModelReq = new PassSlip();
 // Get filter parameters
 $type = $_GET['type'] ?? 'all'; // all, ls, at, ps
 $status = $_GET['status'] ?? '';
+// Keep empty status as-is for "All Status" filter; only normalize explicit legacy value.
+if (strtolower(trim((string) $status)) === 'rejected') {
+    $status = 'disapproved';
+}
 $search = $_GET['search'] ?? '';
 $dateFrom = $_GET['date_from'] ?? '';
 $dateTo = $_GET['date_to'] ?? '';
@@ -239,7 +243,7 @@ if ($type === 'ps' && ($auth->isEmployee() || $auth->isUnitHead() || $auth->isAS
                 <option value="">All Status</option>
                 <option value="pending" <?php echo $status === 'pending' ? 'selected' : ''; ?>>Pending</option>
                 <option value="approved" <?php echo $status === 'approved' ? 'selected' : ''; ?>>Approved</option>
-                <option value="rejected" <?php echo $status === 'rejected' ? 'selected' : ''; ?>>Rejected</option>
+                <option value="disapproved" <?php echo $status === 'disapproved' ? 'selected' : ''; ?>>Disapproved</option>
                 <option value="cancelled" <?php echo $status === 'cancelled' ? 'selected' : ''; ?>>Cancelled</option>
             </select>
         </div>
@@ -309,6 +313,7 @@ if ($type === 'ps' && ($auth->isEmployee() || $auth->isUnitHead() || $auth->isAS
                     </tr>
                 <?php else: ?>
                     <?php foreach ($requests as $request): ?>
+                        <?php $normalizedStatus = normalizeRequestStatus($request['status'] ?? 'pending'); ?>
                         <tr>
                             <td>
                                 <span class="ref-link"><?php echo htmlspecialchars($request['tracking_no']); ?></span>
@@ -332,17 +337,17 @@ if ($type === 'ps' && ($auth->isEmployee() || $auth->isUnitHead() || $auth->isAS
                                 </div>
                             </td>
                             <td>
-                                <?php echo getStatusBadge($request['status']); ?>
+                                <?php echo getStatusBadge($normalizedStatus); ?>
                             </td>
                             <td>
-                                <?php if ($request['status'] === 'approved'): ?>
+                                <?php if ($normalizedStatus === 'approved'): ?>
                                     <div class="cell-primary">
                                         <?php echo htmlspecialchars($request['approver_name'] ?? $request['approving_authority_name'] ?? '-'); ?>
                                     </div>
                                     <div class="cell-secondary">
                                         <?php echo $request['approval_date'] ? date('M j, Y', strtotime($request['approval_date'])) : ''; ?>
                                     </div>
-                                <?php elseif ($request['status'] === 'rejected'): ?>
+                                <?php elseif ($normalizedStatus === 'disapproved'): ?>
                                     <div class="cell-secondary" style="color: var(--danger);">
                                         <?php echo htmlspecialchars($request['rejection_reason'] ?? 'No reason provided'); ?>
                                     </div>
@@ -365,7 +370,7 @@ if ($type === 'ps' && ($auth->isEmployee() || $auth->isUnitHead() || $auth->isAS
                                         <i class="fas fa-eye"></i>
                                     </a>
 
-                                    <?php if ($request['status'] === 'approved'): ?>
+                                    <?php if ($normalizedStatus === 'approved'): ?>
                                         <?php
                                         if ($request['request_type'] === 'ls') {
                                             $downloadUrl = navUrl('/api/generate-docx.php?type=ls&id=' . $request['id']);

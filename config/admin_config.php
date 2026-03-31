@@ -153,8 +153,8 @@ define('STATUS_CONFIG', [
         'bg' => '#d1fae5',
         'icon' => '<i class="fas fa-check-circle"></i>'
     ],
-    'rejected' => [
-        'label' => 'Rejected',
+    'disapproved' => [
+        'label' => 'Disapproved',
         'color' => '#ef4444',
         'bg' => '#fee2e2',
         'icon' => '<i class="fas fa-times-circle"></i>'
@@ -225,7 +225,7 @@ define('PERMISSIONS', [
     'requests.file' => 'File LS/AT requests',
     'requests.own' => 'View own requests',
     'requests.view' => 'View all requests',
-    'requests.approve' => 'Approve/Reject requests',
+    'requests.approve' => 'Approve/Disapprove requests',
     'users.view' => 'View users',
     'users.create' => 'Create users',
     'users.update' => 'Update users',
@@ -539,12 +539,27 @@ function getApprovingAuthorityName($roleId)
 }
 
 /**
+ * Normalize legacy and alias request status values.
+ */
+function normalizeRequestStatus($status)
+{
+    $status = strtolower(trim((string) $status));
+
+    if ($status === 'rejected') {
+        return 'disapproved';
+    }
+
+    return $status !== '' ? $status : 'pending';
+}
+
+/**
  * Helper function to get status badge HTML
  */
 function getStatusBadge($status)
 {
-    $config = STATUS_CONFIG[$status] ?? STATUS_CONFIG['pending'];
-    return '<span class="status-badge status-' . $status . '">' . $config['label'] . '</span>';
+    $normalizedStatus = normalizeRequestStatus($status);
+    $config = STATUS_CONFIG[$normalizedStatus] ?? STATUS_CONFIG['pending'];
+    return '<span class="status-badge status-' . $normalizedStatus . '">' . $config['label'] . '</span>';
 }
 
 /**

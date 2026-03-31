@@ -29,7 +29,7 @@ ALTER TABLE unit_routing_config
 -- Existing approved/completed records where SDS approved
 UPDATE authority_to_travel 
     SET final_approver_role = 'SDS' 
-    WHERE final_approver_role IS NULL AND status IN ('approved', 'rejected', 'recommended');
+    WHERE final_approver_role IS NULL AND status IN ('approved', 'disapproved', 'recommended');
 
 -- Existing pending records at final stage (waiting for SDS)
 UPDATE authority_to_travel 

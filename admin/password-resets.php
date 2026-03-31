@@ -226,7 +226,7 @@ $stats = $resetModel->getAttemptStats();
                             <!-- Status -->
                             <td style="text-align: center;">
                                 <?php if ($a['is_blocked']): ?>
-                                    <span class="status-badge status-rejected">
+                                    <span class="status-badge status-disapproved">
                                         Blocked
                                     </span>
                                 <?php else: ?>

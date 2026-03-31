@@ -52,7 +52,7 @@
     - Default filter: today's date, but guards can browse all dates
     - Status filter: show all statuses so guards see what's pending/approved
 17. **Guard section in detail view** (~L503-L535): Restrict the guard form to only `$auth->isGuard() || $auth->isSuperAdmin()`. Show read-only actual times for everyone else.
-18. **Hide create/approve/reject/cancel actions from guards**: Guards should NOT see the "New Pass Slip" button, approve/reject modals, or edit forms. They only see list + detail views with departure/arrival buttons.
+18. **Hide create/approve/disapprove/cancel actions from guards**: Guards should NOT see the "New Pass Slip" button, approve/disapprove modals, or edit forms. They only see list + detail views with departure/arrival buttons.
 
 ## F. Pass Slip Creation Form Changes — admin/pass-slips.php (~L972-L1088)
 
@@ -104,7 +104,7 @@
 3. **Departure/Arrival recording**: As guard, click "Mark Departed" on an approved slip — verify `actual_departure_time` is recorded as current server time. Click "Mark Arrived" — verify same. Verify buttons disappear after use.
 4. **Accumulated hours**: Create multiple pass slips for one employee, record departures and arrivals. Verify accumulated hours sum correctly. Cross 8hr threshold — verify VL deduction note appears for the employee and on the pass slip.
 5. **Late arrival**: Set IAT=12:00, record arrival at 13:00 — verify "LATE by 1hr" badge appears and excess hours are tracked.
-6. **Permission checks**: Verify non-guard users cannot click departure/arrival buttons. Verify guards cannot create, approve, or reject pass slips.
+6. **Permission checks**: Verify non-guard users cannot click departure/arrival buttons. Verify guards cannot create, approve, or disapprove pass slips.
 
 ---
 

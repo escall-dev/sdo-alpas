@@ -110,7 +110,7 @@ CREATE TABLE locator_slips (
   rejection_reason TEXT,
 
   -- SYSTEM
-  status ENUM('pending','approved','rejected') DEFAULT 'pending',
+  status ENUM('pending','approved','disapproved') DEFAULT 'pending',
   user_id INT NOT NULL,
   approved_by INT DEFAULT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -163,7 +163,7 @@ CREATE TABLE authority_to_travel (
   -- SYSTEM
   travel_category ENUM('official','personal') NOT NULL DEFAULT 'official',
   travel_scope ENUM('local','national') DEFAULT NULL,
-  status ENUM('pending','recommended','approved','rejected') DEFAULT 'pending',
+  status ENUM('pending','recommended','approved','disapproved') DEFAULT 'pending',
   user_id INT NOT NULL,
   approved_by INT DEFAULT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

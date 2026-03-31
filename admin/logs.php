@@ -66,7 +66,7 @@ $totalPages = ceil($totalLogs / $perPage);
                 <option value="logout" <?php echo ($_GET['action_type'] ?? '') === 'logout' ? 'selected' : ''; ?>>Logout</option>
                 <option value="create" <?php echo ($_GET['action_type'] ?? '') === 'create' ? 'selected' : ''; ?>>Create</option>
                 <option value="approve" <?php echo ($_GET['action_type'] ?? '') === 'approve' ? 'selected' : ''; ?>>Approve</option>
-                <option value="reject" <?php echo ($_GET['action_type'] ?? '') === 'reject' ? 'selected' : ''; ?>>Reject</option>
+                <option value="disapprove" <?php echo ($_GET['action_type'] ?? '') === 'disapprove' ? 'selected' : ''; ?>>Disapprove</option>
                 <option value="download" <?php echo ($_GET['action_type'] ?? '') === 'download' ? 'selected' : ''; ?>>Download</option>
             </select>
         </div>

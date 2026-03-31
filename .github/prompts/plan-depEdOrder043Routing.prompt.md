@@ -140,7 +140,7 @@ Change `current_approver_role = 'SDS'` (hardcoded) to use the stored `final_appr
 ### 12. Add Routing Rejection Guard
 
 - In `create()`, if `determineRouting()` returns `null` or cannot resolve a chain, throw an exception with a descriptive message
-- The submission must be **rejected** if routing rule cannot be resolved (per "Reject submission if routing rule cannot be resolved" constraint)
+- The submission must be **disapproved** if routing rule cannot be resolved (per "Disapprove submission if routing rule cannot be resolved" constraint)
 
 ### 13. Update `getTypeLabel()` — `models/AuthorityToTravel.php` (lines 1068–1077)
 
@@ -225,7 +225,7 @@ START
 - [ ] ASDS can see and act on Division Chief recommending-stage ATs
 - [ ] `forwarded_to_ro` badge appears in list views
 - [ ] Attorney III / Accountant III / AO V now route through their chief (no bypass)
-- [ ] Submission is rejected if routing fails
+- [ ] Submission is disapproved if routing fails
 - [ ] `ROUTING_DECISION` activity log entry with full context is created
 - [ ] Executive override blocked for ATs designated for RD
 - [ ] No manual override of `final_approver_role` possible via UI
