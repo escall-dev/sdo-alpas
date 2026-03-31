@@ -247,7 +247,7 @@ class LocatorSlip {
     }
 
     /**
-     * Get all Locator Slips with filters
+     * Get all Locator Slip with filters
      * Includes visibility filtering based on user role
      */
     public function getAll($filters = [], $limit = 15, $offset = 0, $viewerRoleId = null, $viewerUserId = null) {
@@ -282,17 +282,17 @@ class LocatorSlip {
             $params[] = $viewerUserId;
             $params[] = ROLE_OSDS_CHIEF;
         } elseif ($viewerRoleId && in_array($viewerRoleId, [ROLE_CID_CHIEF, ROLE_SGOD_CHIEF])) {
-            // CID/SGOD Chiefs see locator slips assigned to them for approval (from their unit employees)
+            // CID/SGOD Chiefs see locator slip assigned to them for approval (from their unit employees)
             // Their own submissions route to ASDS and appear in My Requests page
             $sql .= " AND (ls.assigned_approver_user_id = ? OR ls.assigned_approver_role_id = ?)";
             $params[] = $viewerUserId;
             $params[] = $viewerRoleId;
         } elseif ($viewerRoleId == ROLE_ASDS) {
-            // ASDS sees only Locator Slips assigned to ASDS (i.e. requests filed by Office Chiefs)
+            // ASDS sees only Locator Slip assigned to ASDS (i.e. requests filed by Office Chiefs)
             $sql .= " AND ls.assigned_approver_role_id = ?";
             $params[] = ROLE_ASDS;
         } elseif ($viewerRoleId == ROLE_SDS) {
-            // SDS sees all Locator Slips (view-only, no approval actions)
+            // SDS sees all Locator Slip (view-only, no approval actions)
             // No additional filter — show everything
         } elseif ($viewerRoleId == ROLE_SUPERADMIN) {
             // Superadmin sees all requests
@@ -361,7 +361,7 @@ class LocatorSlip {
     }
 
     /**
-     * Get count of Locator Slips with filters
+     * Get count of Locator Slip with filters
      * Includes visibility filtering based on user role
      */
     public function getCount($filters = [], $viewerRoleId = null, $viewerUserId = null) {
@@ -386,7 +386,7 @@ class LocatorSlip {
             $sql .= " AND ls.assigned_approver_role_id = ?";
             $params[] = ROLE_ASDS;
         } elseif ($viewerRoleId == ROLE_SDS) {
-            // SDS sees all Locator Slips (view-only) — no additional filter
+            // SDS sees all Locator Slip (view-only) — no additional filter
         } elseif ($viewerUserId && !in_array($viewerRoleId, [ROLE_ASDS, ROLE_SDS, ROLE_SUPERADMIN])) {
             $sql .= " AND ls.user_id = ?";
             $params[] = $viewerUserId;
@@ -523,7 +523,7 @@ class LocatorSlip {
         if ($viewerRoleId == ROLE_ASDS) {
             return (int) ($ls['assigned_approver_role_id'] ?? 0) === ROLE_ASDS;
         }
-        // SDS can view all locator slips (view-only)
+        // SDS can view all locator slip (view-only)
         if ($viewerRoleId == ROLE_SDS) {
             return true;
         }
@@ -627,7 +627,7 @@ class LocatorSlip {
     }
 
     /**
-     * Get recent Locator Slips for dashboard
+     * Get recent Locator Slip for dashboard
      */
     public function getRecent($limit = 5, $userId = null) {
         $sql = "SELECT ls.*, u.full_name as filed_by_name

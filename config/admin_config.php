@@ -23,7 +23,7 @@ define('ADMIN_URL', '/SDO-alpas/admin');
 
 // Role IDs - Aligned with SQL admin_roles
 define('ROLE_SUPERADMIN', 1);  // System Administrator - Executive Override
-define('ROLE_ASDS', 2);        // ASDS - Approves Office Chief locator slips
+define('ROLE_ASDS', 2);        // ASDS - Approves Office Chief locator slip
 define('ROLE_OSDS_CHIEF', 3);  // AO V - Recommending for OSDS units
 define('ROLE_CID_CHIEF', 4);   // CID Chief - Recommending for CID
 define('ROLE_SGOD_CHIEF', 5);  // SGOD Chief - Recommending for SGOD

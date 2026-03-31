@@ -1,7 +1,7 @@
 <?php
 /**
- * Pass Slips Management Page
- * SDO ALPAS - View, create, approve, reject, cancel Pass Slips, and update guard times
+ * Pass Slip Management Page
+ * SDO ALPAS - View, create, approve, reject, cancel Pass Slip, and update guard times
  */
 
 require_once __DIR__ . '/../includes/header.php';
@@ -274,7 +274,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $message = 'Guard times updated successfully!';
             $viewId = $id; // Stay on view
         } else {
-            $error = 'Guard times can only be updated for approved Pass Slips.';
+            $error = 'Guard times can only be updated for approved Pass Slip.';
         }
     }
 
@@ -1091,10 +1091,10 @@ $formData = [
     <div class="page-header" style="background: #164f77; color: white; padding: 12px 16px; border-radius: var(--radius-lg); margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 15px rgba(22, 79, 119, 0.2); border: none;">
         <div class="header-content">
             <h2 style="margin: 0; font-size: 1.15rem; display: flex; align-items: center; gap: 6px; font-weight: 800; letter-spacing: -0.5px; color: white;">
-                <i class="fas fa-ticket-alt" style="color: rgba(255,255,255,0.8); font-size: 1rem;"></i> Pass Slips Management
+                <i class="fas fa-ticket-alt" style="color: rgba(255,255,255,0.8); font-size: 1rem;"></i> Pass Slip Management
             </h2>
             <p style="margin: 2px 0 0 0; color: rgba(255,255,255,0.8); font-size: 0.75rem;">
-                <?php echo $totalRequests; ?> Pass Slip<?php echo $totalRequests !== 1 ? 's' : ''; ?>
+                <?php echo $totalRequests; ?> Pass Slip
                 <?php if ($isGuardView): ?>
                     <span style="color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-left: 8px;">
                         (<?php echo isset($guardFilters['date']) ? date('M j, Y', strtotime($guardFilters['date'])) : 'All dates'; ?>)
@@ -1181,8 +1181,8 @@ $formData = [
                             <td colspan="9">
                                 <div class="empty-state">
                                     <span class="empty-icon"><i class="fas fa-shield-alt"></i></span>
-                                    <h3>No Pass Slips for this date</h3>
-                                    <p>No pass slips found matching the current filters</p>
+                                    <h3>No Pass Slip for this date</h3>
+                                    <p>No pass slip found matching the current filters</p>
                                 </div>
                             </td>
                         </tr>
@@ -1292,7 +1292,7 @@ $formData = [
     <?php else: ?>
 
     <?php
-    // Show accumulated hours banner for employees viewing their own pass slips
+    // Show accumulated hours banner for employees viewing their own pass slip
     if ($auth->isEmployee() || $auth->isUnitHead() || $auth->isASDS()) {
         $myAccum = $psModel->getAccumulatedHours($auth->getUserId());
         $myProgress = min(100, max(0, ((float) $myAccum['total_hours'] / 8) * 100));
@@ -1434,7 +1434,7 @@ $formData = [
                             <td colspan="6">
                                 <div class="empty-state">
                                     <span class="empty-icon"><i class="fas fa-ticket-alt"></i></span>
-                                    <h3>No Pass Slips found</h3>
+                                    <h3>No Pass Slip found</h3>
                                     <p>Create a new Pass Slip to get started</p>
                                 </div>
                             </td>

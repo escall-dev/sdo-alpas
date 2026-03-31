@@ -1,7 +1,7 @@
 <?php
 /**
- * Locator Slips Management Page
- * SDO ALPAS - View, create, and approve Locator Slips
+ * Locator Slip Management Page
+ * SDO ALPAS - View, create, and approve Locator Slip
  */
 
 require_once __DIR__ . '/../includes/header.php';
@@ -133,7 +133,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // 3. They are acting as OIC for the assigned approver's role
         // 4. ASDS only when this slip is assigned to ASDS (Office Chief as requestor)
         // Note: Superadmin can VIEW all requests but cannot approve/reject
-        // SDS is view-only for Locator Slips — cannot approve
+        // SDS is view-only for Locator Slip — cannot approve
         $canApprove = !$auth->isSDS() && (
             ($ls['assigned_approver_user_id'] == $auth->getUserId()) ||
             ($currentRoleId == $ls['assigned_approver_role_id'] && in_array($currentRoleId, UNIT_HEAD_ROLES)) ||
@@ -602,7 +602,7 @@ $formData = [
         <div class="complaint-sidebar">
             <!-- Actions -->
             <?php
-            // SDS is view-only for Locator Slips — cannot approve
+            // SDS is view-only for Locator Slip — cannot approve
             $canApprove = !$auth->isSDS() && $viewData['status'] === 'pending' &&
                 ($viewData['assigned_approver_user_id'] == $auth->getUserId() ||
                     ($currentRoleId == $viewData['assigned_approver_role_id'] && in_array($currentRoleId, UNIT_HEAD_ROLES)) ||
@@ -804,11 +804,11 @@ $formData = [
         <div class="header-content">
             <h2
                 style="margin: 0; font-size: 1.15rem; display: flex; align-items: center; gap: 6px; font-weight: 800; letter-spacing: -0.5px; color: white;">
-                <i class="fas fa-map-marker-alt" style="color: rgba(255,255,255,0.8); font-size: 1rem;"></i> Locator Slips
+                <i class="fas fa-map-marker-alt" style="color: rgba(255,255,255,0.8); font-size: 1rem;"></i> Locator Slip
                 Management
             </h2>
             <p style="margin: 2px 0 0 0; color: rgba(255,255,255,0.8); font-size: 0.75rem;">
-                Track and manage employee locator slips &bull; <?php echo $totalRequests; ?>
+                Track and manage employee locator slip &bull; <?php echo $totalRequests; ?>
                 Record<?php echo $totalRequests !== 1 ? 's' : ''; ?>
             </p>
         </div>
@@ -937,7 +937,7 @@ $formData = [
                             <td colspan="6">
                                 <div class="empty-state">
                                     <span class="empty-icon"><i class="fas fa-map-marker-alt"></i></span>
-                                    <h3>No Locator Slips found</h3>
+                                    <h3>No Locator Slip found</h3>
                                     <p>Create a new Locator Slip to get started</p>
                                 </div>
                             </td>

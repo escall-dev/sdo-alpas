@@ -1,7 +1,7 @@
 <?php
 /**
  * Pass Slip Model
- * SDO ALPAS - Handles CRUD, routing, approval, and statistics for Pass Slips
+ * SDO ALPAS - Handles CRUD, routing, approval, and statistics for Pass Slip
  */
 
 require_once __DIR__ . '/../config/database.php';
@@ -342,8 +342,8 @@ class PassSlip
     }
 
     /**
-     * Get pass slips for guard dashboard view
-     * Guards see ALL approved pass slips + pending (read-only)
+     * Get pass slip for guard dashboard view
+     * Guards see ALL approved pass slip + pending (read-only)
      */
     public function getForGuardDashboard($filters = [], $limit = 20, $offset = 0)
     {
@@ -484,7 +484,7 @@ class PassSlip
     }
 
     /**
-     * Get all Pass Slips with filters and visibility rules
+     * Get all Pass Slip with filters and visibility rules
      */
     public function getAll($filters = [], $limit = 20, $offset = 0, $viewerRoleId = null, $viewerUserId = null)
     {
@@ -496,7 +496,7 @@ class PassSlip
             if ($viewerRoleId == ROLE_SUPERADMIN || $viewerRoleId == ROLE_SDS) {
                 // Superadmin and SDS can see all
             } elseif ($viewerRoleId == ROLE_GUARD) {
-                // Guards can see all approved + pending pass slips
+                // Guards can see all approved + pending pass slip
                 $where[] = "ps.status IN ('approved', 'pending')";
             } elseif ($viewerRoleId == ROLE_ASDS) {
                 // ASDS sees own + requests assigned to ASDS role
@@ -716,7 +716,7 @@ class PassSlip
     }
 
     /**
-     * Get pending Pass Slips assigned to a specific approver
+     * Get pending Pass Slip assigned to a specific approver
      */
     public function getPendingForApprover($approverRoleId, $approverUserId, $limit = 5)
     {
@@ -733,7 +733,7 @@ class PassSlip
     }
 
     /**
-     * Get count of pending Pass Slips for approver (used for sidebar badges)
+     * Get count of pending Pass Slip for approver (used for sidebar badges)
      */
     public function getPendingCountForApprover($approverRoleId, $approverUserId)
     {
@@ -757,9 +757,9 @@ class PassSlip
             return true;
         // Superadmin and SDS can view all
         if ($viewerRoleId == ROLE_SUPERADMIN || $viewerRoleId == ROLE_SDS)
-            return true;        // Guards can view all pass slips
+            return true;        // Guards can view all pass slip
         if ($viewerRoleId == ROLE_GUARD)
-            return true;        // Guards can view all pass slips
+            return true;        // Guards can view all pass slip
         if ($viewerRoleId == ROLE_GUARD)
             return true;
         // ASDS can view assigned

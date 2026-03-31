@@ -335,7 +335,7 @@ class AdminAuth
     }
 
     /**
-     * Check if current user can approve Locator Slips
+     * Check if current user can approve Locator Slip
      * Office Chiefs (CID, SGOD, OSDS) can approve when slip is assigned to them; ASDS when assigned to ASDS; Superadmin always
      */
     public function canApproveLS()

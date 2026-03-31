@@ -127,7 +127,7 @@ $totalPages = ceil($totalRequests / $perPage);
     <a href="<?php echo navUrl('/my-requests.php?type=ls' . ($status ? '&status=' . $status : '')); ?>"
        class="request-tab <?php echo $type === 'ls' ? 'active' : ''; ?>">
         <i class="fas fa-map-marker-alt"></i>
-        <span>Locator Slips</span>
+        <span>Locator Slip</span>
     </a>
     <a href="<?php echo navUrl('/my-requests.php?type=at' . ($status ? '&status=' . $status : '')); ?>"
        class="request-tab <?php echo $type === 'at' ? 'active' : ''; ?>">
@@ -137,7 +137,7 @@ $totalPages = ceil($totalRequests / $perPage);
     <a href="<?php echo navUrl('/my-requests.php?type=ps' . ($status ? '&status=' . $status : '')); ?>"
        class="request-tab <?php echo $type === 'ps' ? 'active' : ''; ?>">
         <i class="fas fa-ticket-alt"></i>
-        <span>Pass Slips</span>
+        <span>Pass Slip</span>
     </a>
 </div>
 

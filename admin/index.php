@@ -111,17 +111,17 @@ if ($auth->isGuard()) {
         <!-- Quick Action -->
         <div class="dashboard-card">
             <div class="card-header">
-                <h2><i class="fas fa-shield-alt"></i> Today's Approved Pass Slips</h2>
+                <h2><i class="fas fa-shield-alt"></i> Today's Approved Pass Slip</h2>
                 <a href="<?php echo navUrl('/pass-slips.php'); ?>" class="btn btn-sm btn-primary">
-                    <i class="fas fa-list"></i> View All Pass Slips
+                    <i class="fas fa-list"></i> View All Pass Slip
                 </a>
             </div>
             <div class="card-body">
                 <?php if (empty($guardTodaySlips)): ?>
                     <div class="empty-state small">
                         <span class="empty-icon"><i class="fas fa-shield-alt"></i></span>
-                        <h3>No approved pass slips today</h3>
-                        <p>Approved pass slips will appear here for gate monitoring</p>
+                        <h3>No approved pass slip today</h3>
+                        <p>Approved pass slip will appear here for gate monitoring</p>
                     </div>
                 <?php else: ?>
                     <div class="table-responsive">
@@ -280,10 +280,10 @@ if ($auth->isGuard()) {
 
         <!-- Recent Requests -->
         <div class="dashboard-content" style="grid-template-columns: 1fr 1fr;">
-            <!-- Recent Locator Slips -->
+            <!-- Recent Locator Slip -->
             <div class="dashboard-card">
                 <div class="card-header">
-                    <h2><i class="fas fa-map-marker-alt"></i> My Recent Locator Slips</h2>
+                    <h2><i class="fas fa-map-marker-alt"></i> My Recent Locator Slip</h2>
                     <a href="<?php echo navUrl('/my-requests.php?type=ls'); ?>" class="btn btn-sm btn-secondary">View
                         All</a>
                 </div>
@@ -408,7 +408,7 @@ if ($auth->isGuard()) {
         <div class="dashboard-content">
             <div class="dashboard-card">
                 <div class="card-header">
-                    <h2><i class="fas fa-clock"></i> Pending Locator Slips</h2>
+                    <h2><i class="fas fa-clock"></i> Pending Locator Slip</h2>
                     <a href="<?php echo navUrl('/locator-slips.php?status=pending'); ?>"
                         class="btn btn-sm btn-secondary">View All</a>
                 </div>
@@ -417,7 +417,7 @@ if ($auth->isGuard()) {
                         <div class="empty-state small">
                             <span class="empty-icon"><i class="fas fa-check-circle"></i></span>
                             <h3>All caught up!</h3>
-                            <p>No pending Locator Slips</p>
+                            <p>No pending Locator Slip</p>
                         </div>
                     <?php else: ?>
                         <div class="complaints-list">
@@ -478,10 +478,10 @@ if ($auth->isGuard()) {
                     </div>
                 </div>
 
-                <!-- Pending Pass Slips -->
+                <!-- Pending Pass Slip -->
                 <div class="dashboard-card">
                     <div class="card-header">
-                        <h2><i class="fas fa-ticket-alt"></i> Pending Pass Slips</h2>
+                        <h2><i class="fas fa-ticket-alt"></i> Pending Pass Slip</h2>
                         <a href="<?php echo navUrl('/pass-slips.php?status=pending'); ?>"
                             class="btn btn-sm btn-secondary">View All</a>
                     </div>
@@ -490,7 +490,7 @@ if ($auth->isGuard()) {
                             <div class="empty-state small">
                                 <span class="empty-icon"><i class="fas fa-check-circle"></i></span>
                                 <h3>All caught up!</h3>
-                                <p>No pending Pass Slips</p>
+                                <p>No pending Pass Slip</p>
                             </div>
                         <?php else: ?>
                             <div class="complaints-list">
@@ -522,7 +522,7 @@ if ($auth->isGuard()) {
                     </div>
                     <div class="card-body">
                         <div class="quick-stat-item">
-                            <span class="quick-stat-label">Locator Slips Filed</span>
+                            <span class="quick-stat-label">Locator Slip Filed</span>
                             <span class="quick-stat-value"><?php echo $myLsStats['this_week'] ?? 0; ?></span>
                         </div>
                         <div class="quick-stat-item">

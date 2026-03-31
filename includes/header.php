@@ -62,9 +62,9 @@ try {
 // Get page title
 $pageTitles = [
     'index' => 'Dashboard',
-    'locator-slips' => 'Locator Slips',
+    'locator-slips' => 'Locator Slip',
     'authority-to-travel' => 'Authority to Travel',
-    'pass-slips' => 'Pass Slips',
+    'pass-slips' => 'Pass Slip',
     'my-requests' => 'My Requests',
     'users' => 'User Management',
     'unit-routing' => 'Unit Routing Configuration',
@@ -146,9 +146,9 @@ function navUrl($path)
                     </a>
                     <a href="<?php echo navUrl('/my-requests.php?type=ls'); ?>"
                         class="nav-item nav-item-sub <?php echo ($currentPage === 'my-requests' && $myReqType === 'ls') || ($currentPage === 'locator-slips' && !$auth->isApprover() && !$auth->isUnitHead()) ? 'active' : ''; ?>"
-                        data-tooltip="Locator Slips">
+                        data-tooltip="Locator Slip">
                         <span class="nav-icon"><i class="fas fa-map-marker-alt"></i></span>
-                        <span class="nav-text">Locator Slips</span>
+                        <span class="nav-text">Locator Slip</span>
                     </a>
                     <a href="<?php echo navUrl('/my-requests.php?type=at'); ?>"
                         class="nav-item nav-item-sub <?php echo ($currentPage === 'my-requests' && $myReqType === 'at') || ($currentPage === 'authority-to-travel' && !$auth->isApprover() && !$auth->isUnitHead()) ? 'active' : ''; ?>"
@@ -158,9 +158,9 @@ function navUrl($path)
                     </a>
                     <a href="<?php echo navUrl('/my-requests.php?type=ps'); ?>"
                         class="nav-item nav-item-sub <?php echo ($currentPage === 'my-requests' && $myReqType === 'ps') || ($currentPage === 'pass-slips' && !$auth->isApprover() && !$auth->isUnitHead()) ? 'active' : ''; ?>"
-                        data-tooltip="Pass Slips">
+                        data-tooltip="Pass Slip">
                         <span class="nav-icon"><i class="fas fa-ticket-alt"></i></span>
-                        <span class="nav-text">Pass Slips</span>
+                        <span class="nav-text">Pass Slip</span>
                     </a>
                 <?php endif; ?>
 
@@ -168,11 +168,11 @@ function navUrl($path)
                     <!-- Guard-only navigation -->
                     <a href="<?php echo navUrl('/pass-slips.php'); ?>"
                         class="nav-item <?php echo $currentPage === 'pass-slips' ? 'active' : ''; ?>"
-                        data-tooltip="Pass Slips">
+                        data-tooltip="Pass Slip">
                         <span class="nav-icon">
                             <i class="fas fa-shield-alt"></i>
                         </span>
-                        <span class="nav-text">Pass Slips</span>
+                        <span class="nav-text">Pass Slip</span>
                     </a>
                 <?php endif; ?>
 
@@ -180,7 +180,7 @@ function navUrl($path)
                     <!-- Approver/Unit Head navigation -->
                     <a href="<?php echo navUrl('/locator-slips.php'); ?>"
                         class="nav-item <?php echo $currentPage === 'locator-slips' ? 'active' : ''; ?>"
-                        data-tooltip="Locator Slips">
+                        data-tooltip="Locator Slip">
                         <span class="nav-icon">
                             <i class="fas fa-map-marker-alt"></i>
                             <?php if (($notificationCounts['ls_pending'] ?? 0) > 0): ?>
@@ -188,7 +188,7 @@ function navUrl($path)
                                     class="nav-badge"><?php echo $notificationCounts['ls_pending'] > 99 ? '99+' : $notificationCounts['ls_pending']; ?></span>
                             <?php endif; ?>
                         </span>
-                        <span class="nav-text">Locator Slips</span>
+                        <span class="nav-text">Locator Slip</span>
                     </a>
 
                     <a href="<?php echo navUrl('/authority-to-travel.php'); ?>"
@@ -206,7 +206,7 @@ function navUrl($path)
 
                     <a href="<?php echo navUrl('/pass-slips.php'); ?>"
                         class="nav-item <?php echo $currentPage === 'pass-slips' ? 'active' : ''; ?>"
-                        data-tooltip="Pass Slips">
+                        data-tooltip="Pass Slip">
                         <span class="nav-icon">
                             <i class="fas fa-ticket-alt"></i>
                             <?php if (($notificationCounts['ps_pending'] ?? 0) > 0): ?>
@@ -214,7 +214,7 @@ function navUrl($path)
                                     class="nav-badge"><?php echo $notificationCounts['ps_pending'] > 99 ? '99+' : $notificationCounts['ps_pending']; ?></span>
                             <?php endif; ?>
                         </span>
-                        <span class="nav-text">Pass Slips</span>
+                        <span class="nav-text">Pass Slip</span>
                     </a>
 
                     <?php if (!$auth->isSuperAdmin()): ?>

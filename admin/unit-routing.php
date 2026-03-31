@@ -261,7 +261,7 @@ foreach ($routingConfigs as $config) {
 </div>
 <?php endif; ?>
 
-<!-- Filters: same design as Users / Authority to Travel / Locator Slips -->
+<!-- Filters: same design as Users / Authority to Travel / Locator Slip -->
 <div class="filter-bar" style="background: white; padding: 24px; border-radius: var(--radius-lg); box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 24px; border: 1px solid rgba(0,0,0,0.05);">
     <form method="get" class="filter-form">
         <div class="filter-group">
@@ -319,7 +319,7 @@ foreach ($routingConfigs as $config) {
     </form>
 </div>
 
-<!-- Routing Configuration Table (same design as Users / Authority to Travel / Locator Slips) -->
+<!-- Routing Configuration Table (same design as Users / Authority to Travel / Locator Slip) -->
 <div class="data-card" style="border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 8px 25px rgba(0,0,0,0.08); border-radius: var(--radius-xl); overflow: hidden;">
     <div class="table-responsive" style="background: white; overflow-x: hidden;">
         <table class="data-table">
