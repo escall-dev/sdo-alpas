@@ -750,19 +750,52 @@ class PassSlip
     }
 
     /**
-     * Get pending Pass Slip assigned to a specific approver
+     * Requester must be in offices supervised by this unit head (aligned with AT / LS dashboard scoping).
      */
-    public function getPendingForApprover($approverRoleId, $approverUserId, $limit = 5)
+    private function appendSupervisedUnitConditionForPs(&$sql, array &$params, $unitHeadRoleId)
+    {
+        require_once __DIR__ . '/AuthorityToTravel.php';
+        $at = new AuthorityToTravel();
+        $officeIds = $at->getSupervisedOfficeIdsForRole($unitHeadRoleId);
+        $officeNames = $at->getSupervisedOfficesForRole($unitHeadRoleId);
+        $clauses = [];
+        if (!empty($officeIds)) {
+            $placeholders = implode(',', array_fill(0, count($officeIds), '?'));
+            $clauses[] = "u.office_id IN ($placeholders)";
+            foreach ($officeIds as $id) {
+                $params[] = $id;
+            }
+        }
+        if (!empty($officeNames)) {
+            $placeholders = implode(',', array_fill(0, count($officeNames), '?'));
+            $clauses[] = "(ps.employee_office IN ($placeholders) OR u.employee_office IN ($placeholders))";
+            $params = array_merge($params, $officeNames, $officeNames);
+        }
+        if (!empty($clauses)) {
+            $sql .= ' AND (' . implode(' OR ', $clauses) . ')';
+        }
+    }
+
+    /**
+     * Get pending Pass Slip assigned to a specific approver
+     *
+     * @param int|null $unitHeadRoleId When set for a division chief, limits to supervised-unit requesters
+     */
+    public function getPendingForApprover($approverRoleId, $approverUserId, $limit = 5, $unitHeadRoleId = null)
     {
         $sql = "SELECT ps.*, u.full_name as filed_by_name
                 FROM pass_slips ps
                 LEFT JOIN admin_users u ON ps.user_id = u.id
                 WHERE ps.status = 'pending' 
-                AND (ps.assigned_approver_user_id = ? OR ps.assigned_approver_role_id = ?)
-                ORDER BY ps.created_at ASC
-                LIMIT ?";
+                AND (ps.assigned_approver_user_id = ? OR ps.assigned_approver_role_id = ?)";
+        $params = [$approverUserId, $approverRoleId];
+        if ($unitHeadRoleId !== null && in_array((int) $unitHeadRoleId, UNIT_HEAD_ROLES, true)) {
+            $this->appendSupervisedUnitConditionForPs($sql, $params, $unitHeadRoleId);
+        }
+        $sql .= " ORDER BY ps.created_at DESC, ps.id DESC LIMIT ?";
+        $params[] = $limit;
 
-        $stmt = $this->db->query($sql, [$approverUserId, $approverRoleId, $limit]);
+        $stmt = $this->db->query($sql, $params);
         return $stmt->fetchAll();
     }
 

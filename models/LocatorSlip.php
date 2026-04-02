@@ -643,6 +643,60 @@ class LocatorSlip {
     }
 
     /**
+     * Unit-head dashboard: aggregate LS stats for requesters in supervised offices (same scope as pending LS list).
+     */
+    public function getUnitStatistics($roleId) {
+        $empty = [
+            'total' => 0,
+            'pending' => 0,
+            'approved' => 0,
+            'disapproved' => 0,
+            'today' => 0,
+            'this_week' => 0,
+        ];
+        if (!in_array((int) $roleId, UNIT_HEAD_ROLES, true)) {
+            return $empty;
+        }
+
+        require_once __DIR__ . '/AuthorityToTravel.php';
+        $at = new AuthorityToTravel();
+        $officeIds = $at->getSupervisedOfficeIdsForRole($roleId);
+        $officeNames = $at->getSupervisedOfficesForRole($roleId);
+
+        $clauses = [];
+        $params = [];
+        if (!empty($officeIds)) {
+            $placeholders = implode(',', array_fill(0, count($officeIds), '?'));
+            $clauses[] = "u.office_id IN ($placeholders)";
+            foreach ($officeIds as $id) {
+                $params[] = $id;
+            }
+        }
+        if (!empty($officeNames)) {
+            $placeholders = implode(',', array_fill(0, count($officeNames), '?'));
+            $clauses[] = "(ls.requester_office IN ($placeholders) OR u.employee_office IN ($placeholders))";
+            $params = array_merge($params, $officeNames, $officeNames);
+        }
+        if (empty($clauses)) {
+            return $empty;
+        }
+
+        $where = '(' . implode(' OR ', $clauses) . ')';
+        $sql = "SELECT 
+                COUNT(*) as total,
+                SUM(CASE WHEN ls.status = 'pending' THEN 1 ELSE 0 END) as pending,
+                SUM(CASE WHEN ls.status = 'approved' THEN 1 ELSE 0 END) as approved,
+                SUM(CASE WHEN ls.status = 'disapproved' THEN 1 ELSE 0 END) as disapproved,
+                SUM(CASE WHEN DATE(ls.created_at) = CURDATE() THEN 1 ELSE 0 END) as today,
+                SUM(CASE WHEN YEARWEEK(ls.created_at) = YEARWEEK(CURDATE()) THEN 1 ELSE 0 END) as this_week
+                FROM locator_slips ls
+                LEFT JOIN admin_users u ON ls.user_id = u.id
+                WHERE $where";
+
+        return $this->db->query($sql, $params)->fetch() ?: $empty;
+    }
+
+    /**
      * Get pending LS count assigned to a specific approver (by user ID)
      */
     public function getPendingCountForApprover($approverUserId) {
@@ -674,27 +728,55 @@ class LocatorSlip {
     }
 
     /**
+     * Constrain LS rows to requesters in offices supervised by a unit head (same source as AT routing).
+     */
+    private function appendSupervisedUnitConditionForLs(&$sql, array &$params, $unitHeadRoleId) {
+        require_once __DIR__ . '/AuthorityToTravel.php';
+        $at = new AuthorityToTravel();
+        $officeIds = $at->getSupervisedOfficeIdsForRole($unitHeadRoleId);
+        $officeNames = $at->getSupervisedOfficesForRole($unitHeadRoleId);
+        $clauses = [];
+        if (!empty($officeIds)) {
+            $placeholders = implode(',', array_fill(0, count($officeIds), '?'));
+            $clauses[] = "u.office_id IN ($placeholders)";
+            foreach ($officeIds as $id) {
+                $params[] = $id;
+            }
+        }
+        if (!empty($officeNames)) {
+            $placeholders = implode(',', array_fill(0, count($officeNames), '?'));
+            $clauses[] = "(ls.requester_office IN ($placeholders) OR u.employee_office IN ($placeholders))";
+            $params = array_merge($params, $officeNames, $officeNames);
+        }
+        if (!empty($clauses)) {
+            $sql .= ' AND (' . implode(' OR ', $clauses) . ')';
+        }
+    }
+
+    /**
      * Get pending requests for approvers
-     * Filtered by assigned approver (supports OIC)
+     * Filtered by assigned approver (supports OIC); unit heads also scoped to supervised offices
      */
     public function getPending($limit = 10, $approverUserId = null, $approverRoleId = null) {
         $sql = "SELECT ls.*, u.full_name as filed_by_name, u.email as filed_by_email
                 FROM locator_slips ls
                 LEFT JOIN admin_users u ON ls.user_id = u.id
                 WHERE ls.status = 'pending'";
-        
         $params = [];
-        
+
         if ($approverUserId && $approverRoleId) {
-            // Get effective approver (may be OIC)
             $effectiveApproverId = $this->getEffectiveApproverUserId($approverRoleId, $approverUserId);
-            $sql .= " AND ls.assigned_approver_user_id = ?";
+            $sql .= " AND (ls.assigned_approver_user_id = ? OR ls.assigned_approver_role_id = ?)";
             $params[] = $effectiveApproverId;
+            $params[] = $approverRoleId;
+            if (in_array((int) $approverRoleId, UNIT_HEAD_ROLES, true)) {
+                $this->appendSupervisedUnitConditionForLs($sql, $params, $approverRoleId);
+            }
         }
-        
-        $sql .= " ORDER BY ls.created_at ASC LIMIT ?";
+
+        $sql .= " ORDER BY ls.created_at DESC, ls.id DESC LIMIT ?";
         $params[] = $limit;
-        
+
         return $this->db->query($sql, $params)->fetchAll();
     }
 

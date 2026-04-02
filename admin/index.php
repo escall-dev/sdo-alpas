@@ -35,12 +35,12 @@ if ($auth->isGuard()) {
     $recentAT = $atModel->getRecent(5, $userId);
 } elseif ($auth->isUnitHead()) {
     // Unit heads (or OICs acting as unit heads) see stats about requests FROM THEIR UNIT
-    $myLsStats = $lsModel->getStatistics($userId); // Their own LS if any
+    $myLsStats = $lsModel->getUnitStatistics($currentRoleId);
     $myAtStats = $atModel->getUnitStatistics($currentRoleId); // Stats from their supervised offices
     $myPsStats = $psModelDash->getVisibleStatistics($currentRoleId, $userId);
-    $pendingLS = $lsModel->getPending(5);
+    $pendingLS = $lsModel->getPending(5, $userId, $currentRoleId);
     $pendingAT = $atModel->getPending(5, $currentRoleId, $currentRoleName);
-    $pendingPS = $psModelDash->getPendingForApprover($currentRoleId, $userId, 5);
+    $pendingPS = $psModelDash->getPendingForApprover($currentRoleId, $userId, 5, $currentRoleId);
     $queueCount = $atModel->getPendingCountForRole($currentRoleName, $currentRoleId);
 } else {
     // ASDS/Superadmin see all stats

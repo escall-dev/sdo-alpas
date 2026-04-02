@@ -614,7 +614,7 @@ class AuthorityToTravel {
             $this->applyOfficeFilter($sql, $params, $officeIds, $officeNames, 'at.');
         }
         
-        $sql .= " ORDER BY at.created_at ASC LIMIT ? OFFSET ?";
+        $sql .= " ORDER BY at.created_at DESC, at.id DESC LIMIT ? OFFSET ?";
         $params[] = $limit;
         $params[] = $offset;
         
@@ -1292,13 +1292,13 @@ class AuthorityToTravel {
                 WHERE at.status IN ('pending', 'recommended')";
         
         // For unit heads, filter by their role assignment AND supervised offices
-        if ($roleId && in_array($roleId, UNIT_HEAD_ROLES) && isset(UNIT_HEAD_OFFICES[$roleId])) {
+        if ($roleId && in_array($roleId, UNIT_HEAD_ROLES)) {
             $sql .= " AND at.current_approver_role = ?";
             $params[] = $roleName;
             
             $officeIds = $this->getSupervisedOfficeIdsForRole($roleId);
-            $offices = UNIT_HEAD_OFFICES[$roleId];
-            $this->applyOfficeFilter($sql, $params, $officeIds, $offices, 'at.');
+            $officeNames = $this->getSupervisedOfficesForRole($roleId);
+            $this->applyOfficeFilter($sql, $params, $officeIds, $officeNames, 'at.');
         } 
         // For ASDS, show all ATs routed to them (recommending or final)
         elseif ($roleId == ROLE_ASDS) {
@@ -1306,7 +1306,7 @@ class AuthorityToTravel {
         }
         // Superadmin sees all pending
         
-        $sql .= " ORDER BY at.created_at ASC LIMIT ?";
+        $sql .= " ORDER BY at.created_at DESC, at.id DESC LIMIT ?";
         $params[] = $limit;
         
         return $this->db->query($sql, $params)->fetchAll();
