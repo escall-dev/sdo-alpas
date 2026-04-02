@@ -34,6 +34,96 @@ $roles = $db->query("SELECT id, role_name, description FROM admin_roles WHERE id
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
 
+    if ($action === 'office_create') {
+        $officeCode = trim((string)($_POST['office_code'] ?? ''));
+        $officeName = trim((string)($_POST['office_name'] ?? ''));
+        $officeType = trim((string)($_POST['office_type'] ?? 'section'));
+        $parentOfficeId = intval($_POST['parent_office_id'] ?? 0);
+        $approverRoleId = intval($_POST['office_approver_role_id'] ?? 0);
+        $sortOrder = intval($_POST['office_sort_order'] ?? 0);
+        $isOsdsUnit = isset($_POST['office_is_osds_unit']) ? 1 : 0;
+        $isActive = isset($_POST['office_is_active']) ? 1 : 0;
+
+        $allowedOfficeTypes = ['executive', 'division', 'section', 'unit'];
+        if ($officeCode === '' || $officeName === '' || !in_array($officeType, $allowedOfficeTypes, true)) {
+            $error = 'Please provide office code, office name, and a valid office type.';
+        } else {
+            try {
+                $existingOffice = $db->query('SELECT id FROM sdo_offices WHERE office_code = ?', [$officeCode])->fetch();
+                if ($existingOffice) {
+                    $error = 'Office code already exists. Please use a unique code.';
+                } else {
+                    $parentValue = $parentOfficeId > 0 ? $parentOfficeId : null;
+                    $approverValue = $approverRoleId > 0 ? $approverRoleId : null;
+                    $db->query(
+                        'INSERT INTO sdo_offices (office_code, office_name, office_type, parent_office_id, approver_role_id, is_osds_unit, sort_order, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+                        [$officeCode, $officeName, $officeType, $parentValue, $approverValue, $isOsdsUnit, $sortOrder, $isActive]
+                    );
+
+                    $newOfficeId = $db->lastInsertId();
+                    $auth->logActivity('create_office_unit', 'sdo_offices', $newOfficeId, 'Created office/unit: ' . $officeCode . ' - ' . $officeName);
+                    $message = 'Office/unit added successfully.';
+                }
+            } catch (Exception $e) {
+                $error = 'Failed to add office/unit.';
+            }
+        }
+    }
+
+    if ($action === 'office_update' && !empty($_POST['office_id'])) {
+        $officeId = intval($_POST['office_id']);
+        $officeCode = trim((string)($_POST['office_code'] ?? ''));
+        $officeName = trim((string)($_POST['office_name'] ?? ''));
+        $officeType = trim((string)($_POST['office_type'] ?? 'section'));
+        $parentOfficeId = intval($_POST['parent_office_id'] ?? 0);
+        $approverRoleId = intval($_POST['office_approver_role_id'] ?? 0);
+        $sortOrder = intval($_POST['office_sort_order'] ?? 0);
+        $isOsdsUnit = isset($_POST['office_is_osds_unit']) ? 1 : 0;
+        $isActive = isset($_POST['office_is_active']) ? 1 : 0;
+
+        $allowedOfficeTypes = ['executive', 'division', 'section', 'unit'];
+        if ($officeId <= 0 || $officeCode === '' || $officeName === '' || !in_array($officeType, $allowedOfficeTypes, true)) {
+            $error = 'Please provide valid office details.';
+        } elseif ($parentOfficeId === $officeId) {
+            $error = 'An office cannot be its own parent.';
+        } else {
+            try {
+                $existingOffice = $db->query('SELECT id FROM sdo_offices WHERE office_code = ? AND id != ?', [$officeCode, $officeId])->fetch();
+                if ($existingOffice) {
+                    $error = 'Office code already exists. Please use a unique code.';
+                } else {
+                    $parentValue = $parentOfficeId > 0 ? $parentOfficeId : null;
+                    $approverValue = $approverRoleId > 0 ? $approverRoleId : null;
+                    $db->query(
+                        'UPDATE sdo_offices SET office_code = ?, office_name = ?, office_type = ?, parent_office_id = ?, approver_role_id = ?, is_osds_unit = ?, sort_order = ?, is_active = ? WHERE id = ?',
+                        [$officeCode, $officeName, $officeType, $parentValue, $approverValue, $isOsdsUnit, $sortOrder, $isActive, $officeId]
+                    );
+
+                    $auth->logActivity('update_office_unit', 'sdo_offices', $officeId, 'Updated office/unit: ' . $officeCode . ' - ' . $officeName);
+                    $message = 'Office/unit updated successfully.';
+                }
+            } catch (Exception $e) {
+                $error = 'Failed to update office/unit.';
+            }
+        }
+    }
+
+    if ($action === 'office_delete' && !empty($_POST['office_id'])) {
+        $officeId = intval($_POST['office_id']);
+        try {
+            $office = $db->query('SELECT office_code, office_name FROM sdo_offices WHERE id = ?', [$officeId])->fetch();
+            if (!$office) {
+                $error = 'Office/unit not found.';
+            } else {
+                $db->query('DELETE FROM sdo_offices WHERE id = ?', [$officeId]);
+                $auth->logActivity('delete_office_unit', 'sdo_offices', $officeId, 'Deleted office/unit: ' . $office['office_code'] . ' - ' . $office['office_name']);
+                $message = 'Office/unit deleted successfully.';
+            }
+        } catch (Exception $e) {
+            $error = 'Failed to delete office/unit. It may still be referenced by other records.';
+        }
+    }
+
     if ($action === 'create') {
         $officeId = intval($_POST['office_id'] ?? 0);
         $approverRoleId = intval($_POST['approver_role_id'] ?? 0);
@@ -133,6 +223,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+
+// Refresh master office list after any CRUD action on this page
+$offices = getSDOOfficesFromDB(true);
+$allOffices = $db->query("SELECT o.id, o.office_code, o.office_name, o.office_type, o.parent_office_id, o.approver_role_id, o.is_osds_unit, o.sort_order, o.is_active,
+                                 p.office_code AS parent_office_code, p.office_name AS parent_office_name,
+                                 ar.role_name AS approver_role_name
+                          FROM sdo_offices o
+                          LEFT JOIN sdo_offices p ON o.parent_office_id = p.id
+                          LEFT JOIN admin_roles ar ON o.approver_role_id = ar.id
+                          ORDER BY o.sort_order ASC, o.office_name ASC")->fetchAll();
 
 // Office filter: OSDS, CID, SGOD (maps to approver_role_id 3, 4, 5)
 $roleIdByOffice = [ 'OSDS' => ROLE_OSDS_CHIEF, 'CID' => ROLE_CID_CHIEF, 'SGOD' => ROLE_SGOD_CHIEF ];
@@ -261,6 +361,85 @@ foreach ($routingConfigs as $config) {
 </div>
 <?php endif; ?>
 
+<!-- Unit Master Management (directly updates sdo_offices) -->
+<div class="data-card" style="border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 8px 25px rgba(0,0,0,0.08); border-radius: var(--radius-xl); overflow: hidden; margin-bottom: 24px;">
+    <div class="table-header-row" style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding: 16px 20px; border-bottom: 1px solid rgba(0,0,0,0.08); background: #f8fafc;">
+        <div>
+            <h3 style="margin:0; font-size:1rem; font-weight:700; color:#0f172a;">Unit Master (sdo_offices)</h3>
+            <p style="margin:4px 0 0; font-size:0.82rem; color:#64748b;">Add, edit, and delete units directly in the master offices table.</p>
+        </div>
+        <button type="button" class="btn btn-primary btn-sm" onclick="showOfficeModal()" title="Add Unit">
+            <i class="fas fa-plus"></i> Add Unit
+        </button>
+    </div>
+    <div class="table-responsive" style="background: white; overflow-x: auto;">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Parent</th>
+                    <th>Approver</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if (empty($allOffices)): ?>
+                <tr>
+                    <td colspan="7">
+                        <div class="empty-state">
+                            <span class="empty-icon"><i class="fas fa-building"></i></span>
+                            <h3>No offices/units found</h3>
+                        </div>
+                    </td>
+                </tr>
+                <?php else: ?>
+                <?php foreach ($allOffices as $officeRow): ?>
+                <tr class="<?php echo $officeRow['is_active'] ? '' : 'row-inactive'; ?>">
+                    <td><div class="cell-primary"><?php echo htmlspecialchars($officeRow['office_code']); ?></div></td>
+                    <td>
+                        <div class="cell-primary"><?php echo htmlspecialchars($officeRow['office_name']); ?></div>
+                        <?php if ((int)$officeRow['is_osds_unit'] === 1): ?>
+                        <small class="text-muted">OSDS Unit</small>
+                        <?php endif; ?>
+                    </td>
+                    <td><?php echo htmlspecialchars(ucfirst($officeRow['office_type'])); ?></td>
+                    <td>
+                        <?php if (!empty($officeRow['parent_office_name'])): ?>
+                            <?php echo htmlspecialchars($officeRow['parent_office_name']); ?>
+                            <small class="text-muted">(<?php echo htmlspecialchars($officeRow['parent_office_code']); ?>)</small>
+                        <?php else: ?>
+                            <span class="text-muted">-</span>
+                        <?php endif; ?>
+                    </td>
+                    <td><?php echo htmlspecialchars($officeRow['approver_role_name'] ?? '-'); ?></td>
+                    <td>
+                        <?php if ($officeRow['is_active']): ?>
+                        <span class="status-badge status-approved">Active</span>
+                        <?php else: ?>
+                        <span class="status-badge status-disapproved">Inactive</span>
+                        <?php endif; ?>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button type="button" class="btn btn-sm btn-outline" onclick='editOffice(<?php echo htmlspecialchars(json_encode($officeRow), ENT_QUOTES, "UTF-8"); ?>)' title="Edit Unit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger" onclick="confirmOfficeDelete(<?php echo (int)$officeRow['id']; ?>, '<?php echo htmlspecialchars($officeRow['office_name'], ENT_QUOTES, 'UTF-8'); ?>')" title="Delete Unit">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+</div>
+
 <!-- Filters: same design as Users / Authority to Travel / Locator Slip -->
 <div class="filter-bar" style="background: white; padding: 24px; border-radius: var(--radius-lg); box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 24px; border: 1px solid rgba(0,0,0,0.05);">
     <form method="get" class="filter-form">
@@ -321,6 +500,12 @@ foreach ($routingConfigs as $config) {
 
 <!-- Routing Configuration Table (same design as Users / Authority to Travel / Locator Slip) -->
 <div class="data-card" style="border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 8px 25px rgba(0,0,0,0.08); border-radius: var(--radius-xl); overflow: hidden;">
+    <div class="table-header-row" style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding: 16px 20px; border-bottom: 1px solid rgba(0,0,0,0.08); background: #f8fafc;">
+        <h3 style="margin:0; font-size:1rem; font-weight:700; color:#0f172a;">Routing Configurations</h3>
+        <button type="button" class="btn btn-primary btn-sm" onclick="showCreateModal()" title="Add Routing">
+            <i class="fas fa-plus"></i> Add Routing
+        </button>
+    </div>
     <div class="table-responsive" style="background: white; overflow-x: hidden;">
         <table class="data-table">
             <thead>
@@ -402,6 +587,118 @@ foreach ($routingConfigs as $config) {
         </table>
     </div>
 </div>
+
+    <!-- Office Unit Create/Edit Modal -->
+    <div class="modal-overlay" id="officeModal">
+        <div class="modal modal-lg">
+            <div class="modal-header">
+                <h3 id="officeModalTitle"><i class="fas fa-plus"></i> Add Unit</h3>
+                <button class="modal-close" type="button" onclick="closeOfficeModal()">&times;</button>
+            </div>
+            <form method="POST" id="officeForm">
+                <input type="hidden" name="action" id="officeFormAction" value="office_create">
+                <input type="hidden" name="office_id" id="officeFormId" value="">
+                <input type="hidden" name="_token" value="<?php echo $currentToken; ?>">
+
+                <div class="modal-body">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Unit Code <span class="required">*</span></label>
+                            <input type="text" class="form-control" name="office_code" id="officeCode" maxlength="50" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Office Type <span class="required">*</span></label>
+                            <select class="form-control" name="office_type" id="officeType" required>
+                                <option value="executive">Executive</option>
+                                <option value="division">Division</option>
+                                <option value="section" selected>Section</option>
+                                <option value="unit">Unit</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Unit Name <span class="required">*</span></label>
+                        <input type="text" class="form-control" name="office_name" id="officeName" maxlength="150" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Parent Office</label>
+                            <select class="form-control" name="parent_office_id" id="parentOfficeId">
+                                <option value="">-- None --</option>
+                                <?php foreach ($allOffices as $officeOption): ?>
+                                <option value="<?php echo (int)$officeOption['id']; ?>">
+                                    <?php echo htmlspecialchars($officeOption['office_name']); ?> (<?php echo htmlspecialchars($officeOption['office_code']); ?>)
+                                </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Approver Role</label>
+                            <select class="form-control" name="office_approver_role_id" id="officeApproverRoleId">
+                                <option value="">-- None --</option>
+                                <?php foreach ($roles as $role): ?>
+                                <option value="<?php echo (int)$role['id']; ?>"><?php echo htmlspecialchars($role['role_name']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Sort Order</label>
+                            <input type="number" class="form-control" name="office_sort_order" id="officeSortOrder" value="0" min="0">
+                        </div>
+                        <div class="form-group" style="display:flex; flex-direction:column; justify-content:flex-end; gap:8px;">
+                            <label class="checkbox-label" style="color: var(--text-secondary, #475569);">
+                                <input type="checkbox" name="office_is_osds_unit" id="officeIsOsdsUnit">
+                                <span>OSDS Unit</span>
+                            </label>
+                            <label class="checkbox-label" style="color: var(--text-secondary, #475569);">
+                                <input type="checkbox" name="office_is_active" id="officeIsActive" checked>
+                                <span>Active</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeOfficeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="officeSubmitBtn">
+                        <i class="fas fa-save"></i> Save Unit
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Office Delete Confirmation Modal -->
+    <div class="modal-overlay" id="officeDeleteModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i> Confirm Unit Delete</h3>
+                <button class="modal-close" type="button" onclick="closeOfficeDeleteModal()">&times;</button>
+            </div>
+            <form method="POST" id="officeDeleteForm">
+                <input type="hidden" name="action" value="office_delete">
+                <input type="hidden" name="office_id" id="deleteOfficeId" value="">
+                <input type="hidden" name="_token" value="<?php echo $currentToken; ?>">
+
+                <div class="modal-body">
+                    <p>Are you sure you want to delete unit <strong id="deleteOfficeName"></strong>?</p>
+                    <p class="text-muted">This directly removes the row from sdo_offices.</p>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeOfficeDeleteModal()">Cancel</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Delete Unit
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
 <!-- Create/Edit Modal -->
 <div class="modal-overlay" id="routingModal">
@@ -978,6 +1275,52 @@ foreach ($routingConfigs as $config) {
 </style>
 
 <script>
+function showOfficeModal() {
+    document.getElementById('officeModalTitle').innerHTML = '<i class="fas fa-plus"></i> Add Unit';
+    document.getElementById('officeFormAction').value = 'office_create';
+    document.getElementById('officeFormId').value = '';
+    document.getElementById('officeCode').value = '';
+    document.getElementById('officeName').value = '';
+    document.getElementById('officeType').value = 'section';
+    document.getElementById('parentOfficeId').value = '';
+    document.getElementById('officeApproverRoleId').value = '';
+    document.getElementById('officeSortOrder').value = '0';
+    document.getElementById('officeIsOsdsUnit').checked = false;
+    document.getElementById('officeIsActive').checked = true;
+    document.getElementById('officeSubmitBtn').innerHTML = '<i class="fas fa-save"></i> Save Unit';
+    document.getElementById('officeModal').classList.add('active');
+}
+
+function editOffice(office) {
+    document.getElementById('officeModalTitle').innerHTML = '<i class="fas fa-edit"></i> Edit Unit';
+    document.getElementById('officeFormAction').value = 'office_update';
+    document.getElementById('officeFormId').value = office.id;
+    document.getElementById('officeCode').value = office.office_code || '';
+    document.getElementById('officeName').value = office.office_name || '';
+    document.getElementById('officeType').value = office.office_type || 'section';
+    document.getElementById('parentOfficeId').value = office.parent_office_id || '';
+    document.getElementById('officeApproverRoleId').value = office.approver_role_id || '';
+    document.getElementById('officeSortOrder').value = office.sort_order || 0;
+    document.getElementById('officeIsOsdsUnit').checked = office.is_osds_unit == 1;
+    document.getElementById('officeIsActive').checked = office.is_active == 1;
+    document.getElementById('officeSubmitBtn').innerHTML = '<i class="fas fa-save"></i> Update Unit';
+    document.getElementById('officeModal').classList.add('active');
+}
+
+function closeOfficeModal() {
+    document.getElementById('officeModal').classList.remove('active');
+}
+
+function confirmOfficeDelete(officeId, officeName) {
+    document.getElementById('deleteOfficeId').value = officeId;
+    document.getElementById('deleteOfficeName').textContent = officeName;
+    document.getElementById('officeDeleteModal').classList.add('active');
+}
+
+function closeOfficeDeleteModal() {
+    document.getElementById('officeDeleteModal').classList.remove('active');
+}
+
 function showCreateModal() {
     document.getElementById('modalTitle').innerHTML = '<i class="fas fa-plus"></i> Add Unit Routing';
     document.getElementById('formAction').value = 'create';
@@ -1021,8 +1364,26 @@ function closeDeleteModal() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    var officeModal = document.getElementById('officeModal');
+    var officeDeleteModal = document.getElementById('officeDeleteModal');
     var routingModal = document.getElementById('routingModal');
     var deleteModal = document.getElementById('deleteModal');
+
+    if (officeModal) {
+        officeModal.addEventListener('click', function(e) {
+            if (e.target === officeModal) {
+                closeOfficeModal();
+            }
+        });
+    }
+
+    if (officeDeleteModal) {
+        officeDeleteModal.addEventListener('click', function(e) {
+            if (e.target === officeDeleteModal) {
+                closeOfficeDeleteModal();
+            }
+        });
+    }
 
     if (routingModal) {
         routingModal.addEventListener('click', function(e) {
@@ -1044,6 +1405,8 @@ document.addEventListener('DOMContentLoaded', function() {
 // Close modal on Escape key
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
+        closeOfficeModal();
+        closeOfficeDeleteModal();
         closeModal();
         closeDeleteModal();
     }
