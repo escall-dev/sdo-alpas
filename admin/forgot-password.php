@@ -528,8 +528,8 @@ if ($email) {
         </div>
 
         <div class="brand-footer">
-            <p>&copy; <?php echo date('Y'); ?> SDO ALPAS - Department of Education<br>
-            Schools Division Office of San Pedro City</p>
+            <p>&copy; <?php echo date('Y'); ?> ICT Unit<br>
+            DepED - Schools Division Office of San Pedro City</p>
         </div>
     </div>
 
