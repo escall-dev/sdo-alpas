@@ -1,4 +1,4 @@
-<?php
+    <?php
 /**
  * Locator Slip Management Page
  * SDO ALPAS - View, create, and approve Locator Slip
@@ -347,13 +347,9 @@ $formData = [
             </a>
         </div>
 
-        <div class="detail-card"
-            style="border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 8px 30px rgba(0,0,0,0.04); border-radius: var(--radius-xl); overflow: hidden; margin-top: 24px;">
-            <div class="detail-card-header"
-                style="padding: 24px 30px; background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%); border-bottom: none;">
-                <h3
-                    style="color: white; font-size: 1.25rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 10px;">
-                    <i class="fas fa-edit" style="color: var(--accent);"></i> Edit Locator Slip</h3>
+        <div class="detail-card">
+            <div class="detail-card-header">
+                <h3><i class="fas fa-edit"></i> Edit Locator Slip</h3>
             </div>
             <div class="detail-card-body">
                 <form method="POST" action="">
