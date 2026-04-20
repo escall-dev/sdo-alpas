@@ -105,6 +105,7 @@ function navUrl($path)
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="<?php echo ADMIN_URL; ?>/assets/css/admin.css?v=<?php echo time(); ?>">
+    <script defer src="<?php echo ADMIN_URL; ?>/assets/js/context-menu-block.js?v=<?php echo time(); ?>"></script>
 </head>
 
 <body>

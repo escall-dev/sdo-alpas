@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Access Denied - SDO ALPAS</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script defer src="assets/js/context-menu-block.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
