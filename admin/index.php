@@ -56,8 +56,7 @@ if ($auth->isGuard()) {
 
 <?php if ($isActingAsOIC): ?>
     <!-- OIC Notice Banner -->
-    <div class="alert"
-        style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; margin-bottom: 20px;">
+    <div class="alert oic-role-banner">
         <i class="fas fa-user-shield"></i>
         <strong>Acting as OIC:</strong> You are currently serving as Officer-In-Charge
         (<?php echo htmlspecialchars($currentRoleDisplayName); ?>).
@@ -69,7 +68,7 @@ if ($auth->isGuard()) {
     <!-- ==================== GUARD DASHBOARD ==================== -->
     <div class="dashboard-grid">
         <!-- Today's Summary Stats -->
-        <div class="stats-row" style="grid-template-columns: repeat(4, 1fr);">
+        <div class="stats-row stats-row-4">
             <div class="stat-card">
                 <div class="stat-icon" style="background: var(--success-bg); color: #047857;">
                     <i class="fas fa-check-circle"></i>
@@ -125,7 +124,7 @@ if ($auth->isGuard()) {
                     </div>
                 <?php else: ?>
                     <div class="table-responsive">
-                        <table class="data-table">
+                        <table class="data-table mobile-card-table dashboard-guard-table">
                             <thead>
                                 <tr>
                                     <th>Employee</th>
@@ -139,23 +138,23 @@ if ($auth->isGuard()) {
                             <tbody>
                                 <?php foreach ($guardTodaySlips as $gps): ?>
                                     <tr>
-                                        <td>
+                                        <td data-label="Employee">
                                             <div class="cell-primary"><?php echo htmlspecialchars($gps['employee_name']); ?></div>
                                             <div class="cell-secondary"><?php echo htmlspecialchars($gps['employee_office'] ?? ''); ?></div>
                                         </td>
-                                        <td><?php echo htmlspecialchars($gps['destination']); ?></td>
-                                        <td>
+                                        <td data-label="Destination"><?php echo htmlspecialchars($gps['destination']); ?></td>
+                                        <td data-label="IDT / IAT">
                                             <div class="cell-primary"><?php echo date('g:i A', strtotime($gps['idt'])); ?></div>
                                             <div class="cell-secondary"><?php echo date('g:i A', strtotime($gps['iat'])); ?></div>
                                         </td>
-                                        <td>
+                                        <td data-label="Departure">
                                             <?php if (!empty($gps['actual_departure_time'])): ?>
                                                 <span class="guard-badge guard-badge-departed"><?php echo date('g:i A', strtotime($gps['actual_departure_time'])); ?></span>
                                             <?php else: ?>
                                                 <span style="color: var(--text-muted);">—</span>
                                             <?php endif; ?>
                                         </td>
-                                        <td>
+                                        <td data-label="Arrival">
                                             <?php if (!empty($gps['actual_arrival_time'])): ?>
                                                 <span class="guard-badge guard-badge-arrived"><?php echo date('g:i A', strtotime($gps['actual_arrival_time'])); ?></span>
                                             <?php elseif (!empty($gps['actual_departure_time'])): ?>
@@ -164,7 +163,7 @@ if ($auth->isGuard()) {
                                                 <span style="color: var(--text-muted);">—</span>
                                             <?php endif; ?>
                                         </td>
-                                        <td>
+                                        <td data-label="Action">
                                             <?php if (empty($gps['actual_departure_time'])): ?>
                                                 <form method="POST" action="<?php echo navUrl('/pass-slips.php'); ?>" style="display:inline;">
                                                     <input type="hidden" name="_token" value="<?php echo $currentToken; ?>">
@@ -206,7 +205,7 @@ if ($auth->isGuard()) {
                 <h2><i class="fas fa-plus-circle"></i> File New Request</h2>
             </div>
             <div class="card-body">
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;">
+                <div class="dashboard-request-grid">
                     <!-- Locator Slip -->
                     <a href="<?php echo navUrl('/locator-slips.php?action=new'); ?>" class="request-type-card">
                         <i class="fas fa-map-marker-alt"></i>
@@ -232,7 +231,7 @@ if ($auth->isGuard()) {
         </div>
 
         <!-- My Statistics -->
-        <div class="stats-row" style="grid-template-columns: repeat(4, 1fr);">
+        <div class="stats-row stats-row-4">
             <div class="stat-card">
                 <div class="stat-icon" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white;">
                     <i class="fas fa-file-alt"></i>
@@ -279,7 +278,7 @@ if ($auth->isGuard()) {
         </div>
 
         <!-- Recent Requests -->
-        <div class="dashboard-content" style="grid-template-columns: 1fr 1fr;">
+        <div class="dashboard-content dashboard-content-two">
             <!-- Recent Locator Slip -->
             <div class="dashboard-card">
                 <div class="card-header">
@@ -352,7 +351,7 @@ if ($auth->isGuard()) {
     <!-- ==================== ADMIN/APPROVER DASHBOARD ==================== -->
     <div class="dashboard-grid">
         <!-- Stats Row -->
-        <div class="stats-row">
+        <div class="stats-row stats-row-admin">
             <div class="stat-card stat-total">
                 <div class="stat-icon">
                     <i class="fas fa-file-alt" style="color: white;"></i>
@@ -549,12 +548,35 @@ if ($auth->isGuard()) {
 <?php endif; ?>
 
 <style>
+    .oic-role-banner {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        margin-bottom: 20px;
+        word-break: break-word;
+    }
+
+    .stats-row-4 {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .dashboard-content-two {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .dashboard-request-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+    }
+
     .request-type-card {
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         padding: 32px 24px;
+        min-height: 220px;
         background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
         border-radius: var(--radius-lg);
         text-decoration: none;
@@ -619,6 +641,144 @@ if ($auth->isGuard()) {
     .request-type-card:hover i {
         transform: scale(1.1) rotate(5deg);
         background: rgba(255, 255, 255, 0.2);
+    }
+
+    @media (max-width: 992px) {
+        .stats-row-4 {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .dashboard-content-two {
+            grid-template-columns: 1fr;
+        }
+
+        .dashboard-request-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 768px) {
+        .request-type-card {
+            min-height: 180px;
+            padding: 22px 14px;
+            border-radius: 14px;
+        }
+
+        .request-type-card i {
+            width: 58px;
+            height: 58px;
+            font-size: 1.6rem;
+            margin-bottom: 12px;
+        }
+
+        .request-type-card .request-title {
+            font-size: 0.98rem;
+            margin-bottom: 6px;
+        }
+
+        .request-type-card .request-desc {
+            font-size: 0.76rem;
+            line-height: 1.28;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .stats-row-4 {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .stats-row-admin {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        }
+
+        .stats-row-admin .stat-card:last-child {
+            grid-column: 1 / -1;
+        }
+
+        .dashboard-request-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 8px;
+            overflow: visible;
+            padding-bottom: 0;
+        }
+
+        .dashboard-request-grid .request-type-card {
+            min-height: 118px;
+            padding: 10px 6px;
+            border-radius: 12px;
+        }
+
+        .dashboard-request-grid .request-type-card i {
+            width: 40px;
+            height: 40px;
+            font-size: 1.05rem;
+            margin-bottom: 6px;
+        }
+
+        .dashboard-request-grid .request-type-card .request-title {
+            font-size: 0.78rem;
+            margin-bottom: 2px;
+            line-height: 1.2;
+        }
+
+        .dashboard-request-grid .request-type-card .request-desc {
+            font-size: 0.61rem;
+            line-height: 1.15;
+            word-break: break-word;
+        }
+
+        .oic-role-banner {
+            font-size: 0.9rem;
+            line-height: 1.45;
+        }
+
+        .dashboard-guard-table .btn-guard-depart,
+        .dashboard-guard-table .btn-guard-arrive {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    @media (max-width: 460px) {
+        .stats-row-4 {
+            grid-template-columns: 1fr;
+        }
+
+        .stats-row-admin {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        }
+
+        .stats-row-admin .stat-card:last-child {
+            grid-column: 1 / -1;
+        }
+
+        .dashboard-request-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 6px;
+        }
+
+        .dashboard-request-grid .request-type-card {
+            min-height: 108px;
+            padding: 8px 5px;
+        }
+
+        .dashboard-request-grid .request-type-card i {
+            width: 34px;
+            height: 34px;
+            font-size: 0.95rem;
+            margin-bottom: 5px;
+        }
+
+        .dashboard-request-grid .request-type-card .request-title {
+            font-size: 0.72rem;
+            margin-bottom: 2px;
+        }
+
+        .dashboard-request-grid .request-type-card .request-desc {
+            font-size: 0.58rem;
+            line-height: 1.1;
+        }
     }
 </style>
 

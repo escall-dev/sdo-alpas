@@ -539,54 +539,36 @@ $formData = [
 
             <?php if ($viewData['status'] !== 'pending' && ($viewData['approver_name'] || $viewData['rejection_reason'])): ?>
                 <!-- Approval Details -->
-                <div class="detail-card"
-                    style="border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 8px 25px rgba(0,0,0,0.04); border-radius: var(--radius-xl); margin-top: 24px;">
-                    <div class="detail-card-header"
-                        style="padding: 20px 24px; background: <?php echo $viewData['status'] === 'approved' ? 'var(--success-bg)' : 'var(--danger-bg)'; ?>; border-bottom: 1px solid rgba(0,0,0,0.05);">
-                        <h3
-                            style="font-size: 1.1rem; color: <?php echo $viewData['status'] === 'approved' ? 'var(--success)' : 'var(--danger)'; ?>; font-weight: 700;">
-                            <i
+                <div class="detail-card" style="margin-top: 24px;">
+                    <div class="detail-card-header">
+                        <h3><i
                                 class="fas fa-<?php echo $viewData['status'] === 'approved' ? 'check-circle' : 'times-circle'; ?>"></i>
                             <?php echo $viewData['status'] === 'approved' ? 'Approval' : 'Disapproval'; ?> Details
                         </h3>
                     </div>
-                    <div class="detail-card-body" style="padding: 24px;">
-                        <div class="detail-grid"
-                            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px;">
+                    <div class="detail-card-body">
+                        <div class="detail-grid">
                             <?php if ($viewData['status'] === 'approved'): ?>
-                                <div class="detail-item"
-                                    style="border: none; background: var(--bg-primary); padding: 16px; border-radius: var(--radius-md);">
-                                    <label style="color: var(--success); font-weight: 700; margin-bottom: 8px;">Approved By</label>
-                                    <span
-                                        style="font-weight: 600; font-size: 1.05rem;"><?php echo htmlspecialchars($viewData['approver_name']); ?></span>
+                                <div class="detail-item">
+                                    <label>Approved By</label>
+                                    <span><?php echo htmlspecialchars($viewData['approver_name']); ?></span>
                                 </div>
-                                <div class="detail-item"
-                                    style="border: none; background: var(--bg-primary); padding: 16px; border-radius: var(--radius-md);">
-                                    <label style="color: var(--success); font-weight: 700; margin-bottom: 8px;">Position</label>
-                                    <span
-                                        style="font-weight: 600; font-size: 1.05rem;"><?php echo htmlspecialchars($viewData['approver_position'] ?: '-'); ?></span>
+                                <div class="detail-item">
+                                    <label>Position</label>
+                                    <span><?php echo htmlspecialchars($viewData['approver_position'] ?: '-'); ?></span>
                                 </div>
-                                <div class="detail-item"
-                                    style="border: none; background: var(--bg-primary); padding: 16px; border-radius: var(--radius-md);">
-                                    <label style="color: var(--success); font-weight: 700; margin-bottom: 8px;">Approval
-                                        Date</label>
-                                    <span
-                                        style="font-weight: 600; font-size: 1.05rem;"><?php echo $viewData['approval_date'] ? date('F j, Y', strtotime($viewData['approval_date'])) : '-'; ?></span>
+                                <div class="detail-item">
+                                    <label>Approval Date</label>
+                                    <span><?php echo $viewData['approval_date'] ? date('F j, Y', strtotime($viewData['approval_date'])) : '-'; ?></span>
                                 </div>
-                                <div class="detail-item"
-                                    style="border: none; background: var(--bg-primary); padding: 16px; border-radius: var(--radius-md);">
-                                    <label style="color: var(--success); font-weight: 700; margin-bottom: 8px;">Approval
-                                        Time</label>
-                                    <span style="font-weight: 600; font-size: 1.05rem;"><i class="far fa-clock"
-                                            style="margin-right: 4px;"></i><?php echo !empty($viewData['approving_time']) ? date('g:i A', strtotime($viewData['approving_time'])) : '-'; ?></span>
+                                <div class="detail-item">
+                                    <label>Approval Time</label>
+                                    <span><?php echo !empty($viewData['approving_time']) ? date('g:i A', strtotime($viewData['approving_time'])) : '-'; ?></span>
                                 </div>
                             <?php else: ?>
-                                <div class="detail-item"
-                                    style="border: none; background: var(--danger-bg); padding: 16px; border-radius: var(--radius-md); grid-column: 1 / -1;">
-                                    <label style="color: var(--danger); font-weight: 700; margin-bottom: 8px;">Disapproval
-                                        Reason</label>
-                                    <span
-                                        style="font-weight: 600; font-size: 1.05rem; color: var(--danger);"><?php echo htmlspecialchars($viewData['rejection_reason'] ?: 'No reason provided'); ?></span>
+                                <div class="detail-item">
+                                    <label>Disapproval Reason</label>
+                                    <span><?php echo htmlspecialchars($viewData['rejection_reason'] ?: 'No reason provided'); ?></span>
                                 </div>
                             <?php endif; ?>
                         </div>

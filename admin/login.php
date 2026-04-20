@@ -336,18 +336,127 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-size: 0.75rem;
         }
         
-        @media (max-width: 480px) {
+        @media (max-width: 640px) {
+            body {
+                padding: 14px;
+                align-items: center;
+                background: radial-gradient(circle at top, #12385a 0%, #0a1628 58%);
+            }
+
+            .login-container {
+                max-width: 360px;
+                min-height: auto;
+            }
+
             .login-card {
-                padding: 24px 20px;
+                border: 1px solid rgba(187, 225, 250, 0.14);
+                border-radius: 16px;
+                padding: 20px 16px;
+                backdrop-filter: blur(8px);
+                box-shadow: 0 10px 26px rgba(0, 0, 0, 0.28);
             }
-            
+
+            .login-header {
+                margin-bottom: 14px;
+            }
+
             .logo-badge {
-                width: 70px;
-                height: 70px;
+                width: 56px;
+                height: 56px;
+                margin-bottom: 10px;
             }
-            
-            .logo-badge i {
-                font-size: 2rem;
+
+            .login-header h1 {
+                font-size: 1.55rem;
+                margin-bottom: 3px;
+                letter-spacing: -0.3px;
+            }
+
+            .login-header p {
+                font-size: 0.74rem;
+                line-height: 1.35;
+            }
+
+            .form-group {
+                margin-bottom: 10px;
+            }
+
+            .form-label {
+                font-size: 0.86rem;
+                margin-bottom: 5px;
+            }
+
+            .form-control {
+                padding: 11px 12px;
+                border-radius: 10px;
+                background: rgba(255, 255, 255, 0.08);
+                border-color: rgba(255, 255, 255, 0.16);
+                font-size: 0.94rem;
+            }
+
+            .forgot-password-link {
+                margin-top: -1px;
+                margin-bottom: 10px;
+            }
+
+            .forgot-password-link a {
+                font-size: 0.85rem;
+            }
+
+            .forgot-password-link a i,
+            .btn i {
+                display: none;
+            }
+
+            .btn {
+                padding: 11px 14px;
+                border-radius: 10px;
+                font-size: 0.98rem;
+            }
+
+            .divider {
+                margin: 14px 0;
+                font-size: 0.76rem;
+            }
+
+            .login-footer {
+                margin-top: 12px;
+                padding-top: 12px;
+            }
+
+            .login-footer p {
+                font-size: 0.78rem;
+            }
+
+            .brand-footer {
+                display: none;
+            }
+
+            .error-message,
+            .success-message {
+                padding: 9px 10px;
+                border-radius: 10px;
+                margin-bottom: 10px;
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .login-card {
+                padding: 18px 14px;
+            }
+
+            .login-header h1 {
+                font-size: 1.4rem;
+            }
+
+            .login-header p {
+                font-size: 0.71rem;
+            }
+
+            .form-control,
+            .btn {
+                font-size: 0.9rem;
             }
         }
     </style>

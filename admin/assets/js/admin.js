@@ -7,11 +7,39 @@ document.addEventListener('DOMContentLoaded', function() {
     initFlashMessages();
     initFormValidation();
     initFilterEnterSubmit();
+    initResponsiveTables();
     initModalNotificationHandlers();
     initAvatarUpload();
     initSPANavigation();
     initMyRequestsAjaxNav();
 });
+
+/**
+ * Convert shared desktop tables to card-friendly tables on mobile.
+ */
+function initResponsiveTables() {
+    const tables = document.querySelectorAll('.table-responsive .data-table');
+    if (!tables.length) return;
+
+    tables.forEach(function(table) {
+        table.classList.add('mobile-card-table');
+
+        const headerCells = table.querySelectorAll('thead th');
+        const headers = Array.from(headerCells).map(function(th) {
+            return (th.textContent || '').replace(/\s+/g, ' ').trim();
+        });
+
+        const rows = table.querySelectorAll('tbody tr');
+        rows.forEach(function(row) {
+            const cells = row.querySelectorAll('td');
+            cells.forEach(function(cell, index) {
+                if (cell.hasAttribute('colspan')) return;
+                const label = headers[index] || ('Column ' + (index + 1));
+                cell.setAttribute('data-label', label);
+            });
+        });
+    });
+}
 
 /**
  * Initialize Enter key submit for filter forms
@@ -53,6 +81,30 @@ function initSidebar() {
     const desktopToggle = document.getElementById('desktopSidebarToggle');
     
     if (!sidebar) return;
+
+    const isMobileViewport = function() {
+        return window.innerWidth < 992;
+    };
+
+    const existingBackdrop = document.querySelector('.sidebar-backdrop');
+    const backdrop = existingBackdrop || document.createElement('div');
+    if (!existingBackdrop) {
+        backdrop.className = 'sidebar-backdrop';
+        document.body.appendChild(backdrop);
+    }
+
+    const setMobileSidebarState = function(isOpen) {
+        const canUseMobileDrawer = isMobileViewport();
+        const shouldOpen = canUseMobileDrawer && isOpen;
+
+        sidebar.classList.toggle('open', shouldOpen);
+        backdrop.classList.toggle('active', shouldOpen);
+        document.body.classList.toggle('sidebar-open-mobile', shouldOpen);
+
+        if (mobileToggle) {
+            mobileToggle.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
+        }
+    };
     
     // Restore sidebar state from localStorage
     const sidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
@@ -60,17 +112,24 @@ function initSidebar() {
         sidebar.classList.add('collapsed');
         if (adminLayout) adminLayout.classList.add('sidebar-collapsed');
     }
+
+    if (mobileToggle) {
+        mobileToggle.setAttribute('aria-controls', 'sidebar');
+        mobileToggle.setAttribute('aria-expanded', 'false');
+    }
     
     if (mobileToggle) {
         mobileToggle.addEventListener('click', function(e) {
             e.preventDefault();
-            sidebar.classList.toggle('open');
+            setMobileSidebarState(!sidebar.classList.contains('open'));
         });
     }
     
     if (desktopToggle) {
         desktopToggle.addEventListener('click', function(e) {
             if (e) e.preventDefault();
+            if (isMobileViewport()) return;
+
             const isCollapsed = sidebar.classList.toggle('collapsed');
             if (adminLayout) adminLayout.classList.toggle('sidebar-collapsed', isCollapsed);
             
@@ -81,12 +140,22 @@ function initSidebar() {
             window.dispatchEvent(new Event('resize'));
         });
     }
+
+    backdrop.addEventListener('click', function() {
+        setMobileSidebarState(false);
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && sidebar.classList.contains('open')) {
+            setMobileSidebarState(false);
+        }
+    });
     
     // Close sidebar when clicking outside on mobile
     document.addEventListener('click', function(e) {
-        if (window.innerWidth < 992) {
-            if (mobileToggle && !sidebar.contains(e.target) && !mobileToggle.contains(e.target)) {
-                sidebar.classList.remove('open');
+        if (isMobileViewport() && sidebar.classList.contains('open')) {
+            if (mobileToggle && !sidebar.contains(e.target) && !mobileToggle.contains(e.target) && !backdrop.contains(e.target)) {
+                setMobileSidebarState(false);
             }
         }
     });
@@ -99,15 +168,19 @@ function initSidebar() {
             if (window.innerWidth < 992) {
                 // On mobile, remove collapsed state
                 sidebar.classList.remove('collapsed');
-                adminLayout.classList.remove('sidebar-collapsed');
+                if (adminLayout) adminLayout.classList.remove('sidebar-collapsed');
+                setMobileSidebarState(false);
             } else {
                 // On desktop, restore saved state
                 const savedState = localStorage.getItem('sidebarCollapsed') === 'true';
                 sidebar.classList.toggle('collapsed', savedState);
-                adminLayout.classList.toggle('sidebar-collapsed', savedState);
+                if (adminLayout) adminLayout.classList.toggle('sidebar-collapsed', savedState);
+                setMobileSidebarState(false);
             }
         }, 100);
     });
+
+    setMobileSidebarState(false);
 }
 
 /**
@@ -828,6 +901,20 @@ function updateSidebarAvatar(avatarUrl) {
         .notification-close:hover {
             color: #64748b;
         }
+
+        @media (max-width: 640px) {
+            .notification {
+                top: 12px;
+                left: 12px;
+                right: 12px;
+                max-width: none;
+                transform: translateY(-140%);
+            }
+
+            .notification.show {
+                transform: translateY(0);
+            }
+        }
         
         .spinner {
             display: inline-block;
@@ -1206,6 +1293,8 @@ function spaReinitHandlers() {
     initFormValidation();
     // Re-init flash messages for new alerts
     initFlashMessages();
+    // Re-apply mobile card table behavior to newly injected table markup.
+    initResponsiveTables();
     // Re-init filter enter-to-submit for new filter forms
     initFilterEnterSubmit();
     // Re-init avatar upload if profile page loaded

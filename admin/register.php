@@ -237,13 +237,94 @@ if (isset($_GET['otp_error'])) {
             margin-top: 4px;
         }
         
-        @media (max-width: 480px) {
-            .form-row {
-                grid-template-columns: 1fr;
+        @media (max-width: 640px) {
+            body {
+                padding: 14px;
+                align-items: flex-start;
             }
-            
+
+            .register-container {
+                max-width: 380px;
+            }
+
             .register-card {
-                padding: 24px 20px;
+                border-radius: 16px;
+                padding: 20px 16px;
+            }
+
+            .register-header {
+                margin-bottom: 16px;
+            }
+
+            .register-header h1 {
+                font-size: 1.2rem;
+                margin-bottom: 6px;
+            }
+
+            .register-header p {
+                font-size: 0.77rem;
+            }
+
+            .form-row {
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+                gap: 10px;
+            }
+
+            .form-group {
+                margin-bottom: 12px;
+            }
+
+            .form-label {
+                font-size: 0.75rem;
+                margin-bottom: 5px;
+            }
+
+            .form-control {
+                padding: 9px 10px;
+                font-size: 0.85rem;
+                border-radius: 8px;
+            }
+
+            .form-hint {
+                font-size: 0.68rem;
+            }
+
+            .info-box,
+            .error-message {
+                padding: 10px 12px;
+                border-radius: 8px;
+                margin-bottom: 14px;
+                font-size: 0.74rem;
+            }
+
+            .btn {
+                margin-top: 6px;
+                padding: 10px 12px;
+                font-size: 0.9rem;
+                border-radius: 9px;
+            }
+
+            .btn-secondary {
+                margin-top: 10px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .register-card {
+                padding: 18px 14px;
+            }
+
+            .form-row {
+                gap: 8px;
+            }
+
+            .register-header h1 {
+                font-size: 1.1rem;
+            }
+
+            .form-control,
+            .btn {
+                font-size: 0.82rem;
             }
         }
     </style>

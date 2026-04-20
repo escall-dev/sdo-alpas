@@ -288,7 +288,7 @@ if ($type === 'ps' && ($auth->isEmployee() || $auth->isUnitHead() || $auth->isAS
 <!-- Requests Table -->
 <div class="data-card" style="border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 8px 25px rgba(0,0,0,0.08); border-radius: var(--radius-xl); overflow: hidden;">
     <div class="table-responsive" style="background: white; overflow-x: hidden;">
-        <table class="data-table">
+        <table class="data-table mobile-card-table">
             <thead>
                 <tr>
                     <th>Tracking No.</th>
@@ -315,13 +315,13 @@ if ($type === 'ps' && ($auth->isEmployee() || $auth->isUnitHead() || $auth->isAS
                     <?php foreach ($requests as $request): ?>
                         <?php $normalizedStatus = normalizeRequestStatus($request['status'] ?? 'pending'); ?>
                         <tr>
-                            <td>
+                            <td data-label="Tracking No.">
                                 <span class="ref-link"><?php echo htmlspecialchars($request['tracking_no']); ?></span>
                             </td>
-                            <td>
+                            <td data-label="Type">
                                 <span class="unit-badge"><?php echo htmlspecialchars($request['type_label']); ?></span>
                             </td>
-                            <td>
+                            <td data-label="Destination">
                                 <div class="cell-primary"><?php echo htmlspecialchars($request['destination']); ?></div>
                                 <?php if ($request['request_type'] === 'at' && !empty($request['purpose_of_travel'])): ?>
                                     <div class="cell-secondary">
@@ -331,15 +331,15 @@ if ($type === 'ps' && ($auth->isEmployee() || $auth->isUnitHead() || $auth->isAS
                                         <?php echo htmlspecialchars(substr($request['purpose'], 0, 50)); ?>...</div>
                                 <?php endif; ?>
                             </td>
-                            <td>
+                            <td data-label="Date Filed">
                                 <div class="cell-primary"><?php echo date('M j, Y', strtotime($request['created_at'])); ?></div>
                                 <div class="cell-secondary"><?php echo date('g:i A', strtotime($request['created_at'])); ?>
                                 </div>
                             </td>
-                            <td>
+                            <td data-label="Status">
                                 <?php echo getStatusBadge($normalizedStatus); ?>
                             </td>
-                            <td>
+                            <td data-label="Approver">
                                 <?php if ($normalizedStatus === 'approved'): ?>
                                     <div class="cell-primary">
                                         <?php echo htmlspecialchars($request['approver_name'] ?? $request['approving_authority_name'] ?? '-'); ?>
@@ -355,7 +355,7 @@ if ($type === 'ps' && ($auth->isEmployee() || $auth->isUnitHead() || $auth->isAS
                                     <span class="cell-secondary">Awaiting approval</span>
                                 <?php endif; ?>
                             </td>
-                            <td>
+                            <td data-label="Actions">
                                 <div class="action-buttons">
                                     <?php
                                     if ($request['request_type'] === 'ls') {
