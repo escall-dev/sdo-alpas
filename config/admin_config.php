@@ -4,22 +4,67 @@
  * SDO ALPAS - Schools Division Office Authority to Travel, Locator and Pass slip Approval System
  */
 
+if (!function_exists('loadEnvFile')) {
+    function loadEnvFile() {
+        $envFile = dirname(__DIR__) . DIRECTORY_SEPARATOR . '.env';
+        if (!is_readable($envFile)) {
+            return;
+        }
+
+        $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        if ($lines === false) {
+            return;
+        }
+
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if ($line === '' || $line[0] === '#') {
+                continue;
+            }
+
+            $pos = strpos($line, '=');
+            if ($pos === false) {
+                continue;
+            }
+
+            $key = trim(substr($line, 0, $pos));
+            $val = trim(substr($line, $pos + 1));
+            $len = strlen($val);
+
+            if ($len >= 2) {
+                $first = $val[0];
+                $last = $val[$len - 1];
+                if (($first === '"' && $last === '"') || ($first === "'" && $last === "'")) {
+                    $val = substr($val, 1, -1);
+                }
+            }
+
+            if (getenv($key) === false) {
+                putenv($key . '=' . $val);
+                $_ENV[$key] = $val;
+            }
+        }
+    }
+}
+
+loadEnvFile();
+
 // Set timezone to Manila, Philippines
-date_default_timezone_set('Asia/Manila');
+date_default_timezone_set(getenv('APP_TIMEZONE') !== false ? getenv('APP_TIMEZONE') : 'Asia/Manila');
 
 // Session configuration
-define('ADMIN_SESSION_NAME', 'SDO_ALPAS_ADMIN');
-define('ADMIN_SESSION_LIFETIME', 3600 * 8); // 8 hours
-define('TOKEN_LIFETIME', 3600 * 8); // 8 hours for session tokens
+define('ADMIN_SESSION_NAME', getenv('ADMIN_SESSION_NAME') !== false ? getenv('ADMIN_SESSION_NAME') : 'SDO_ALPAS_ADMIN');
+define('ADMIN_SESSION_LIFETIME', is_numeric(getenv('ADMIN_SESSION_LIFETIME')) ? (int) getenv('ADMIN_SESSION_LIFETIME') : 3600 * 8); // 8 hours
+define('TOKEN_LIFETIME', is_numeric(getenv('TOKEN_LIFETIME')) ? (int) getenv('TOKEN_LIFETIME') : 3600 * 8); // 8 hours for session tokens
 
 // Admin panel settings
-define('ADMIN_TITLE', 'SDO ALPAS');
-define('ADMIN_FULL_TITLE', 'Authority to Travel, Locator and Pass slip Approval System (ALPAS)');
-define('ITEMS_PER_PAGE', 15);
+define('ADMIN_TITLE', getenv('ADMIN_TITLE') !== false ? getenv('ADMIN_TITLE') : 'SDO ALPAS');
+define('ADMIN_FULL_TITLE', getenv('ADMIN_FULL_TITLE') !== false ? getenv('ADMIN_FULL_TITLE') : 'Authority to Travel, Locator and Pass slip Approval System (ALPAS)');
+define('ITEMS_PER_PAGE', is_numeric(getenv('ITEMS_PER_PAGE')) ? (int) getenv('ITEMS_PER_PAGE') : 15);
 
 // Base URL
-define('BASE_URL', '/SDO-alpas');
-define('ADMIN_URL', '/SDO-alpas/admin');
+define('BASE_URL', getenv('BASE_URL') !== false ? getenv('BASE_URL') : '/SDO-alpas');
+define('ADMIN_URL', getenv('ADMIN_URL') !== false ? getenv('ADMIN_URL') : '/SDO-alpas/admin');
 
 // Role IDs - Aligned with SQL admin_roles
 define('ROLE_SUPERADMIN', 1);  // System Administrator - Executive Override

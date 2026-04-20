@@ -644,8 +644,8 @@ if ($auth->isGuard()) {
     }
 
     @media (max-width: 992px) {
-        .stats-row-4 {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+        .stats-row.stats-row-4 {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
         }
 
         .dashboard-content-two {
@@ -683,8 +683,8 @@ if ($auth->isGuard()) {
     }
 
     @media (max-width: 640px) {
-        .stats-row-4 {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+        .stats-row.stats-row-4 {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
         }
 
         .stats-row-admin {
@@ -740,9 +740,9 @@ if ($auth->isGuard()) {
         }
     }
 
-    @media (max-width: 460px) {
-        .stats-row-4 {
-            grid-template-columns: 1fr;
+    @media (max-width: 480px) {
+        .stats-row.stats-row-4 {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
         }
 
         .stats-row-admin {

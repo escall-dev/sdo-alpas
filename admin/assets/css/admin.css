@@ -3231,6 +3231,10 @@ textarea.form-control {
         grid-template-columns: 1fr !important;
     }
 
+    .stats-row.stats-row-4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
     .filter-form {
         grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 6px 8px;

@@ -4,10 +4,57 @@
  * SDO ATLAS - Schools Division Office Authority to Travel and Locator Approval System
  */
 
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'sdo_atlas');
-define('DB_USER', 'root');
-define('DB_PASS', '');
+if (!function_exists('loadEnvFile')) {
+    function loadEnvFile() {
+        $envFile = dirname(__DIR__) . DIRECTORY_SEPARATOR . '.env';
+        if (!is_readable($envFile)) {
+            return;
+        }
+
+        $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        if ($lines === false) {
+            return;
+        }
+
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if ($line === '' || $line[0] === '#') {
+                continue;
+            }
+
+            $pos = strpos($line, '=');
+            if ($pos === false) {
+                continue;
+            }
+
+            $key = trim(substr($line, 0, $pos));
+            $val = trim(substr($line, $pos + 1));
+            $len = strlen($val);
+
+            if ($len >= 2) {
+                $first = $val[0];
+                $last = $val[$len - 1];
+                if (($first === '"' && $last === '"') || ($first === "'" && $last === "'")) {
+                    $val = substr($val, 1, -1);
+                }
+            }
+
+            if (getenv($key) === false) {
+                putenv($key . '=' . $val);
+                $_ENV[$key] = $val;
+            }
+        }
+    }
+}
+
+loadEnvFile();
+
+define('DB_HOST', getenv('DB_HOST') !== false ? getenv('DB_HOST') : 'localhost');
+define('DB_NAME', getenv('DB_NAME') !== false ? getenv('DB_NAME') : 'sdo_atlas');
+define('DB_USER', getenv('DB_USER') !== false ? getenv('DB_USER') : 'root');
+define('DB_PASS', getenv('DB_PASS') !== false ? getenv('DB_PASS') : '');
+define('DB_PORT', is_numeric(getenv('DB_PORT')) ? (int) getenv('DB_PORT') : 3306);
+define('DB_CHARSET', getenv('DB_CHARSET') !== false ? getenv('DB_CHARSET') : 'utf8mb4');
 
 class Database {
     private static $instance = null;
@@ -16,7 +63,7 @@ class Database {
     private function __construct() {
         try {
             $this->connection = new PDO(
-                "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4",
+                "mysql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET,
                 DB_USER,
                 DB_PASS,
                 [
