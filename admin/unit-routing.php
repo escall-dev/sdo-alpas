@@ -1024,7 +1024,7 @@ foreach ($routingConfigs as $config) {
 }
 
 .badge-primary {
-    background: linear-gradient(135deg, #0f4c75, #1b6ca8);
+    background: linear-gradient(135deg, #1b4a9a, #1b4a9a);
     color: white;
     padding: 4px 10px;
     border-radius: 12px;

@@ -57,16 +57,16 @@ if ($pendingRecord) {
     <script defer src="<?php echo ADMIN_URL; ?>/assets/js/context-menu-block.js?v=<?php echo time(); ?>"></script>
     <style>
         :root {
-            --primary: #0f4c75;
-            --primary-light: #1b6ca8;
-            --primary-dark: #0a2f4a;
-            --accent: #bbe1fa;
+            --primary: #1b4a9a;
+            --primary-light: #1b4a9a;
+            --primary-dark: #1b4a9a;
+            --accent: #1b4a9a;
             --gold: #d4af37;
             --bg-dark: #0a1628;
             --bg-card: #111d2e;
             --text: #e8f1f8;
             --text-muted: #7a9bb8;
-            --border: rgba(187, 225, 250, 0.1);
+            --border: rgba(27, 74, 154, 0.12);
             --error: #ef4444;
             --success: #10b981;
         }
@@ -91,7 +91,7 @@ if ($pendingRecord) {
         .verify-header h1 { color: var(--text); font-size: 1.4rem; font-weight: 700; margin-bottom: 8px; }
         .verify-header p { color: var(--text-muted); font-size: 0.85rem; line-height: 1.5; }
         .verify-header .email-display {
-            color: var(--accent);
+            color: rgba(255, 255, 255, 0.9);
             font-weight: 600;
             word-break: break-all;
         }
@@ -118,7 +118,7 @@ if ($pendingRecord) {
         .otp-inputs input:focus {
             border-color: var(--primary-light);
             background: rgba(0,0,0,0.4);
-            box-shadow: 0 0 0 3px rgba(27, 108, 168, 0.2);
+            box-shadow: 0 0 0 3px rgba(27, 74, 154, 0.2);
         }
         .otp-inputs input.error-border { border-color: var(--error); }
         .otp-inputs input.success-border { border-color: var(--success); }
@@ -138,9 +138,9 @@ if ($pendingRecord) {
             display: flex;
         }
         .status-msg.info {
-            background: rgba(59, 130, 246, 0.1);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            color: #93c5fd;
+            background: rgba(27, 74, 154, 0.12);
+            border: 1px solid rgba(27, 74, 154, 0.28);
+            color: rgba(255, 255, 255, 0.9);
             display: flex;
         }
         .status-msg.success-box {
@@ -172,7 +172,7 @@ if ($pendingRecord) {
         }
         .btn-primary:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(15, 76, 117, 0.4);
+            box-shadow: 0 4px 12px rgba(27, 74, 154, 0.4);
         }
         .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
         .btn-secondary {
@@ -189,7 +189,7 @@ if ($pendingRecord) {
             margin-top: 16px;
         }
         .resend-link a {
-            color: var(--primary-light);
+            color: rgba(255, 255, 255, 0.9);
             text-decoration: none;
             font-size: 0.85rem;
             cursor: pointer;

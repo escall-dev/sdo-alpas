@@ -43,16 +43,16 @@ if (!$valid) {
     <script defer src="<?php echo ADMIN_URL; ?>/assets/js/context-menu-block.js?v=<?php echo time(); ?>"></script>
     <style>
         :root {
-            --primary: #0f4c75;
-            --primary-light: #1b6ca8;
-            --primary-dark: #0a2f4a;
-            --accent: #bbe1fa;
+            --primary: #1b4a9a;
+            --primary-light: #1b4a9a;
+            --primary-dark: #1b4a9a;
+            --accent: #1b4a9a;
             --gold: #d4af37;
             --bg-dark: #0a1628;
             --bg-card: #111d2e;
             --text: #e8f1f8;
             --text-muted: #7a9bb8;
-            --border: rgba(187, 225, 250, 0.1);
+            --border: rgba(27, 74, 154, 0.12);
             --error: #ef4444;
             --success: #10b981;
         }
@@ -152,7 +152,7 @@ if (!$valid) {
         }
 
         .step-dot.active {
-            background: var(--primary-light);
+            background: var(--primary);
             width: 24px;
             border-radius: 4px;
         }
@@ -259,7 +259,7 @@ if (!$valid) {
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(15, 76, 117, 0.4);
+            box-shadow: 0 4px 12px rgba(27, 74, 154, 0.4);
         }
 
         .btn-primary:disabled {

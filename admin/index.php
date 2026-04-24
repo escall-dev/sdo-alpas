@@ -79,7 +79,7 @@ if ($auth->isGuard()) {
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white;">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #1b4a9a, #1b4a9a); color: white;">
                     <i class="fas fa-sign-out-alt"></i>
                 </div>
                 <div class="stat-content">
@@ -233,7 +233,7 @@ if ($auth->isGuard()) {
         <!-- My Statistics -->
         <div class="stats-row stats-row-4">
             <div class="stat-card">
-                <div class="stat-icon" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white;">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #1b4a9a, #1b4a9a); color: white;">
                     <i class="fas fa-file-alt"></i>
                 </div>
                 <div class="stat-content">
@@ -384,7 +384,7 @@ if ($auth->isGuard()) {
 
             <div class="stat-card stat-progress">
                 <div class="stat-icon">
-                    <i class="fas fa-inbox" style="color: #7c3aed;"></i>
+                    <i class="fas fa-inbox" style="color: #1b4a9a;"></i>
                 </div>
                 <div class="stat-content">
                     <span class="stat-value"><?php echo $queueCount ?? 0; ?></span>
@@ -549,7 +549,7 @@ if ($auth->isGuard()) {
 
 <style>
     .oic-role-banner {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #1b4a9a 0%, #1b4a9a 100%);
         color: white;
         border: none;
         margin-bottom: 20px;

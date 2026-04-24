@@ -215,7 +215,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <?php endif; ?>
                     <!-- Camera badge at bottom-right -->
                     <div id="avatarCameraBadge" title="Change avatar"
-                         style="position: absolute; bottom: 2px; right: 2px; width: 34px; height: 34px; border-radius: 50%; background: #2563eb; display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; font-size: 0.85rem; border: 2.5px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.25); transition: background 0.2s ease;">
+                         style="position: absolute; bottom: 2px; right: 2px; width: 34px; height: 34px; border-radius: 50%; background: #1b4a9a; display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; font-size: 0.85rem; border: 2.5px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.25); transition: background 0.2s ease;">
                         <i class="fas fa-camera"></i>
                     </div>
                 </div>
@@ -261,6 +261,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <style>
 #profile-edit-body::-webkit-scrollbar {
     display: none;
+}
+
+/* Force avatar camera badge to follow brand color (avoid editing scripts) */
+#avatarCameraBadge {
+    background: #1b4a9a !important;
+}
+#avatarCameraBadge:hover {
+    background: rgba(27, 74, 154, 0.9) !important;
 }
 </style>
 

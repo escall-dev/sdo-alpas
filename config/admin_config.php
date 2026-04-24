@@ -188,8 +188,8 @@ define('STATUS_CONFIG', [
     ],
     'recommended' => [
         'label' => 'Recommended',
-        'color' => '#3b82f6',
-        'bg' => '#dbeafe',
+        'color' => '#1b4a9a',
+        'bg' => 'rgba(27, 74, 154, 0.12)',
         'icon' => '<i class="fas fa-thumbs-up"></i>'
     ],
     'approved' => [

@@ -41,7 +41,7 @@
             align-items: center;
             gap: 8px;
             padding: 12px 24px;
-            background: #0f4c75;
+            background: #1b4a9a;
             color: white;
             text-decoration: none;
             border-radius: 8px;
@@ -49,7 +49,7 @@
             transition: all 0.2s;
         }
         .btn:hover {
-            background: #1b6ca8;
+            background: rgba(27, 74, 154, 0.9);
             transform: translateY(-2px);
         }
     </style>

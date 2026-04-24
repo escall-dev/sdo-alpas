@@ -301,7 +301,7 @@ $formData = [
 <?php if ($isActingAsOIC): ?>
     <!-- OIC Notice Banner -->
     <div class="alert"
-        style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; margin-bottom: 20px;">
+        style="background: linear-gradient(135deg, #1b4a9a 0%, #1b4a9a 100%); color: white; border: none; margin-bottom: 20px;">
         <i class="fas fa-user-shield"></i>
         <strong>Acting as OIC:</strong> You are currently serving as Officer-In-Charge
         (<?php echo htmlspecialchars($auth->getEffectiveRoleDisplayName()); ?>).
@@ -458,7 +458,7 @@ $formData = [
         <div class="complaint-main">
             <!-- Reference Card -->
             <div class="detail-card ref-card"
-                style="background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%); border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 15px 35px rgba(15, 76, 117, 0.25); border-radius: var(--radius-xl); overflow: hidden; position: relative;">
+                style="background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%); border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 15px 35px rgba(27, 74, 154, 0.25); border-radius: var(--radius-xl); overflow: hidden; position: relative;">
                 <div
                     style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; background: url('data:image/svg+xml,%3Csvg width=%22100%22 height=%22100%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Ccircle cx=%22100%22 cy=%220%22 r=%2280%22 fill=%22rgba(255,255,255,0.05)%22/%3E%3C/svg%3E') no-repeat top right / cover; pointer-events: none;">
                 </div>
@@ -637,7 +637,7 @@ $formData = [
                     <div class="detail-card-body" style="padding: 24px;">
                         <a href="<?php echo navUrl('/locator-slips.php?edit=' . $viewData['id']); ?>"
                             class="btn btn-primary btn-block"
-                            style="padding: 14px; font-size: 1.05rem; box-shadow: 0 4px 12px rgba(15, 76, 117, 0.2); transition: all 0.2s;"
+                            style="padding: 14px; font-size: 1.05rem; box-shadow: 0 4px 12px rgba(27, 74, 154, 0.2); transition: all 0.2s;"
                             onmouseover="this.style.transform='translateY(-2px)';"
                             onmouseout="this.style.transform='translateY(0)';">
                             <i class="fas fa-edit"></i> Edit Request
@@ -656,7 +656,7 @@ $formData = [
                     <div class="detail-card-body" style="padding: 24px;">
                         <a href="<?php echo navUrl('/api/generate-docx.php?type=ls&id=' . $viewData['id']); ?>"
                             class="btn btn-primary btn-block"
-                            style="padding: 14px; font-size: 1.05rem; box-shadow: 0 4px 12px rgba(15, 76, 117, 0.2); transition: all 0.2s;"
+                            style="padding: 14px; font-size: 1.05rem; box-shadow: 0 4px 12px rgba(27, 74, 154, 0.2); transition: all 0.2s;"
                             onmouseover="this.style.transform='translateY(-2px)';"
                             onmouseout="this.style.transform='translateY(0)';">
                             <i class="fas fa-file-pdf"></i> Download PDF
@@ -778,7 +778,7 @@ $formData = [
 <?php else: ?>
     <!-- List View -->
     <div class="page-header"
-        style="background: #164f77; color: white; padding: 12px 16px; border-radius: var(--radius-lg); margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 15px rgba(22, 79, 119, 0.2); border: none;">
+        style="background: #1b4a9a; color: white; padding: 12px 16px; border-radius: var(--radius-lg); margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 15px rgba(27, 74, 154, 0.2); border: none;">
         <div class="header-content">
             <h2
                 style="margin: 0; font-size: 1.15rem; display: flex; align-items: center; gap: 6px; font-weight: 800; letter-spacing: -0.5px; color: white;">
@@ -1276,7 +1276,7 @@ $formData = [
         .form-control:focus {
             border-color: var(--primary);
             background: #ffffff;
-            box-shadow: 0 0 0 4px rgba(15, 76, 117, 0.1);
+            box-shadow: 0 0 0 4px rgba(27, 74, 154, 0.1);
         }
 
         .form-control:hover {
@@ -1293,13 +1293,13 @@ $formData = [
 
         .btn-primary {
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-            box-shadow: 0 4px 12px rgba(15, 76, 117, 0.2);
+            box-shadow: 0 4px 12px rgba(27, 74, 154, 0.2);
             border: none;
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(15, 76, 117, 0.3);
+            box-shadow: 0 6px 16px rgba(27, 74, 154, 0.3);
         }
 
         .btn-secondary {

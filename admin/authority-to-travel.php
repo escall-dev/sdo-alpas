@@ -407,7 +407,7 @@ if ($type === 'outside_region') {
 <?php if ($isActingAsOIC): ?>
     <!-- OIC Notice Banner -->
     <div class="alert"
-        style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; margin-bottom: 20px;">
+        style="background: linear-gradient(135deg, #1b4a9a 0%, #1b4a9a 100%); color: white; border: none; margin-bottom: 20px;">
         <i class="fas fa-user-shield"></i>
         <strong>Acting as OIC:</strong> You are currently serving as Officer-In-Charge
         (<?php echo htmlspecialchars($auth->getEffectiveRoleDisplayName()); ?>).
@@ -1075,7 +1075,7 @@ if ($type === 'outside_region') {
 <?php else: ?>
     <!-- List View -->
     <div class="page-header"
-        style="background: #164f77; color: white; padding: 12px 16px; border-radius: var(--radius-lg); margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 15px rgba(22, 79, 119, 0.2); border: none;">
+        style="background: #1b4a9a; color: white; padding: 12px 16px; border-radius: var(--radius-lg); margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 15px rgba(27, 74, 154, 0.2); border: none;">
         <div class="header-content">
             <h2
                 style="margin: 0; font-size: 1.15rem; display: flex; align-items: center; gap: 6px; font-weight: 800; letter-spacing: -0.5px; color: white;">
@@ -1667,7 +1667,7 @@ if ($type === 'outside_region') {
     .form-control:focus {
         border-color: var(--primary);
         background: #ffffff;
-        box-shadow: 0 0 0 4px rgba(15, 76, 117, 0.1);
+        box-shadow: 0 0 0 4px rgba(27, 74, 154, 0.1);
     }
 
     .input-with-icon .form-control:focus+i,
@@ -1689,13 +1689,13 @@ if ($type === 'outside_region') {
 
     .btn-primary {
         background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-        box-shadow: 0 4px 12px rgba(15, 76, 117, 0.2);
+        box-shadow: 0 4px 12px rgba(27, 74, 154, 0.2);
         border: none;
     }
 
     .btn-primary:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(15, 76, 117, 0.3);
+        box-shadow: 0 6px 16px rgba(27, 74, 154, 0.3);
     }
 
     .btn-secondary {

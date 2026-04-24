@@ -84,16 +84,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script defer src="<?php echo ADMIN_URL; ?>/assets/js/context-menu-block.js?v=<?php echo time(); ?>"></script>
     <style>
         :root {
-            --primary: #0f4c75;
-            --primary-light: #1b6ca8;
-            --primary-dark: #0a2f4a;
-            --accent: #bbe1fa;
+            --primary: #1b4a9a;
+            --primary-light: #1b4a9a;
+            --primary-dark: #1b4a9a;
+            --accent: #1b4a9a;
             --gold: #d4af37;
             --bg-dark: #0a1628;
             --bg-card: #111d2e;
             --text: #e8f1f8;
             --text-muted: #7a9bb8;
-            --border: rgba(187, 225, 250, 0.1);
+            --border: rgba(27, 74, 154, 0.12);
             --error: #ef4444;
             --success: #10b981;
         }
@@ -215,7 +215,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .forgot-password-link a {
-            color: var(--accent);
+            color: rgba(255, 255, 255, 0.9);
             font-size: 0.82rem;
             text-decoration: none;
             font-weight: 500;
@@ -277,7 +277,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(15, 76, 117, 0.4);
+            box-shadow: 0 4px 12px rgba(27, 74, 154, 0.4);
         }
         
         .divider {
@@ -321,7 +321,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         .login-footer a {
-            color: var(--accent);
+            color: rgba(255, 255, 255, 0.9);
             text-decoration: none;
             font-weight: 500;
         }
@@ -350,7 +350,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             .login-card {
-                border: 1px solid rgba(187, 225, 250, 0.14);
+                border: 1px solid rgba(27, 74, 154, 0.14);
                 border-radius: 16px;
                 padding: 20px 16px;
                 backdrop-filter: blur(8px);

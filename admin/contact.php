@@ -94,7 +94,7 @@ require_once __DIR__ . '/../includes/header.php';
             </div>
             <div class="detail-card-body" style="text-align: center; padding: 40px 20px;">
                 <i class="fas fa-question-circle"
-                    style="font-size: 4rem; color: var(--primary-color, #2563eb); margin-bottom: 20px;"></i>
+                    style="font-size: 4rem; color: var(--primary-color, #1b4a9a); margin-bottom: 20px;"></i>
                 <h4 style="margin-bottom: 15px; font-size: 1.5rem;">
                     <span class="label-desktop">ICT Helpdesk Support</span>
                     <span class="label-mobile">ICT Helpdesk</span>

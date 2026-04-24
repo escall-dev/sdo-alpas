@@ -41,16 +41,16 @@ if ($email) {
     <script defer src="<?php echo ADMIN_URL; ?>/assets/js/context-menu-block.js?v=<?php echo time(); ?>"></script>
     <style>
         :root {
-            --primary: #0f4c75;
-            --primary-light: #1b6ca8;
-            --primary-dark: #0a2f4a;
-            --accent: #bbe1fa;
+            --primary: #1b4a9a;
+            --primary-light: #1b4a9a;
+            --primary-dark: #1b4a9a;
+            --accent: #1b4a9a;
             --gold: #d4af37;
             --bg-dark: #0a1628;
             --bg-card: #111d2e;
             --text: #e8f1f8;
             --text-muted: #7a9bb8;
-            --border: rgba(187, 225, 250, 0.1);
+            --border: rgba(27, 74, 154, 0.12);
             --error: #ef4444;
             --success: #10b981;
             --warning: #f59e0b;
@@ -213,7 +213,7 @@ if ($email) {
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(15, 76, 117, 0.4);
+            box-shadow: 0 4px 12px rgba(27, 74, 154, 0.4);
         }
 
         .btn-primary:disabled {
@@ -266,9 +266,9 @@ if ($email) {
         }
 
         .alert-info {
-            background: rgba(59, 130, 246, 0.1);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            color: #93c5fd;
+            background: rgba(27, 74, 154, 0.12);
+            border: 1px solid rgba(27, 74, 154, 0.28);
+            color: rgba(255, 255, 255, 0.9);
         }
 
         .blocked-container {
@@ -296,15 +296,15 @@ if ($email) {
         }
 
         .blocked-container .contact-info {
-            background: rgba(59, 130, 246, 0.1);
-            border: 1px solid rgba(59, 130, 246, 0.2);
+            background: rgba(27, 74, 154, 0.12);
+            border: 1px solid rgba(27, 74, 154, 0.22);
             border-radius: 10px;
             padding: 16px;
             margin-top: 16px;
         }
 
         .blocked-container .contact-info p {
-            color: #93c5fd;
+            color: rgba(255, 255, 255, 0.9);
             font-size: 0.85rem;
             margin-bottom: 4px;
         }
@@ -324,7 +324,7 @@ if ($email) {
         }
 
         .resend-link a {
-            color: var(--accent);
+            color: rgba(255, 255, 255, 0.9);
             font-size: 0.85rem;
             text-decoration: none;
             cursor: pointer;
@@ -389,7 +389,7 @@ if ($email) {
         }
 
         .step-dot.active {
-            background: var(--primary-light);
+            background: var(--primary);
             width: 24px;
             border-radius: 4px;
         }

@@ -482,7 +482,7 @@ function buildOTPEmailHTML($fullName, $otp) {
     <table cellpadding="0" cellspacing="0" width="100%" style="max-width: 520px; margin: 20px auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.08);">
         <!-- Header -->
         <tr>
-            <td style="background: linear-gradient(135deg, #0f4c75, #1b6ca8); padding: 24px 32px;">
+            <td style="background: linear-gradient(135deg, #1b4a9a, #1b4a9a); padding: 24px 32px;">
                 <table cellpadding="0" cellspacing="0" width="100%" style="border-collapse: collapse;">
                     <tr>
                         <td style="width: 70px; text-align: left; vertical-align: middle;">
@@ -511,9 +511,9 @@ function buildOTPEmailHTML($fullName, $otp) {
                 </p>
                 <!-- OTP Box -->
                 <div style="text-align: center; margin: 24px 0;">
-                    <div style="display: inline-block; background: #f0f7ff; border: 2px dashed #1b6ca8; border-radius: 10px; padding: 16px 40px;">
+                    <div style="display: inline-block; background: #1b4a9a; border: 2px dashed rgba(255, 255, 255, 0.6); border-radius: 10px; padding: 16px 40px;">
                         <p style="margin: 0 0 4px; color: #666; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Your OTP Code</p>
-                        <p style="margin: 0; color: #0f4c75; font-size: 32px; font-weight: 800; letter-spacing: 8px;">{$otp}</p>
+                        <p style="margin: 0; color: #ffffff; font-size: 32px; font-weight: 800; letter-spacing: 8px;">{$otp}</p>
                     </div>
                 </div>
                 <p style="margin: 16px 0; color: #ef4444; font-size: 13px; text-align: center; font-weight: 500;">
@@ -536,7 +536,7 @@ function buildOTPEmailHTML($fullName, $otp) {
                 <p style="margin: 0; color: #999; font-size: 12px;">
                     SDO ALPAS - Department of Education<br>
                     Schools Division Office of San Pedro City<br>
-                    <a href="mailto:ict.sanpedrocity@deped.gov.ph" style="color: #1b6ca8;">ict.sanpedrocity@deped.gov.ph</a>
+                    <a href="mailto:ict.sanpedrocity@deped.gov.ph" style="color: #1b4a9a;">ict.sanpedrocity@deped.gov.ph</a>
                 </p>
             </td>
         </tr>
