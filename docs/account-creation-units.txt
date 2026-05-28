@@ -1,0 +1,34 @@
+Account Creation Units by Office
+
+OSDS (Office of the SDS Staff)
+- OSDS (Office of the SDS Staff)
+- Personnel
+- Property and Supply
+- Records
+- Cash
+- Procurement
+- General Services
+- Legal
+- ICT
+- Accounting (Finance - Accounting)
+- Budget (Finance - Budget)
+- Administrative
+
+SGOD (School Governance and Operations Division)
+- SGOD (School Governance and Operations Division)
+- SMME (School Management Monitoring and Evaluation)
+- HRD (Human Resource Development)
+- SMN (Social Mobilization and Networking)
+- PR (Planning and Research)
+- DRRM (Disaster Risk Reduction and Management)
+- EF (Education Facilities)
+- SHN_DENTAL (School Health and Nutrition - Dental)
+- SHN_MEDICAL (School Health and Nutrition - Medical)
+- SHN (School Health and Nutrition)
+
+CID (Curriculum Implementation Division)
+- CID (Curriculum Implementation Division)
+- IM (Instructional Management)
+- LRM (Learning Resource Management)
+- ALS (Alternative Learning System)
+- DIS (District Instructional Supervision)
